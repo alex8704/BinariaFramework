@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+	<comment>Paquetes Excluidos del escaneo de anotaciones para configuracion del ViewProvider</comment>
+	<entry key="excludeds">
+		com.vaadin,
+		org.apache,
+		org.slf4j,
+		org.springframework,
+		org.springframework,
+		javax.transaction,
+		org.reflections,
+		com.google
+	</entry>
+</properties>

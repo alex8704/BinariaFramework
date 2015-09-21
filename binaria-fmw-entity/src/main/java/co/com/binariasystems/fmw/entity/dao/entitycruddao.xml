@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+	<comment>Mensajes para el DAO de Manejo de Entidades maestras</comment>
+	<entry key="hsqldb.sequence.next.sentence.template">next value for {0}</entry>
+	<entry key="mysql.sequence.next.sentence.template"></entry>
+	<entry key="oracle.sequence.next.sentence.template">select {0}.nextval from dual</entry>
+	<entry key="sqlserver.sequence.next.sentence.template">next value for {0}</entry>
+	<entry key="postgres.sequence.next.sentence.template">nextval('{0}')</entry>
+	<entry key="unsupported.sequence.next.sentence.template">next value for {0}</entry>
+	<entry key="entitycrud.max_query">select (case when max({0}) is null then 1 else max({0})+1 end) from {1}</entry>
+</properties>

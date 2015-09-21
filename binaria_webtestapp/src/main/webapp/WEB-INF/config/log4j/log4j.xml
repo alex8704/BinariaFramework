@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE log4j:configuration PUBLIC "-//APACHE//DTD LOG4J 1.2//EN" "http://logging.apache.org/log4j/1.2/apidocs/org/apache/log4j/xml/doc-files/log4j.dtd">
+<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">
+	<!-- ******************************************************************************************************************
+						Appender Hacia Salida estandard, osea a consola 
+	 ****************************************************************************************************************** -->
+	<appender name="Stdout" class="org.apache.log4j.ConsoleAppender">
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="- %m%n" />
+		</layout>
+	</appender>
+	
+	
+	<!-- ******************************************************************************************************************
+						Appender de Rotacion diaria de Arhcivos por Defecto (destino <ubicacion-logs>/application.log)
+	 ****************************************************************************************************************** -->
+	<appender name="DefaultRolling" class="org.apache.log4j.DailyRollingFileAppender">
+		<!-- Archivo destino de las trazas generadas por este appender -->
+		<param name="file" value="/opt/webtest_app/logs/application.log" />
+		<param name="append" value="true" />
+		<param name="encoding" value="UTF-8" />
+		<rollingPolicy class="org.apache.log4j.rolling.TimeBasedRollingPolicy">
+		
+		<!-- Nombre del archivo a rotar, este es un parametro bastante inteligente,
+			Si el nombre de archivo termina en .gz, comprimira en formato gzip el archivo,
+			basandose en la marca de fecha que tenga en el momento, por defecto yyyy-MM-dd (Rota a media noche)
+			para mas informacion consultar http://logging.apache.org/log4j/companions/extras/apidocs/org/apache/log4j/rolling/TimeBasedRollingPolicy.html 
+		 -->
+			<param name="FileNamePattern" value="/opt/webtest_app/logs/application.%d.log.gz" />
+		</rollingPolicy>
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="[%p]	%d{yyyy/MM/dd HH:mm:ss.SSS}	(%t)	- %m%n" />
+		</layout>
+	</appender>
+	
+	<!-- ******************************************************************************************************************
+						Logger Ancestro del resto de loggers de la aplicacion ya que referencia el paquete base
+						de los demas paquetes de la aplicacion co.com.binariasystems
+	 ****************************************************************************************************************** -->
+	<logger name="co.com.binariasystems" additivity="false">
+		<level value="DEBUG" />
+		<appender-ref ref="DefaultRolling" />
+		<appender-ref ref="Stdout" />
+	</logger>
+	
+	<logger name="org.apache.shiro" additivity="false">
+		<level value="DEBUG" />
+		<appender-ref ref="DefaultRolling" />
+		<appender-ref ref="Stdout" />
+	</logger>
+	
+	<logger name="org.atmosphere" additivity="false">
+		<level value="DEBUG" />
+		<appender-ref ref="DefaultRolling" />
+		<appender-ref ref="Stdout" />
+	</logger>
+	
+	<!-- ******************************************************************************************************************
+						Categoria root (raiz), prioridad INFO, por Consola
+	 ****************************************************************************************************************** -->
+	<root>
+		<priority value="INFO"/>
+		<appender-ref ref="Stdout"/>
+	</root>
+</log4j:configuration>

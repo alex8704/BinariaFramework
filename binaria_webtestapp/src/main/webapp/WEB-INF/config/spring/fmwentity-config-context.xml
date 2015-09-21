@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context" xmlns:util="http://www.springframework.org/schema/util" xmlns:jee="http://www.springframework.org/schema/jee" xmlns:tx="http://www.springframework.org/schema/tx" xsi:schemaLocation="http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-4.0.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.0.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.0.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd">
+	
+	<bean id="entity.crudOperatios.showsql" class="java.lang.String">
+		<constructor-arg value="${entity.crudOperatios.showsql}" />
+	</bean>
+
+	<util:constant id="EnumKeyProperty.ORDINAL" static-field="co.com.binariasystems.fmw.entity.cfg.EnumKeyProperty.ORDINAL" />
+	<util:constant id="EnumKeyProperty.NAME" static-field="co.com.binariasystems.fmw.entity.cfg.EnumKeyProperty.NAME" />
+
+	<util:constant id="PKGenerationStrategy.MAX_QUERY" static-field="co.com.binariasystems.fmw.entity.cfg.PKGenerationStrategy.MAX_QUERY" />
+	<util:constant id="PKGenerationStrategy.SEQUENCE" static-field="co.com.binariasystems.fmw.entity.cfg.PKGenerationStrategy.SEQUENCE" />
+	<util:constant id="PKGenerationStrategy.IDENTITY" static-field="co.com.binariasystems.fmw.entity.cfg.PKGenerationStrategy.IDENTITY" />
+
+	<util:constant id="EntityConfigUIControl.TEXTFIELD" static-field="co.com.binariasystems.fmw.entity.cfg.EntityConfigUIControl.TEXTFIELD" />
+	<util:constant id="EntityConfigUIControl.DATEFIELD" static-field="co.com.binariasystems.fmw.entity.cfg.EntityConfigUIControl.DATEFIELD" />
+	<util:constant id="EntityConfigUIControl.SEARCHBOX" static-field="co.com.binariasystems.fmw.entity.cfg.EntityConfigUIControl.SEARCHBOX" />
+	<util:constant id="EntityConfigUIControl.COMBOBOX" static-field="co.com.binariasystems.fmw.entity.cfg.EntityConfigUIControl.COMBOBOX" />
+	<util:constant id="EntityConfigUIControl.TEXTAREA" static-field="co.com.binariasystems.fmw.entity.cfg.EntityConfigUIControl.TEXTAREA" />
+	<util:constant id="EntityConfigUIControl.RADIO" static-field="co.com.binariasystems.fmw.entity.cfg.EntityConfigUIControl.RADIO" />
+	<util:constant id="EntityConfigUIControl.CHECKBOX" static-field="co.com.binariasystems.fmw.entity.cfg.EntityConfigUIControl.CHECKBOX" />
+
+
+	<util:map id="entityConfiguratorContextMap">
+		<entry key="co.com.binariasystems.webtestapp.dto.Suscriptor">
+			<bean class="co.com.binariasystems.fmw.entity.cfg.DefaultEntityConfigurator">
+				<property name="titleKey" value="Maestro Suscriptores"></property>
+				<property name="deleteEnabled" value="true" />
+				<property name="enumKeyProperty" ref="EnumKeyProperty.NAME" />
+				<property name="PKGenerationStrategy" ref="PKGenerationStrategy.IDENTITY" />
+				<property name="fieldLabelMappings">
+					<util:map>
+						<entry key="cualquierCampo" value="cualquierValor" />
+					</util:map>
+				</property>
+				<property name="fieldUIControlMappings">
+					<util:map>
+						<entry key="cycle" value-ref="EntityConfigUIControl.COMBOBOX" />
+					</util:map>
+				</property>
+			</bean>
+		</entry>
+		<entry key="co.com.binariasystems.webtestapp.dto.Gateway">
+			<bean class="co.com.binariasystems.fmw.entity.cfg.DefaultEntityConfigurator">
+				<property name="titleKey" value="Maestro Suscriptores"></property>
+				<property name="deleteEnabled" value="true" />
+				<property name="enumKeyProperty" ref="EnumKeyProperty.NAME" />
+				<property name="PKGenerationStrategy" ref="PKGenerationStrategy.IDENTITY" />
+				<property name="fieldLabelMappings">
+					<util:map>
+						<entry key="cualquierCampo" value="cualquierValor" />
+					</util:map>
+				</property>
+				<property name="fieldUIControlMappings">
+					<util:map>
+						<entry key="cycle" value-ref="EntityConfigUIControl.COMBOBOX" />
+					</util:map>
+				</property>
+			</bean>
+		</entry>
+		<entry key="co.com.binariasystems.webtestapp.dto.Medidor">
+			<bean class="co.com.binariasystems.fmw.entity.cfg.DefaultEntityConfigurator">
+				<property name="titleKey" value="Maestro Suscriptores"></property>
+				<property name="deleteEnabled" value="true" />
+				<property name="enumKeyProperty" ref="EnumKeyProperty.NAME" />
+				<property name="PKGenerationStrategy" ref="PKGenerationStrategy.IDENTITY" />
+				<property name="fieldLabelMappings">
+					<util:map>
+						<entry key="cualquierCampo" value="cualquierValor" />
+					</util:map>
+				</property>
+				<property name="fieldUIControlMappings">
+					<util:map>
+						<entry key="cycle" value-ref="EntityConfigUIControl.COMBOBOX" />
+					</util:map>
+				</property>
+			</bean>
+		</entry>
+	</util:map>
+	
+	
+
+	<!-- Manejador de Entity Configurators al cual se le pueden pedir instancias pasando una Clase entidad como parametro -->
+	<!-- Por defecto se inicia con los configurators matriculados en el masterEntityConfiguratorContextMap -->
+	<bean id="entityConfigurationManager" class="co.com.binariasystems.fmw.entity.cfg.EntityConfigurationManager" factory-method="getInstance">
+		<property name="configuratorsContext" ref="entityConfiguratorContextMap" />
+	</bean>
+</beans>

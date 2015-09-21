@@ -1,0 +1,54 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<artifactId>binaria-fmw-parent</artifactId>
+	<packaging>pom</packaging>
+	
+	<properties>
+		<project.source.version>1.7</project.source.version>
+		<project.target.version>1.7</project.target.version>
+	</properties>
+	
+	<modules>
+		<module>../binaria-fmw</module>
+		<module>../binaria-fmw-util</module>
+		<module>../binaria-fmw-business</module>
+		<module>../binaria-fmw-entity</module>
+		<module>../binaria-fmw-security</module>
+		<module>../binaria-fmw-vweb</module>
+	</modules>
+	<dependencies>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+			<version>3.3.2</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>commons-beanutils</groupId>
+			<artifactId>commons-beanutils</artifactId>
+			<version>1.9.2</version>
+			<scope>provided</scope>
+		</dependency>
+	</dependencies>
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>2.5.1</version>
+				<configuration>
+					<source>${project.source.version}</source>
+					<target>${project.target.version}</target>
+					<encoding>UTF-8</encoding>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+	
+	<parent>
+		<groupId>co.com.binariasystems</groupId>
+		<artifactId>binaria-platform-parent</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
+		<relativePath>../binaria-platform-parent/pom.xml</relativePath>
+	</parent>
+</project>

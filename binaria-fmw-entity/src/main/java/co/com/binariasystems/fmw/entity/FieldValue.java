@@ -1,0 +1,17 @@
+package co.com.binariasystems.fmw.entity;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+/**
+ * @author Alexander Castro O.
+ */
+
+@Target(value = ElementType.FIELD)
+@Retention(value = RetentionPolicy.RUNTIME)
+public @interface FieldValue {
+	public abstract String pk() default "";
+	public abstract String description() default "";
+}

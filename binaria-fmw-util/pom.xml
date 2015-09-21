@@ -1,0 +1,79 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <artifactId>binaria-fmw-util</artifactId>
+  <properties>
+		<spring.version>4.0.5.RELEASE</spring.version>
+		<slf4j.version>1.7.12</slf4j.version>
+		<javamail.version>1.4.7</javamail.version>
+		<project.source.version>1.7</project.source.version>
+		<project.target.version>1.7</project.target.version>
+	</properties>
+  <dependencies>
+  	<dependency>
+  		<groupId>co.com.binariasystems</groupId>
+  		<artifactId>binaria-fmw</artifactId>
+  		<version>0.0.1-SNAPSHOT</version>
+  		<scope>provided</scope>
+  	</dependency>
+  	<dependency>
+  		<groupId>org.springframework</groupId>
+  		<artifactId>spring-context</artifactId>
+  		<version>${spring.version}</version>
+  		<scope>provided</scope>
+  	</dependency>
+  	<dependency>
+  		<groupId>org.springframework</groupId>
+  		<artifactId>spring-tx</artifactId>
+  		<version>${spring.version}</version>
+  		<scope>provided</scope>
+  	</dependency>
+  	<dependency>
+  		<groupId>org.apache.commons</groupId>
+  		<artifactId>commons-lang3</artifactId>
+  		<version>3.3.2</version>
+  		<scope>provided</scope>
+  	</dependency>
+  	<dependency>
+  		<groupId>commons-beanutils</groupId>
+  		<artifactId>commons-beanutils</artifactId>
+  		<version>1.9.2</version>
+  		<scope>provided</scope>
+  	</dependency>
+  	
+  	 <dependency>
+  	 	<groupId>org.slf4j</groupId>
+  	 	<artifactId>slf4j-api</artifactId>
+  	 	<version>${slf4j.version}</version>
+  	 	<scope>provided</scope>
+  	 </dependency>
+  	 
+  	 <dependency>
+  	 	<groupId>javax.mail</groupId>
+  	 	<artifactId>mail</artifactId>
+  	 	<version>${javamail.version}</version>
+  	 	<scope>provided</scope>
+  	 </dependency>
+  	 
+  	 <dependency>
+  	 	<groupId>org.apache.velocity</groupId>
+  	 	<artifactId>velocity</artifactId>
+  	 	<version>1.7</version>
+  	 	<scope>provided</scope>
+  	 </dependency>
+  	 
+  	 <dependency>
+  	 	<groupId>org.apache.velocity</groupId>
+  	 	<artifactId>velocity-tools</artifactId>
+  	 	<version>2.0</version>
+  	 	<scope>provided</scope>
+  	 </dependency>
+  	 
+  	
+  </dependencies>
+  <parent>
+  	<groupId>co.com.binariasystems</groupId>
+  	<artifactId>binaria-fmw-parent</artifactId>
+  	<version>0.0.1-SNAPSHOT</version>
+  	<relativePath>../binaria-fmw-parent/pom.xml</relativePath>
+  </parent>
+</project>

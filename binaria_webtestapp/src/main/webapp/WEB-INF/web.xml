@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app version="3.1" xmlns="http://xmlns.jcp.org/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd">
+	<display-name>App Basada en VAADIN para Testing de Framework Binaria</display-name>
+
+	<!--******************************************************************************************************************************** 
+	Parametros de Contexto 
+	******************************************************************************************************************************** -->
+
+	<context-param>
+		<description>Archivo de Configurcacion de Spring</description>
+		<param-name>contextConfigLocation</param-name>
+		<param-value>/WEB-INF/config/spring/application-context.xml</param-value>
+	</context-param>
+	<context-param>
+		<description>Configuracion de log4j</description>
+		<param-name>log4jConfigLocation</param-name>
+		<param-value>/WEB-INF/config/log4j/log4j.xml</param-value>
+	</context-param>
+	<context-param>
+		<description>Clase de Inicializacion del Enterno Shiro</description>
+		<param-name>shiroEnvironmentClass</param-name>
+		<param-value>co.com.binariasystems.fmw.vweb.util.shiro.ShiroIniWebEnvironment</param-value>
+	</context-param>
+	<context-param>
+		<description>Ubicacion Archivo de Configuracion de Shiro</description>
+		<param-name>shiroConfigLocations</param-name>
+		<param-value>/WEB-INF/config/shiro/shiro.ini</param-value>
+	</context-param>
+
+	<!--******************************************************************************************************************************** 
+	Listeners de la Aplicacion 
+	******************************************************************************************************************************** -->
+
+	<listener>
+		<listener-class>org.springframework.web.util.Log4jConfigListener</listener-class>
+	</listener>
+	<listener>
+		<listener-class>org.apache.shiro.web.env.EnvironmentLoaderListener</listener-class>
+	</listener>
+	<listener>
+		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+	</listener>
+
+	<listener>
+		<listener-class>org.springframework.web.context.request.RequestContextListener</listener-class>
+	</listener>
+
+	<listener>
+		<listener-class>co.com.binariasystems.webtestapp.context.WebtestContextListener</listener-class>
+	</listener>
+
+	<!--******************************************************************************************************************************** 
+	Filtros y Servlets de la Aplicacion 
+	******************************************************************************************************************************** -->
+
+	<filter>
+		<filter-name>shiro-filter</filter-name>
+		<filter-class>org.apache.shiro.web.servlet.ShiroFilter</filter-class>
+		<async-supported>true</async-supported>
+		<init-param>
+			<param-name>staticSecurityManagerEnabled</param-name>
+			<param-value>true</param-value>
+		</init-param>
+	</filter>
+
+	<servlet>
+		<display-name>VaadinServlet</display-name>
+		<servlet-name>VaadinServlet</servlet-name>
+		<servlet-class>co.com.binariasystems.fmw.vweb.servlet.CustomVaadinServlet</servlet-class>
+		<init-param>
+			<param-name>UI</param-name>
+			<param-value>co.com.binariasystems.webtestapp.ui.AppUI</param-value>
+		</init-param>
+		<init-param>
+			<description>Application widgetset</description>
+			<param-name>widgetset</param-name>
+			<param-value>co.com.binariasystems.webtestapp.AppWidgetSet</param-value>
+		</init-param>
+		<init-param>
+			<description>Indica si se desea desabilitar el modo DEBUG</description>
+			<param-name>productionMode</param-name>
+			<param-value>false</param-value>
+		</init-param>
+		<init-param>
+			<param-name>pushmode</param-name>
+			<param-value>automatic</param-value>
+		</init-param>
+		<init-param>
+			<description>Atmosphere Interceptors Disable/Enable</description>
+			<param-name>org.atmosphere.cpr.AtmosphereInterceptor.disableDefaults</param-name>
+			<param-value>false</param-value>
+		</init-param>
+		<init-param>
+			<description>My Own Atmosphere Interceptors</description>
+			<param-name>org.atmosphere.cpr.AtmosphereInterceptor</param-name>
+			<param-value>co.com.binariasystems.fmw.vweb.util.atmosphere.SpringContextPushInterceptor</param-value>
+		</init-param>
+		<load-on-startup>1</load-on-startup>
+		<async-supported>true</async-supported>
+	</servlet>
+
+
+	<!--******************************************************************************************************************************** 
+	Mappings de Servlets y Filtros de la Aplicacion 
+	******************************************************************************************************************************** -->
+
+	<filter-mapping>
+		<filter-name>shiro-filter</filter-name>
+		<url-pattern>/*</url-pattern>
+		<dispatcher>REQUEST</dispatcher>
+		<dispatcher>FORWARD</dispatcher>
+		<dispatcher>INCLUDE</dispatcher>
+		<dispatcher>ERROR</dispatcher>
+	</filter-mapping>
+
+
+	<servlet-mapping>
+		<servlet-name>VaadinServlet</servlet-name>
+		<url-pattern>/main/*</url-pattern>
+		<url-pattern>/VAADIN/*</url-pattern>
+	</servlet-mapping>
+
+	<!--******************************************************************************************************************************** 
+	Otros Parametros 
+	******************************************************************************************************************************** -->
+	<session-config>
+		<session-timeout>5</session-timeout>
+	</session-config>
+	<welcome-file-list>
+		<welcome-file>index.jsp</welcome-file>
+	</welcome-file-list>
+</web-app>

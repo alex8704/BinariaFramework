@@ -1,0 +1,121 @@
+// Global variable overrides. Must be declared before importing Valo.
+$v-app-loading-text: "";
+// Defines the plaintext font size, weight and family. Font size affects general component sizing.
+$v-font-size: 12px;
+$v-font-weight: 300;
+$v-caption-font-size: $v-font-size;
+$v-caption-font-weight: $v-font-weight;
+//$v-font-family: "Open Sans", sans-serif;
+
+// Defines the border used by all components.
+//$v-border: 1px solid (v-shade 0.7);
+//$v-border-radius: 4px;
+
+// Affects the color of some component elements, e.g Button, Panel title, etc
+//$v-background-color: hsl(210, 0%, 98%);
+// Affects the color of content areas, e.g  Panel and Window content, TextField input etc
+//$v-app-background-color: $v-background-color;
+
+// Affects the visual appearance of all components
+//$v-gradient: v-linear 8%;
+//$v-bevel-depth: 30%;
+//$v-shadow-opacity: 5%;
+
+// Defines colors for indicating status (focus, success, failure)
+//$v-focus-color: valo-focus-color(); // Calculates a suitable color automatically
+//$v-friendly-color: #2c9720;
+//$v-error-indicator-color: #ed473b;
+
+
+// For more information, see: https://vaadin.com/book/-/page/themes.valo.html
+// Example variants can be copy/pasted from https://vaadin.com/wiki/-/wiki/Main/Valo+Examples
+
+@import "../valo/valo.scss";
+/* @include v-font(DejaVuSans, '../customvalo/fonts/DejaVuSans'); */
+/* @include v-font(DejaVuSansBold, '../customvalo/fonts/DejaVuSans-Bold'); */
+
+@mixin customvalo {
+  @include valo;
+
+  // Insert your own theme rules here
+  .section-separator{
+		background-color: #c5d6ea;
+		text-align: center;
+		vertical-align:bottom;
+		padding-top: 5px;
+		margin-top: 5px;	
+	}
+	
+	.v-select-optiongroup .v-select-option{
+		display: inline;
+	}
+	
+	ul.err-msgs-applist{
+		list-style-position:inside;
+		padding:0px 0px 0px 0px;
+	}
+	
+	.textcenter{
+		text-align:center;
+	}
+	
+	.textright{
+		text-align:right;
+	}
+	
+	/* --------------- Message Dialog Styles ----------------- */
+	/* Seccion Titulo */
+	.title-msgd-error, .title-msgd-information, .title-msgd-warning, .title-msgd-plane, .title-msgd-question{
+		font-weight:bold; font-size:12pt; padding:10px;
+	}
+	.title-msgd-error, .title-msgd-warning{color:#830d01;}
+	.title-msgd-information, .title-msgd-plane, .title-msgd-question{color:#000000;}
+	
+	/* Seccion Mensaje */
+	.msg-msgd-error, .msg-msgd-information, .msg-msgd-warning, .msg-msgd-plane, .msg-msgd-question{
+		font-size:8pt;
+	}
+	.msg-msgd-error, .msg-msgd-warning{color:#833501;}
+	.msg-msgd-information, .msg-msgd-plane, .msg-msgd-question{color:#000000;}
+	
+	/* Icono Descriptivo */
+	.v-image-icon-msgd{margin:10px;}
+	/* Seccion Botones */
+	.v-horizontal-btns-msgd{}
+	
+	
+	/* --------------- Paginador ----------------- */
+	.gr-pager{font-weight:300;}
+	.gr-pager a{text-decoration:none;font-weight:300;}
+	
+	.v-table-cell-content-stat-report-metters-column{
+		background-color:rgb(221,235,247);
+	}
+	
+	.v-table-cell-content-stat-report-macros-column{
+		background-color:rgb(226,239,218);
+	}
+	
+	.v-table-cell-content-stat-report-separator-column{
+		background-color:#d4d4d4;
+	}
+	
+	/************************************************************************
+	 * Radio Buttons List (Horizontal and Vertical)
+	*************************************************************************/
+	
+	.v-select-optiongroup-horizontal .v-select-option {
+	    display: inline-block;
+	}
+	
+	/* Avoid wrapping if the layout is too tight */
+	.v-select-optiongroup-horizontal {
+	    white-space: nowrap;
+	}
+	
+	/* Some extra spacing is needed */
+	.v-select-optiongroup-horizontal
+	  .v-select-option.v-radiobutton {
+	    padding-right: 10px;
+	}
+}

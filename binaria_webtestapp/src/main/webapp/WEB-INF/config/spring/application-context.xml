@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context" xmlns:util="http://www.springframework.org/schema/util" xmlns:jee="http://www.springframework.org/schema/jee" xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-4.0.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.0.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.0.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd">
+
+	<bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="locations">
+			<list>
+				<value>/WEB-INF/config/spring/spring-properties.properties</value>
+			</list>
+		</property>
+		<property name="ignoreUnresolvablePlaceholders" value="true" />
+	</bean>
+
+	<bean id="entities_strings.filePath" class="java.lang.String">
+		<constructor-arg value="${entities_strings.filePath}" />
+	</bean>
+
+	<bean id="application.default.resorceLoaderClass" class="java.lang.Class" factory-method="forName">
+		<constructor-arg value="co.com.binariasystems.webtestapp.ui.AppUI" />
+	</bean>
+
+	<jee:jndi-lookup id="mainDS" jndi-name="jdbc/WebtestMainDS" resource-ref="true"></jee:jndi-lookup>
+
+	<!-- No se usan transacciones manejadas por el Servidor de Aplicaciones ya que Posiblemente se realice despliegue sobre un simple Contenedor de Sevlets <tx:jta-transaction-manager/> -->
+	<tx:jta-transaction-manager />
+	<!-- <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager"> -->
+	<!-- <property name="dataSource" ref="siamsDS"/> -->
+	<!-- </bean> -->
+
+	<tx:annotation-driven transaction-manager="transactionManager" />
+
+	<import resource="business-context.xml" />
+	<import resource="fmwentity-config-context.xml" />
+	<import resource="mvp-context.xml" />
+</beans>
