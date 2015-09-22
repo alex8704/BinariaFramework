@@ -7,8 +7,6 @@ import org.slf4j.LoggerFactory;
 import co.com.binariasystems.fmw.ioc.IOCHelper;
 
 import com.vaadin.annotations.Theme;
-import com.vaadin.event.UIEvents.PollEvent;
-import com.vaadin.event.UIEvents.PollListener;
 import com.vaadin.server.Page.UriFragmentChangedListener;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.ui.UI;

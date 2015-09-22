@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <web-app version="3.1" xmlns="http://xmlns.jcp.org/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd">
 	<display-name>App Basada en VAADIN para Testing de Framework Binaria</display-name>
-
+	
 	<!--******************************************************************************************************************************** 
 	Parametros de Contexto 
 	******************************************************************************************************************************** -->
@@ -13,8 +13,8 @@
 	</context-param>
 	<context-param>
 		<description>Configuracion de log4j</description>
-		<param-name>log4jConfigLocation</param-name>
-		<param-value>/WEB-INF/config/log4j/log4j.xml</param-value>
+		<param-name>log4jConfiguration</param-name>
+		<param-value>/WEB-INF/config/log4j/log4j2.xml</param-value>
 	</context-param>
 	<context-param>
 		<description>Clase de Inicializacion del Enterno Shiro</description>
@@ -31,9 +31,12 @@
 	Listeners de la Aplicacion 
 	******************************************************************************************************************************** -->
 
+<!-- 	<listener> -->
+<!-- 		<listener-class>org.springframework.web.util.Log4jConfigListener</listener-class> -->
+<!-- 	</listener> -->
 	<listener>
-		<listener-class>org.springframework.web.util.Log4jConfigListener</listener-class>
-	</listener>
+        <listener-class>org.apache.logging.log4j.web.Log4jServletContextListener</listener-class>
+    </listener>
 	<listener>
 		<listener-class>org.apache.shiro.web.env.EnvironmentLoaderListener</listener-class>
 	</listener>
@@ -52,7 +55,11 @@
 	<!--******************************************************************************************************************************** 
 	Filtros y Servlets de la Aplicacion 
 	******************************************************************************************************************************** -->
-
+	<filter>
+        <filter-name>log4jServletFilter</filter-name>
+        <filter-class>org.apache.logging.log4j.web.Log4jServletFilter</filter-class>
+    </filter>
+    
 	<filter>
 		<filter-name>shiro-filter</filter-name>
 		<filter-class>org.apache.shiro.web.servlet.ShiroFilter</filter-class>
@@ -103,7 +110,16 @@
 	<!--******************************************************************************************************************************** 
 	Mappings de Servlets y Filtros de la Aplicacion 
 	******************************************************************************************************************************** -->
-
+	<filter-mapping>
+        <filter-name>log4jServletFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+        <dispatcher>REQUEST</dispatcher>
+        <dispatcher>FORWARD</dispatcher>
+        <dispatcher>INCLUDE</dispatcher>
+        <dispatcher>ERROR</dispatcher>
+        <dispatcher>ASYNC</dispatcher><!-- Servlet 3.0 w/ disabled auto-initialization only; not supported in 2.5 -->
+    </filter-mapping>
+    
 	<filter-mapping>
 		<filter-name>shiro-filter</filter-name>
 		<url-pattern>/*</url-pattern>

@@ -24,7 +24,5 @@
 		</plugins>
 	</build>
 	<modules>
-		<module>../binaria-fmw-parent</module>
-		<module>../binaria_webtestapp</module>
 	</modules>
 </project>

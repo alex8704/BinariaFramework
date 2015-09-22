@@ -11,6 +11,8 @@ import java.util.Map;
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.reflect.ConstructorUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 
 import co.com.binariasystems.fmw.constants.FMWConstants;
@@ -49,6 +51,7 @@ import co.com.binariasystems.fmw.util.pagination.ListPage;
  */
 
 public class EntityCRUDOperationsManager {
+	private static final Logger LOGGER = LoggerFactory.getLogger(EntityCRUDOperationsManager.class);
 	private static Map<Class, EntityCRUDOperationsManager> entityCRUDMgrContext = new HashMap<Class, EntityCRUDOperationsManager>();
 	private static final String SQL_XML_FILE = "entitycruddao.xml";
 	private static final PropertiesManager mm = PropertiesManager.forPath(EntityCRUDDAO.class.getPackage().getName() + "." + SQL_XML_FILE, EntityCRUDDAO.class);
@@ -148,7 +151,7 @@ public class EntityCRUDOperationsManager {
 
 		sqlBuilder.append(colNamesBuilder.toString()).append(") values(").append(namedParamsBuilder.toString()).append(")");
 		if(FMWEntityUtils.showOpeationsSql())
-			System.out.println("INSERT_SQL: {" + sqlBuilder.toString() + "}");
+			LOGGER.info("INSERT_SQL: {" + sqlBuilder.toString() + "}");
 		dao.save(sqlBuilder.toString(), paramSource);
 		ListPage<Object> postSearch = search(entityBean, -1, 1, null);
 		return postSearch.getRowCount() > 0 ? postSearch.getData().get(postSearch.getData().size() - 1) : entityBean;
@@ -193,7 +196,7 @@ public class EntityCRUDOperationsManager {
 		sqlBuilder.append(" where ").append(pkField.getColumnName()).append(" = :").append(pkField.getFieldName());
 		
 		if(FMWEntityUtils.showOpeationsSql())
-			System.out.println("UPDATE_SQL: {" + sqlBuilder.toString() + "}");
+			LOGGER.info("UPDATE_SQL: {" + sqlBuilder.toString() + "}");
 		dao.edit(sqlBuilder.toString(), paramSource);
 	}
 
@@ -306,7 +309,7 @@ public class EntityCRUDOperationsManager {
 		sqlBuilder.append(" order by ").append(FMWEntityConstants.ENTITY_DYNASQL_MAIN_ALIAS).append(".").append(entityConfigData.getFieldsData().get(entityConfigData.getPkFieldName()).getColumnName()).append(" asc");
 		
 		if(FMWEntityUtils.showOpeationsSql())
-			System.out.println("SEARCH_SQL: {" + sqlBuilder.toString() + "}");
+			LOGGER.info("SEARCH_SQL: {" + sqlBuilder.toString() + "}");
 		return dao.search(sqlBuilder.toString(), paramSource, offset, rowsByPage, new EntityRowMapper(entityConfigData, configurator));
 	}
 
@@ -320,7 +323,7 @@ public class EntityCRUDOperationsManager {
 		paramSource.addValue(pkField.getFieldName(), PropertyUtils.getNestedProperty(entityBean, pkField.getFieldName()));
 		
 		if(FMWEntityUtils.showOpeationsSql())
-			System.out.println("DELETE_SQL: {" + sqlBuilder.toString() + "}");
+			LOGGER.info("DELETE_SQL: {" + sqlBuilder.toString() + "}");
 		dao.delete(sqlBuilder.toString(), paramSource);
 	}
 
@@ -416,7 +419,7 @@ public class EntityCRUDOperationsManager {
 
 		sqlBuilder.append(" order by ").append(FMWEntityConstants.ENTITY_DYNASQL_MAIN_ALIAS).append(".").append(entityConfigData.getFieldsData().get(entityConfigData.getPkFieldName()).getColumnName()).append(" asc");
 		if(FMWEntityUtils.showOpeationsSql())
-			System.out.println("SEARCH_SQL: {" + sqlBuilder.toString() + "}");
+			LOGGER.info("SEARCH_SQL: {" + sqlBuilder.toString() + "}");
 		
 		return dao.search(sqlBuilder.toString(), paramSource, offset, rowsByPage, new EntityRowMapper(entityConfigData, configurator));
 	}
@@ -511,7 +514,7 @@ public class EntityCRUDOperationsManager {
 		sqlBuilder.append(" order by ").append(FMWEntityConstants.ENTITY_DYNASQL_MAIN_ALIAS).append(".").append(entityConfigData.getFieldsData().get(entityConfigData.getPkFieldName()).getColumnName()).append(" asc");
 		
 		if(FMWEntityUtils.showOpeationsSql())
-			System.out.println("SEARCH_WITHOUT_PAGING_SQL: {" + sqlBuilder.toString() + "}");
+			LOGGER.info("SEARCH_WITHOUT_PAGING_SQL: {" + sqlBuilder.toString() + "}");
 		
 		return dao.searchWithoutPaging(sqlBuilder.toString(), paramSource, new EntityRowMapper(entityConfigData, configurator));
 	}

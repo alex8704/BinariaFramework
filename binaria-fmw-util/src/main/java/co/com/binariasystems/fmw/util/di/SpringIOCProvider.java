@@ -1,11 +1,14 @@
 package co.com.binariasystems.fmw.util.di;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 
 import co.com.binariasystems.fmw.ioc.IOCProvider;
 import co.com.binariasystems.fmw.util.exception.FMWExceptionUtils;
 
 public class SpringIOCProvider implements IOCProvider{
+	private static final Logger LOGGER  =  LoggerFactory.getLogger(SpringIOCProvider.class);
 	private static IOCProvider instance;
 	private ApplicationContext appCtx;
 	
@@ -22,7 +25,7 @@ public class SpringIOCProvider implements IOCProvider{
 		try{
 			return appCtx.getBean(beanId, clazz);
 		}catch(Exception ex){
-			System.err.println(FMWExceptionUtils.prettyMessageException(ex).getMessage());
+			LOGGER.error(FMWExceptionUtils.prettyMessageException(ex).getMessage(), ex);
 			return null;
 		}
 		
@@ -32,7 +35,7 @@ public class SpringIOCProvider implements IOCProvider{
 		try{
 			return appCtx.getBean(clazz);
 		}catch(Exception ex){
-			System.err.println(FMWExceptionUtils.prettyMessageException(ex).getMessage());
+			LOGGER.error(FMWExceptionUtils.prettyMessageException(ex).getMessage(), ex);
 			return null;
 		}
 	}
@@ -41,7 +44,7 @@ public class SpringIOCProvider implements IOCProvider{
 		try{
 			return appCtx.getBean(beanId);
 		}catch(Exception ex){
-			System.err.println(FMWExceptionUtils.prettyMessageException(ex).getMessage());
+			LOGGER.error(FMWExceptionUtils.prettyMessageException(ex).getMessage(), ex);
 			return null;
 		}
 	}

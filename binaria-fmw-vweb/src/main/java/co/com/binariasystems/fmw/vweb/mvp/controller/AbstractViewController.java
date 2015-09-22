@@ -3,7 +3,6 @@ package co.com.binariasystems.fmw.vweb.mvp.controller;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
-import co.com.binariasystems.fmw.business.FMWBusiness;
 import co.com.binariasystems.fmw.ioc.IOCHelper;
 import co.com.binariasystems.fmw.util.messagebundle.MessageBundleManager;
 import co.com.binariasystems.fmw.vweb.mvp.event.UIEvent;
@@ -11,7 +10,7 @@ import co.com.binariasystems.fmw.vweb.mvp.eventbus.EventBus;
 import co.com.binariasystems.fmw.vweb.uicomponet.MessageDialog;
 import co.com.binariasystems.fmw.vweb.util.LocaleMessagesUtil;
 
-public abstract class AbstractViewController<T extends FMWBusiness> {
+public abstract class AbstractViewController<T> {
 	protected T business;
 	protected MessageBundleManager messages;
 	protected EventBus eventBus;
@@ -19,8 +18,8 @@ public abstract class AbstractViewController<T extends FMWBusiness> {
 	public AbstractViewController(){
 	}
 	
-	public AbstractViewController(Class<T> daoClazz){
-		business = lookupBusiness(daoClazz);
+	public AbstractViewController(Class<T> businessClazz){
+		business = lookupBusiness(businessClazz);
 	}
 
 	public T getSBusiness() {
@@ -31,7 +30,7 @@ public abstract class AbstractViewController<T extends FMWBusiness> {
 		this.business = service;
 	}
 	
-	protected <C extends FMWBusiness> C lookupBusiness(Class<C> daoClazz){
+	protected <C> C lookupBusiness(Class<C> daoClazz){
 		return IOCHelper.getBean(daoClazz);
 	}
 
@@ -70,8 +69,6 @@ public abstract class AbstractViewController<T extends FMWBusiness> {
 		MessageDialog.showExceptions(throwable);
 		if(logger != null)
 			logger.error("error", throwable);
-		else
-			throwable.printStackTrace();
 	}
 	
 }

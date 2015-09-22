@@ -23,7 +23,7 @@ import co.com.binariasystems.fmw.vweb.mvp.dispatcher.ViewProvider;
  *
  */
 public class WebtestContextListener implements ServletContextListener {
-	private static final Logger log = LoggerFactory.getLogger(WebtestContextListener.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(WebtestContextListener.class);
     /**
      * Default constructor. 
      */
@@ -41,9 +41,9 @@ public class WebtestContextListener implements ServletContextListener {
     	String entitiesStringsFilePath = IOCHelper.getBean(VWebCommonConstants.APP_ENTITIES_MESSAGES_FILE_IOC_KEY, String.class);
     	String entityOperatiosShowSql = IOCHelper.getBean(FMWEntityConstants.ENTITY_OPERATIONS_SHOWSQL_IOC_KEY, String.class);
     	
-    	System.out.println(FMWConstants.APPLICATION_DEFAULT_CLASS_FOR_RESOURCE_LOAD_IOC_KEY + ": " + resourceLoaderClass);
-    	System.out.println(VWebCommonConstants.APP_ENTITIES_MESSAGES_FILE_IOC_KEY + ": " + entitiesStringsFilePath);
-    	System.out.println(FMWEntityConstants.ENTITY_OPERATIONS_SHOWSQL_IOC_KEY + ": " + entityOperatiosShowSql);
+    	LOGGER.info(FMWConstants.APPLICATION_DEFAULT_CLASS_FOR_RESOURCE_LOAD_IOC_KEY + ": " + resourceLoaderClass);
+    	LOGGER.info(VWebCommonConstants.APP_ENTITIES_MESSAGES_FILE_IOC_KEY + ": " + entitiesStringsFilePath);
+    	LOGGER.info(FMWEntityConstants.ENTITY_OPERATIONS_SHOWSQL_IOC_KEY + ": " + entityOperatiosShowSql);
     	
     	
     	ViewProvider viewProvider = IOCHelper.getBean(ViewProvider.class);
@@ -51,7 +51,7 @@ public class WebtestContextListener implements ServletContextListener {
 			try {
 				viewProvider.configure(sce.getServletContext());
 			} catch (ViewConfigurationException e) {
-				log.error(e.getMessage(), e);
+				LOGGER.error(e.getMessage(), e);
 			}
     	
     }
