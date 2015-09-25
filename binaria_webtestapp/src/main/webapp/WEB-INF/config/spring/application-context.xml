@@ -1,15 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context" xmlns:util="http://www.springframework.org/schema/util" xmlns:jee="http://www.springframework.org/schema/jee" xmlns:tx="http://www.springframework.org/schema/tx"
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:util="http://www.springframework.org/schema/util" xmlns:jee="http://www.springframework.org/schema/jee"
+	xmlns:tx="http://www.springframework.org/schema/tx"
 	xsi:schemaLocation="http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-4.0.xsd
 		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
 		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.0.xsd
 		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.0.xsd
 		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd">
 
-	<bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+	<bean
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
 		<property name="locations">
 			<list>
 				<value>/WEB-INF/config/spring/spring-properties.properties</value>
+				<value>/WEB-INF/config/spring/javamail.properties</value>
 			</list>
 		</property>
 		<property name="ignoreUnresolvablePlaceholders" value="true" />
@@ -19,19 +24,53 @@
 		<constructor-arg value="${entities_strings.filePath}" />
 	</bean>
 
-	<bean id="application.default.resorceLoaderClass" class="java.lang.Class" factory-method="forName">
+	<bean id="application.default.resorceLoaderClass" class="java.lang.Class"
+		factory-method="forName">
 		<constructor-arg value="co.com.binariasystems.webtestapp.ui.AppUI" />
 	</bean>
 
-	<jee:jndi-lookup id="mainDS" jndi-name="jdbc/WebtestMainDS" resource-ref="true"></jee:jndi-lookup>
+	<jee:jndi-lookup id="mainDS" jndi-name="jdbc/WebtestMainDS"
+		resource-ref="true"></jee:jndi-lookup>
 
-	<!-- No se usan transacciones manejadas por el Servidor de Aplicaciones ya que Posiblemente se realice despliegue sobre un simple Contenedor de Sevlets <tx:jta-transaction-manager/> -->
+	<!-- No se usan transacciones manejadas por el Servidor de Aplicaciones 
+		ya que Posiblemente se realice despliegue sobre un simple Contenedor de Sevlets 
+		<tx:jta-transaction-manager/> -->
 	<tx:jta-transaction-manager />
 	<!-- <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager"> -->
 	<!-- <property name="dataSource" ref="siamsDS"/> -->
 	<!-- </bean> -->
 
 	<tx:annotation-driven transaction-manager="transactionManager" />
+
+
+	<bean id="velocityEngineFactory"
+		class="co.com.binariasystems.fmw.util.velocity.VelocityEngineFactoryWebHelper">
+		<property name="velocityConfigLocation" value="/velocity.properties" />
+		<property name="resourceLoaderClass" ref="application.default.resorceLoaderClass" />
+	</bean>
+
+	<bean id="mailSender" class="co.com.binariasystems.fmw.util.mail.javamail.JavaMailSenderImpl">
+		<property name="host" value="${mail.smtp.host}" />
+		<property name="port" value="${mail.smtp.port}" />
+		<property name="protocol" value="${mail.transport.protocol}" />
+		<property name="username" value="${mail.smtp.user}" />
+		<property name="password" value="${mail.smtp.password}" />
+		<property name="defaultEncoding" value="UTF-8" />
+		<property name="javaMailProperties">
+			<props>
+				<prop key="mail.smtp.auth">${mailsender.smtp.auth}</prop>
+				<prop key="mail.smtp.starttls.enable">${mailsender.smtp.starttls.enable}</prop>
+				<prop key="mail.smtp.EnableSSL.enable">${mailsender.smtp.EnableSSL.enable}</prop>
+				<prop key="mail.smtp.sendpartial">${mailsender.smtp.sendpartial}</prop>
+			</props>
+		</property>
+	</bean>
+	
+	<bean id="velocityMailSender" class="co.com.binariasystems.fmw.util.velocity.VelocityMailSender">
+		<property name="mailSender" ref="mailSender"/>
+		<property name="velocityEngineFactory" ref="velocityEngineFactory"/>
+	</bean>
+
 
 	<import resource="business-context.xml" />
 	<import resource="fmwentity-config-context.xml" />

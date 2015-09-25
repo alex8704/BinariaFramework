@@ -12,6 +12,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import co.com.binariasystems.fmw.ioc.IOCHelper;
+import co.com.binariasystems.fmw.util.mail.SimpleMailMessage;
+import co.com.binariasystems.fmw.util.velocity.VelocityMailSender;
 import co.com.binariasystems.fmw.vweb.mvp.annotation.Init;
 import co.com.binariasystems.fmw.vweb.mvp.annotation.ViewController;
 import co.com.binariasystems.fmw.vweb.mvp.annotation.ViewController.OnLoad;
@@ -56,6 +58,12 @@ public class AuthenticationViewController extends AbstractViewController{
 				
 				try{
 					subject.login(authToken);
+					VelocityMailSender mailSender = IOCHelper.getBean(VelocityMailSender.class);
+					SimpleMailMessage msg = new SimpleMailMessage();
+					msg.setTo("alexander.castro@techandsolve.com");
+					msg.setSubject("[Mensaje Simple]");
+					
+					mailSender.send(msg, "/simple-tmpl.vm", null);
 					new MessageDialog("Bienvenido", "La validaci\u00f3n de las credenciales de autenticaci\u00f3n ha sida satisfactoria", Type.INFORMATION)
 					.addYesClickListener(new ClickListener() {
 						@Override

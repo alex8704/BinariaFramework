@@ -1,12 +1,12 @@
 package co.com.binariasystems.fmw.util.velocity;
 
 import java.io.File;
+import java.util.Date;
 import java.util.Map;
 
 import javax.activation.FileDataSource;
 import javax.mail.internet.MimeMessage;
 
-import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.tools.generic.DateTool;
 import org.apache.velocity.tools.generic.NumberTool;
 
@@ -16,15 +16,17 @@ import co.com.binariasystems.fmw.util.mail.javamail.MimeMessageHelper;
 import co.com.binariasystems.fmw.util.mail.javamail.MimeMessagePreparator;
 
 public class VelocityMailSender {
-	private VelocityEngine velocityEngine;
+	private VelocityEngineFactoryHelper velocityEngineFactory;
 	private JavaMailSenderImpl mailSender;
 
-	public VelocityEngine getVelocityEngine() {
-		return velocityEngine;
+	
+
+	public VelocityEngineFactoryHelper getVelocityEngineFactory() {
+		return velocityEngineFactory;
 	}
 
-	public void setVelocityEngine(VelocityEngine velocityEngine) {
-		this.velocityEngine = velocityEngine;
+	public void setVelocityEngineFactory(VelocityEngineFactoryHelper velocityEngineFactory) {
+		this.velocityEngineFactory = velocityEngineFactory;
 	}
 
 	public JavaMailSenderImpl getMailSender() {
@@ -56,6 +58,7 @@ public class VelocityMailSender {
                message.setTo(msg.getTo());
                message.setFrom(msg.getFrom() != null ? msg.getFrom() : mailSender.getUsername());
                message.setSubject(msg.getSubject());
+               message.setSentDate(new Date());
                
                if(inlineResources != null){
             	   for(String key : inlineResources.keySet()){
@@ -76,7 +79,7 @@ public class VelocityMailSender {
             	   templateParams.put("numberTool", new NumberTool());
                }
                
-               String body = VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, templatePath, "UTF-8", templateParams);
+               String body = VelocityEngineUtils.mergeTemplateIntoString(velocityEngineFactory.getEngine(), templatePath, "UTF-8", templateParams);
                
                message.setText(body, true);
             }
