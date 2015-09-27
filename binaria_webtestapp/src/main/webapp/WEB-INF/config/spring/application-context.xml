@@ -51,12 +51,6 @@
 		<property name="velocityConfigLocation" value="/velocity.properties" />
 		<property name="resourceLoaderClass" ref="application.default.resorceLoaderClass" />
 	</bean>
-<!--
-props.setProperty("", "");   
-props.setProperty("", "");   
-props.setProperty(", "");   
-props.setProperty("", "465"); 
- -->
 	<bean id="mailSender" class="co.com.binariasystems.fmw.util.mail.javamail.JavaMailSenderImpl">
 		<property name="host" value="${mail.smtp.host}" />
 		<property name="port" value="${mail.smtp.port}" />
@@ -66,15 +60,16 @@ props.setProperty("", "465");
 		<property name="defaultEncoding" value="UTF-8" />
 		<property name="javaMailProperties">
 			<props>
-				<prop key="mail.smtp.auth">${mailsender.smtp.auth}</prop>
-				<prop key="mail.smtp.starttls.enable">${mailsender.smtp.starttls.enable}</prop>
-				<prop key="mail.smtp.EnableSSL.enable">${mailsender.smtp.EnableSSL.enable}</prop>
-				<prop key="mail.smtp.sendpartial">${mailsender.smtp.sendpartial}</prop>
+				<prop key="mail.smtp.auth">${mail.smtp.auth}</prop>
+				<prop key="mail.smtp.starttls.enable">${mail.smtp.starttls.enable}</prop>
+				<prop key="mail.smtp.EnableSSL.enable">${mail.smtp.EnableSSL.enable}</prop>
+				<prop key="mail.smtp.sendpartial">${mail.smtp.sendpartial}</prop>
+				<prop key="mail.smtp.ssl.trust">${mail.smtp.ssl.trust}</prop>
 				<!-- Propiedades exclusivas de servidores de correo con ssl activo -->
-				<prop key="mail.smtp.socketFactory.class">javax.net.ssl.SSLSocketFactory</prop>
-				<prop key="mail.smtp.socketFactory.fallback">false</prop>
-				<prop key="mail.smtp.port">465</prop>
-				<prop key="mail.smtp.socketFactory.port">465</prop>
+<!-- 				<prop key="mail.smtp.socketFactory.class">javax.net.ssl.SSLSocketFactory</prop> -->
+<!-- 				<prop key="mail.smtp.socketFactory.fallback">false</prop> -->
+<!-- 				<prop key="mail.smtp.port">465</prop> -->
+<!-- 				<prop key="mail.smtp.socketFactory.port">465</prop> -->
 			</props>
 		</property>
 	</bean>

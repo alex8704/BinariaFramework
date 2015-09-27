@@ -10,8 +10,8 @@ import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.subject.Subject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
-import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Component;
 
 import com.vaadin.data.util.PropertysetItem;
@@ -38,7 +38,7 @@ import co.com.binariasystems.fmw.vweb.uicomponet.UIForm;
 
 
 @Component
-@Scope(value="session", proxyMode=ScopedProxyMode.TARGET_CLASS)
+@Scope(value=ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @ViewController
 public class AuthenticationViewController extends AbstractViewController{
 	private static final Logger log = LoggerFactory.getLogger(AuthenticationViewController.class);
@@ -62,12 +62,7 @@ public class AuthenticationViewController extends AbstractViewController{
 				
 				try{
 					subject.login(authToken);
-					VelocityMailSender mailSender = IOCHelper.getBean(VelocityMailSender.class);
-					SimpleMailMessage msg = new SimpleMailMessage();
-					msg.setTo("alexander.castro@techandsolve.com");
-					msg.setSubject("[Mensaje Simple]");
-					
-					mailSender.send(msg, "/simple-tmpl.vm", null);
+					sendAuthenticationMail();
 					new MessageDialog("Bienvenido", "La validaci\u00f3n de las credenciales de autenticaci\u00f3n ha sida satisfactoria", Type.INFORMATION)
 					.addYesClickListener(new ClickListener() {
 						@Override
@@ -87,6 +82,20 @@ public class AuthenticationViewController extends AbstractViewController{
 				
 			}
 		});
+	}
+	
+	
+	private void sendAuthenticationMail(){
+		try{
+			VelocityMailSender mailSender = IOCHelper.getBean(VelocityMailSender.class);
+			SimpleMailMessage msg = new SimpleMailMessage();
+			msg.setTo("alexander_8704@hotmail.com");
+			msg.setSubject("[Mensaje Simple]");
+			
+			mailSender.send(msg, "/simple-tmpl.vm", null);
+		}catch(Exception ex){
+			ex.printStackTrace();
+		}
 	}
 	
 	@OnLoad

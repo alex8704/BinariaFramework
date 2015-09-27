@@ -3,9 +3,18 @@ package co.com.binariasystems.webtestapp.ui;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
-import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Component;
+
+import com.vaadin.data.Property.ValueChangeEvent;
+import com.vaadin.data.Property.ValueChangeListener;
+import com.vaadin.server.Page;
+import com.vaadin.ui.HorizontalSplitPanel;
+import com.vaadin.ui.Label;
 
 import co.com.binariasystems.fmw.vweb.mvp.annotation.Init;
 import co.com.binariasystems.fmw.vweb.mvp.annotation.ViewController;
@@ -17,15 +26,9 @@ import co.com.binariasystems.fmw.vweb.uicomponet.treemenu.MenuElement;
 import co.com.binariasystems.webtestapp.dto.MenuModuleDTO;
 import co.com.binariasystems.webtestapp.dto.MenuOptionDTO;
 
-import com.vaadin.data.Property.ValueChangeEvent;
-import com.vaadin.data.Property.ValueChangeListener;
-import com.vaadin.server.Page;
-import com.vaadin.ui.HorizontalSplitPanel;
-import com.vaadin.ui.Label;
-
 
 @Component
-@Scope(value="session", proxyMode=ScopedProxyMode.TARGET_CLASS)
+@Scope(value=ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 @ViewController
 public class DashboardViewController extends AbstractViewController {
 	@ViewField private TreeMenu menuContainer;
@@ -93,6 +96,23 @@ public class DashboardViewController extends AbstractViewController {
 		opciones.add(configuracion);
 		
 		menuContainer.setItems(opciones);
-		
+	}
+	
+	@PostConstruct
+	protected void postConstruct(){
+		System.out.println("-------------------------------------");
+		System.out.println("Postconstructing "+DashboardViewController.class.getName());
+		System.out.println("-------------------------------------");
+	}
+	
+	@PreDestroy
+	protected void preDestroy(){
+		System.out.println("|||||||||||||||||||||||||||||||||||||");
+		System.out.println("|||||||||||||||||||||||||||||||||||||");
+		System.out.println("|||||||||||||||||||||||||||||||||||||");
+		System.out.println("Predestroying "+DashboardViewController.class.getName());
+		System.out.println("|||||||||||||||||||||||||||||||||||||");
+		System.out.println("|||||||||||||||||||||||||||||||||||||");
+		System.out.println("|||||||||||||||||||||||||||||||||||||");
 	}
 }
