@@ -14,6 +14,7 @@
 		<servlet.api.version>3.0.1</servlet.api.version>
 		<spring.version>4.0.5.RELEASE</spring.version>
 		<shiro.version>1.2.3</shiro.version>
+		<reflections.version>0.9.10</reflections.version>
 		<jetty.plugin.version>9.2.3.v20140905</jetty.plugin.version>
 		<project.source.version>1.7</project.source.version>
 		<project.target.version>1.7</project.target.version>
@@ -113,7 +114,7 @@
 		<dependency>
 			<groupId>org.reflections</groupId>
 			<artifactId>reflections</artifactId>
-			<version>0.9.9-RC1</version>
+			<version>${reflections.version}</version>
 		</dependency>
 
 		<!-- JDBC Data Access Library (depends on spring-core, spring-beans, spring-context, 

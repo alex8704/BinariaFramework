@@ -6,6 +6,7 @@
 		<spring.version>4.0.5.RELEASE</spring.version>
 		<vaadin.version>7.4.5</vaadin.version>
 		<shiro.version>1.2.3</shiro.version>
+		<reflections.version>0.9.10</reflections.version>
 		<project.source.version>1.7</project.source.version>
 		<project.target.version>1.7</project.target.version>
 	</properties>
@@ -85,7 +86,7 @@
 		<dependency>
 			<groupId>org.reflections</groupId>
 			<artifactId>reflections</artifactId>
-			<version>0.9.9-RC1</version>
+			<version>${reflections.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<!-- Web application development utilities applicable to both Servlet and Portlet Environments (depends on spring-core, spring-beans, spring-context) Define this if you use Spring MVC, or wish to use Struts, JSF, or another web framework with Spring (org.springframework.web.*) -->

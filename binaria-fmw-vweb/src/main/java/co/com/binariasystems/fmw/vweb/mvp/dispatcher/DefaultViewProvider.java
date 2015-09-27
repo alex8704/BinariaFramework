@@ -12,6 +12,7 @@ import javax.servlet.ServletContext;
 import org.apache.commons.beanutils.MethodUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.reflections.Reflections;
+import org.reflections.scanners.SubTypesScanner;
 import org.reflections.scanners.TypeAnnotationsScanner;
 import org.reflections.util.ClasspathHelper;
 import org.reflections.util.ConfigurationBuilder;
@@ -77,7 +78,7 @@ public class DefaultViewProvider implements ViewProvider {
 		if(servletContext != null)
 			configBuilder.addUrls(ClasspathHelper.forWebInfClasses(servletContext))
 			.addUrls(ClasspathHelper.forWebInfLib(servletContext));
-		configBuilder.setScanners(new TypeAnnotationsScanner());
+		configBuilder.setScanners(new SubTypesScanner(), new TypeAnnotationsScanner());
 		
 		reflections = new Reflections(configBuilder);
 		

@@ -10,27 +10,11 @@ import co.com.binariasystems.fmw.vweb.mvp.eventbus.EventBus;
 import co.com.binariasystems.fmw.vweb.uicomponet.MessageDialog;
 import co.com.binariasystems.fmw.vweb.util.LocaleMessagesUtil;
 
-public abstract class AbstractViewController<T> {
-	protected T business;
+public abstract class AbstractViewController {
 	protected MessageBundleManager messages;
 	protected EventBus eventBus;
 	
-	public AbstractViewController(){
-	}
-	
-	public AbstractViewController(Class<T> businessClazz){
-		business = lookupBusiness(businessClazz);
-	}
-
-	public T getSBusiness() {
-		return business;
-	}
-
-	public void setBusiness(T service) {
-		this.business = service;
-	}
-	
-	protected <C> C lookupBusiness(Class<C> daoClazz){
+	protected <C> C lookupBean(Class<C> daoClazz){
 		return IOCHelper.getBean(daoClazz);
 	}
 
@@ -48,10 +32,6 @@ public abstract class AbstractViewController<T> {
 
 	public void setEventBus(EventBus eventBus) {
 		this.eventBus = eventBus;
-	}
-
-	public T getBusiness() {
-		return business;
 	}
 	
 	protected void fireEvent(UIEvent event){

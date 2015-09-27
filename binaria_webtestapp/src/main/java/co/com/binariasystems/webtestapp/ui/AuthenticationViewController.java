@@ -10,6 +10,17 @@ import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.subject.Subject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
+import org.springframework.stereotype.Component;
+
+import com.vaadin.data.util.PropertysetItem;
+import com.vaadin.ui.Button;
+import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.Button.ClickListener;
+import com.vaadin.ui.PasswordField;
+import com.vaadin.ui.TextField;
+import com.vaadin.ui.UI;
 
 import co.com.binariasystems.fmw.ioc.IOCHelper;
 import co.com.binariasystems.fmw.util.mail.SimpleMailMessage;
@@ -25,16 +36,9 @@ import co.com.binariasystems.fmw.vweb.uicomponet.MessageDialog;
 import co.com.binariasystems.fmw.vweb.uicomponet.MessageDialog.Type;
 import co.com.binariasystems.fmw.vweb.uicomponet.UIForm;
 
-import com.vaadin.data.Validator;
-import com.vaadin.data.util.PropertysetItem;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.PasswordField;
-import com.vaadin.ui.TextField;
-import com.vaadin.ui.UI;
 
-
+@Component
+@Scope(value="session", proxyMode=ScopedProxyMode.TARGET_CLASS)
 @ViewController
 public class AuthenticationViewController extends AbstractViewController{
 	private static final Logger log = LoggerFactory.getLogger(AuthenticationViewController.class);

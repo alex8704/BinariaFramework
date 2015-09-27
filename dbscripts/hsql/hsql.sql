@@ -6,7 +6,7 @@ CREATE CACHED TABLE gateways (
 );
 
 
-CREATE TABLE suscriptores (
+CREATE CACHED TABLE suscriptores (
   id_suscriptor integer IDENTITY NOT NULL,
   nombre varchar(100) DEFAULT NULL,
   identificacion varchar(15) DEFAULT NULL,
@@ -31,14 +31,14 @@ CREATE CACHED TABLE recursos (
   recurso varchar(512) DEFAULT NULL
 ) ;
 
-CREATE TABLE roles (
+CREATE CACHED TABLE roles (
   id_rol integer IDENTITY NOT NULL,
   nombre_rol varchar(45) DEFAULT NULL,
   descripcion_rol varchar(256) DEFAULT NULL,
   CONSTRAINT nombre_rol_UNIQUE UNIQUE (nombre_rol)
 ) ;
 
-CREATE TABLE recursos_x_roles (
+CREATE CACHED TABLE recursos_x_roles (
   id_rol integer NOT NULL,
   id_recurso integer NOT NULL,
   PRIMARY KEY (id_rol,id_recurso),
@@ -46,7 +46,7 @@ CREATE TABLE recursos_x_roles (
   CONSTRAINT fk_resorcerole_rolid FOREIGN KEY (id_rol) REFERENCES roles (id_rol) ON DELETE NO ACTION
 ) ;
 
-CREATE TABLE usuarios (
+CREATE CACHED TABLE usuarios (
   id_usuario integer IDENTITY NOT NULL,
   nombre_usuario varchar(45) DEFAULT NULL,
   password varchar(512) DEFAULT NULL,
@@ -54,7 +54,7 @@ CREATE TABLE usuarios (
   CONSTRAINT nombre_usuario_UNIQUE UNIQUE (nombre_usuario)
 ) ;
 
-CREATE TABLE roles_x_usuarios (
+CREATE CACHED TABLE roles_x_usuarios (
   id_usuario integer NOT NULL,
   id_rol integer NOT NULL,
   PRIMARY KEY (id_usuario,id_rol),

@@ -8,7 +8,10 @@
 		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.0.xsd
 		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.0.xsd
 		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd">
-
+	
+	<context:annotation-config />
+	<context:component-scan base-package="co.com.binariasystems"/>
+	
 	<bean
 		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
 		<property name="locations">
@@ -48,7 +51,12 @@
 		<property name="velocityConfigLocation" value="/velocity.properties" />
 		<property name="resourceLoaderClass" ref="application.default.resorceLoaderClass" />
 	</bean>
-
+<!--
+props.setProperty("", "");   
+props.setProperty("", "");   
+props.setProperty(", "");   
+props.setProperty("", "465"); 
+ -->
 	<bean id="mailSender" class="co.com.binariasystems.fmw.util.mail.javamail.JavaMailSenderImpl">
 		<property name="host" value="${mail.smtp.host}" />
 		<property name="port" value="${mail.smtp.port}" />
@@ -62,6 +70,11 @@
 				<prop key="mail.smtp.starttls.enable">${mailsender.smtp.starttls.enable}</prop>
 				<prop key="mail.smtp.EnableSSL.enable">${mailsender.smtp.EnableSSL.enable}</prop>
 				<prop key="mail.smtp.sendpartial">${mailsender.smtp.sendpartial}</prop>
+				<!-- Propiedades exclusivas de servidores de correo con ssl activo -->
+				<prop key="mail.smtp.socketFactory.class">javax.net.ssl.SSLSocketFactory</prop>
+				<prop key="mail.smtp.socketFactory.fallback">false</prop>
+				<prop key="mail.smtp.port">465</prop>
+				<prop key="mail.smtp.socketFactory.port">465</prop>
 			</props>
 		</property>
 	</bean>

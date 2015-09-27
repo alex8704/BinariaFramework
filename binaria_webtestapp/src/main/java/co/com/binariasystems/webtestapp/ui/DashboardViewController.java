@@ -3,6 +3,10 @@ package co.com.binariasystems.webtestapp.ui;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
+import org.springframework.stereotype.Component;
+
 import co.com.binariasystems.fmw.vweb.mvp.annotation.Init;
 import co.com.binariasystems.fmw.vweb.mvp.annotation.ViewController;
 import co.com.binariasystems.fmw.vweb.mvp.annotation.ViewController.OnLoad;
@@ -20,6 +24,8 @@ import com.vaadin.ui.HorizontalSplitPanel;
 import com.vaadin.ui.Label;
 
 
+@Component
+@Scope(value="session", proxyMode=ScopedProxyMode.TARGET_CLASS)
 @ViewController
 public class DashboardViewController extends AbstractViewController {
 	@ViewField private TreeMenu menuContainer;
