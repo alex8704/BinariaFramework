@@ -30,6 +30,7 @@ import co.com.binariasystems.fmw.entity.cfg.EntityConfigData.FieldConfigData;
 import co.com.binariasystems.fmw.entity.cfg.EntityConfigData.RelationFieldConfigData;
 import co.com.binariasystems.fmw.entity.validator.EntityValidator;
 import co.com.binariasystems.fmw.exception.FMWException;
+import co.com.binariasystems.fmw.exception.FMWUncheckedException;
 import co.com.binariasystems.fmw.reflec.TypeHelper;
 
 /*
@@ -58,8 +59,8 @@ public class DefaultEntityConfigurator implements EntityConfigurator{
 	public DefaultEntityConfigurator(String entityClazzName){
 		try{
 			this.entityClazz = (Class<? extends Serializable>) Class.forName(entityClazzName);
-		}catch(Exception ex){
-			throw new RuntimeException(ex);
+		}catch(ClassNotFoundException ex){
+			throw new FMWUncheckedException(ex);
 		}
 		
 	}
@@ -69,7 +70,7 @@ public class DefaultEntityConfigurator implements EntityConfigurator{
 	}
 
 	
-	public EntityConfigData configure() throws Exception{
+	public EntityConfigData configure() throws FMWException {
 		keyCount = 0;
 		searchKeyCount = 0;
 		if(entityConfigData != null) 
@@ -81,6 +82,8 @@ public class DefaultEntityConfigurator implements EntityConfigurator{
 		for(Annotation annot : entityClazz.getAnnotations()){
 			if(annot instanceof Entity){
 				entityConfigData.setTable(StringUtils.defaultIfEmpty(((Entity)annot).table(), entityConfigData.getTable()));
+				setEnumKeyProperty(((Entity)annot).enumKeyProperty());
+				setPKGenerationStrategy(((Entity)annot).pkGenerationStrategy());
 				if(!((Entity)annot).validationClass().equals(EntityValidator.class))
 					entityConfigData.setValidationClass(((Entity)annot).validationClass());
 			}if(annot instanceof SearchTarget){
@@ -98,12 +101,12 @@ public class DefaultEntityConfigurator implements EntityConfigurator{
 		}
 		
 		if(StringUtils.isEmpty(entityConfigData.getPkFieldName()))
-			throw new Exception("Cannot found the Primary Key Field, for Entity entity "+entityClazz.getName());
+			throw new FMWException("Cannot found the Primary Key Field, for Entity entity "+entityClazz.getName());
 		
 		if(keyCount > 1) 
-			throw new Exception("Entity class "+entityClazz.getName()+" must have only and only one(1) field annotated with @"+Key.class.getSimpleName());
+			throw new FMWException("Entity class "+entityClazz.getName()+" must have only and only one(1) field annotated with @"+Key.class.getSimpleName());
 		if(searchKeyCount > 1) 
-			throw new Exception("Entity class "+entityClazz.getName()+" must have only and only one(1) field annotated with @"+SearchField.class.getSimpleName());
+			throw new FMWException("Entity class "+entityClazz.getName()+" must have only and only one(1) field annotated with @"+SearchField.class.getSimpleName());
 		
 		if(StringUtils.isEmpty(entityConfigData.getSearchFieldName()))
 			entityConfigData.setSearchFieldName(entityConfigData.getPkFieldName());
@@ -111,7 +114,7 @@ public class DefaultEntityConfigurator implements EntityConfigurator{
 	}
 	
 	
-	private void processEntityClazzConfig(Class clazz, EntityConfigData entityConfigData) throws Exception{
+	private void processEntityClazzConfig(Class clazz, EntityConfigData entityConfigData) throws FMWException{
 		Field[] declaredFields = clazz.getDeclaredFields();
 		for(Field field : declaredFields){
 			FieldConfigData fieldCfg = null;
@@ -131,7 +134,7 @@ public class DefaultEntityConfigurator implements EntityConfigurator{
 				if(annot instanceof ForeignKey){
 					if(TypeHelper.isBasicType(field.getType())){
 						if(((ForeignKey)annot).entityClazz() == null)//Un campo anotado como ForeignKey de tipo Basico Java debe especificar un entityClazz
-							throw new Exception("The basic standard type field "+clazz.getName()+"."+field.getName()+" must declare a entityClazz");
+							throw new FMWException("The basic standard type field "+clazz.getName()+"."+field.getName()+" must declare a entityClazz");
 						((RelationFieldConfigData)fieldCfg).setRelationEntityClass(((ForeignKey)annot).entityClazz());
 					}else{
 						Class relationClazz = field.getType();
@@ -143,7 +146,7 @@ public class DefaultEntityConfigurator implements EntityConfigurator{
 				if(annot instanceof Relation){
 					//La anotacion @Relation solo se puede usar cuando el campo es del tipo de la entidad foranea
 					if(TypeHelper.isBasicType(field.getType()))
-						throw new Exception("Cannot determine entityClass of @"+Relation.class.getSimpleName()+" field "+clazz.getName()+"."+field.getName());
+						throw new FMWException("Cannot determine entityClass of @"+Relation.class.getSimpleName()+" field "+clazz.getName()+"."+field.getName());
 					Class relationClazz = field.getType();
 					((RelationFieldConfigData)fieldCfg).setRelationEntityClass(relationClazz);
 					fieldCfg.setColumnName(StringUtils.defaultIfEmpty(((Relation)annot).column(), fieldCfg.getColumnName()));
@@ -193,21 +196,16 @@ public class DefaultEntityConfigurator implements EntityConfigurator{
 			ensureFieldConfig(field, fieldCfg, entityConfigData);
 			
 			if(field.getName().equals(entityConfigData.getPkFieldName()) && fieldCfg instanceof RelationFieldConfigData)//No se puede tener una PK y anotarla como ForeignKey
-				throw new Exception("Field "+clazz.getName()+"."+field.getName()+" has annotated at same time with @"+Key.class.getSimpleName()+" and @"+ForeignKey.class.getSimpleName()+" and these are mutualy exclusive annotations");
+				throw new FMWException("Field "+clazz.getName()+"."+field.getName()+" has annotated at same time with @"+Key.class.getSimpleName()+" and @"+ForeignKey.class.getSimpleName()+" and these are mutualy exclusive annotations");
 			
 			entityConfigData.getFieldsData().put(fieldCfg.getFieldName(), fieldCfg);
 		}
 	}
 	
 	
-	private void ensureFieldConfig(Field field, FieldConfigData fieldCfg, EntityConfigData entityConfigData) throws Exception{
+	private void ensureFieldConfig(Field field, FieldConfigData fieldCfg, EntityConfigData entityConfigData) throws FMWException{
 		fieldCfg.setFieldName(field.getName());
 		fieldCfg.setFieldType(field.getType());
-//		fieldCfg.setSetterMethodName(TypeHelper.extractSetterMethodName(field, clazz));
-//		fieldCfg.setGetterMethodName(TypeHelper.extractGetterMethodName(field, clazz));
-//		if(StringUtils.isEmpty(fieldCfg.getGetterMethodName()) || StringUtils.isEmpty(fieldCfg.getSetterMethodName()))
-//			throw new Exception("Setter or Getter method not found for field "+clazz.getName()+"."+field.getName());
-		
 		fieldCfg.setColumnName(StringUtils.defaultIfEmpty(fieldCfg.getColumnName(), field.getName()));
 		
 		if(fieldCfg instanceof RelationFieldConfigData)
@@ -219,7 +217,7 @@ public class DefaultEntityConfigurator implements EntityConfigurator{
 		EntityConfigUIControl fieldUIControl = getFieldUIControlMappings().get(fieldCfg.getFieldName());
 		if(fieldUIControl != null){
 			if(!isValidControlForField(fieldUIControl, fieldCfg))
-				throw new Exception("Cannot create UIControl of type "+fieldUIControl.name()+" for "+fieldCfg.getFieldType()+" field "+fieldCfg.getFieldName());
+				throw new FMWException("Cannot create UIControl of type "+fieldUIControl.name()+" for "+fieldCfg.getFieldType()+" field "+fieldCfg.getFieldName());
 		}else{
 			if(fieldCfg instanceof RelationFieldConfigData){// Buscador Por defecto
 				fieldUIControl = EntityConfigUIControl.SEARCHBOX;

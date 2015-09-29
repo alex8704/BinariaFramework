@@ -1,5 +1,7 @@
 package co.com.binariasystems.fmw.vweb.mvp.controller;
 
+import java.io.Serializable;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
@@ -10,7 +12,7 @@ import co.com.binariasystems.fmw.vweb.mvp.eventbus.EventBus;
 import co.com.binariasystems.fmw.vweb.uicomponet.MessageDialog;
 import co.com.binariasystems.fmw.vweb.util.LocaleMessagesUtil;
 
-public abstract class AbstractViewController {
+public abstract class AbstractViewController implements Serializable {
 	protected MessageBundleManager messages;
 	protected EventBus eventBus;
 	

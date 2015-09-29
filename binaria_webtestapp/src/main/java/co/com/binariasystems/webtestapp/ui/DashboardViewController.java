@@ -6,15 +6,9 @@ import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
-
-import com.vaadin.data.Property.ValueChangeEvent;
-import com.vaadin.data.Property.ValueChangeListener;
-import com.vaadin.server.Page;
-import com.vaadin.ui.HorizontalSplitPanel;
-import com.vaadin.ui.Label;
 
 import co.com.binariasystems.fmw.vweb.mvp.annotation.Init;
 import co.com.binariasystems.fmw.vweb.mvp.annotation.ViewController;
@@ -23,17 +17,26 @@ import co.com.binariasystems.fmw.vweb.mvp.annotation.ViewField;
 import co.com.binariasystems.fmw.vweb.mvp.controller.AbstractViewController;
 import co.com.binariasystems.fmw.vweb.uicomponet.TreeMenu;
 import co.com.binariasystems.fmw.vweb.uicomponet.treemenu.MenuElement;
+import co.com.binariasystems.webtestapp.business.AuthenticationBusiness;
 import co.com.binariasystems.webtestapp.dto.MenuModuleDTO;
 import co.com.binariasystems.webtestapp.dto.MenuOptionDTO;
 
+import com.vaadin.data.Property.ValueChangeEvent;
+import com.vaadin.data.Property.ValueChangeListener;
+import com.vaadin.server.Page;
+import com.vaadin.ui.HorizontalSplitPanel;
+import com.vaadin.ui.Label;
+
 
 @Component
-@Scope(value=ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+@Scope(value="session")
 @ViewController
 public class DashboardViewController extends AbstractViewController {
 	@ViewField private TreeMenu menuContainer;
 	@ViewField private HorizontalSplitPanel splitPanel;
 	@ViewField private Label welcomeLabel;
+	@Autowired
+	private AuthenticationBusiness authBusiness;
 	
 	@Init
 	public void inicializar(){
@@ -102,6 +105,7 @@ public class DashboardViewController extends AbstractViewController {
 	protected void postConstruct(){
 		System.out.println("-------------------------------------");
 		System.out.println("Postconstructing "+DashboardViewController.class.getName());
+		System.out.println(authBusiness.dato());
 		System.out.println("-------------------------------------");
 	}
 	

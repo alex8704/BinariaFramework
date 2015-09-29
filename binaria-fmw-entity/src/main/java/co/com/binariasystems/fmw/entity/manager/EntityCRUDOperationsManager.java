@@ -2,6 +2,7 @@ package co.com.binariasystems.fmw.entity.manager;
 
 import static co.com.binariasystems.fmw.entity.criteria.CriteriaUtils.instanceOfMultipleGroupedCriteria;
 
+import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -37,6 +38,7 @@ import co.com.binariasystems.fmw.entity.util.EntityRowMapper;
 import co.com.binariasystems.fmw.entity.util.FMWEntityConstants;
 import co.com.binariasystems.fmw.entity.util.FMWEntityUtils;
 import co.com.binariasystems.fmw.entity.validator.EntityValidator;
+import co.com.binariasystems.fmw.exception.FMWException;
 import co.com.binariasystems.fmw.exception.FMWUncheckedException;
 import co.com.binariasystems.fmw.ioc.IOCHelper;
 import co.com.binariasystems.fmw.reflec.TypeHelper;
@@ -200,7 +202,7 @@ public class EntityCRUDOperationsManager {
 		dao.edit(sqlBuilder.toString(), paramSource);
 	}
 
-	private List<String> getColumnsForSQLSearchStatementFromEntity(Class entityClazz, String prefix, boolean includeRelations, String aliasPrefix) throws Exception {
+	private List<String> getColumnsForSQLSearchStatementFromEntity(Class entityClazz, String prefix, boolean includeRelations, String aliasPrefix) throws FMWException {
 		List<String> resp = new LinkedList<String>();
 		EntityConfigurator mtd_configurator = EntityConfigurationManager.getInstance().getConfigurator(entityClazz);
 		EntityConfigData mtd_cfgData = mtd_configurator.configure();
@@ -431,9 +433,14 @@ public class EntityCRUDOperationsManager {
 	 * 
 	 * @param searchDTO
 	 * @return
+	 * @throws InstantiationException 
+	 * @throws InvocationTargetException 
+	 * @throws IllegalAccessException 
+	 * @throws NoSuchMethodException 
+	 * @throws FMWException 
 	 * @throws Exception
 	 */
-	public List<Object> searchWithoutPaging(Object searchDTO) throws Exception {
+	public List<Object> searchWithoutPaging(Object searchDTO) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException, FMWException{
 		Object entityBean = searchDTO != null ? searchDTO : ConstructorUtils.invokeConstructor(entityConfigData.getEntityClass());
 		StringBuilder sqlBuilder = new StringBuilder();
 		StringBuilder whereBuilder = new StringBuilder();

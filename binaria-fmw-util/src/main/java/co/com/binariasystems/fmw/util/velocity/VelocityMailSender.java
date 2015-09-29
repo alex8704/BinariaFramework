@@ -11,13 +11,13 @@ import org.apache.velocity.tools.generic.DateTool;
 import org.apache.velocity.tools.generic.NumberTool;
 
 import co.com.binariasystems.fmw.util.mail.SimpleMailMessage;
-import co.com.binariasystems.fmw.util.mail.javamail.JavaMailSenderImpl;
+import co.com.binariasystems.fmw.util.mail.javamail.JavaMailSender;
 import co.com.binariasystems.fmw.util.mail.javamail.MimeMessageHelper;
 import co.com.binariasystems.fmw.util.mail.javamail.MimeMessagePreparator;
 
 public class VelocityMailSender {
 	private VelocityEngineFactoryHelper velocityEngineFactory;
-	private JavaMailSenderImpl mailSender;
+	private JavaMailSender mailSender;
 
 	
 
@@ -29,11 +29,11 @@ public class VelocityMailSender {
 		this.velocityEngineFactory = velocityEngineFactory;
 	}
 
-	public JavaMailSenderImpl getMailSender() {
+	public JavaMailSender getMailSender() {
 		return mailSender;
 	}
 
-	public void setMailSender(JavaMailSenderImpl mailSender) {
+	public void setMailSender(JavaMailSender mailSender) {
 		this.mailSender = mailSender;
 	}
 
@@ -56,7 +56,7 @@ public class VelocityMailSender {
             public void prepare(MimeMessage mimeMessage) throws Exception {
             	MimeMessageHelper message = new MimeMessageHelper(mimeMessage, MimeMessageHelper.MULTIPART_MODE_RELATED);
                message.setTo(msg.getTo());
-               message.setFrom(msg.getFrom() != null ? msg.getFrom() : mailSender.getUsername());
+               message.setFrom(msg.getFrom());
                message.setSubject(msg.getSubject());
                message.setSentDate(new Date());
                

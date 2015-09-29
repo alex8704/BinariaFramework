@@ -2,6 +2,8 @@ package co.com.binariasystems.fmw.vweb.mvp.dispatcher;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -9,6 +11,7 @@ import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.reflect.FieldUtils;
+import org.apache.commons.lang3.reflect.MethodUtils;
 import org.reflections.Reflections;
 import org.reflections.scanners.FieldAnnotationsScanner;
 import org.reflections.scanners.SubTypesScanner;
@@ -18,15 +21,10 @@ import org.reflections.util.FilterBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.vaadin.data.Validatable;
-import com.vaadin.ui.AbstractComponent;
-import com.vaadin.ui.Grid;
-import com.vaadin.ui.Grid.Column;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Table;
-import com.vaadin.ui.Table.ColumnHeaderMode;
-
+import co.com.binariasystems.fmw.annotation.Dependency;
 import co.com.binariasystems.fmw.constants.FMWConstants;
+import co.com.binariasystems.fmw.exception.FMWException;
+import co.com.binariasystems.fmw.ioc.IOCHelper;
 import co.com.binariasystems.fmw.util.messagebundle.MessageBundleManager;
 import co.com.binariasystems.fmw.vweb.mvp.annotation.ViewField;
 import co.com.binariasystems.fmw.vweb.mvp.annotation.validation.DateRangeValidator;
@@ -43,6 +41,14 @@ import co.com.binariasystems.fmw.vweb.uicomponet.UIForm;
 import co.com.binariasystems.fmw.vweb.util.LocaleMessagesUtil;
 import co.com.binariasystems.fmw.vweb.util.VWebUtils;
 import co.com.binariasystems.fmw.vweb.util.ValidationUtils;
+
+import com.vaadin.data.Validatable;
+import com.vaadin.ui.AbstractComponent;
+import com.vaadin.ui.Grid;
+import com.vaadin.ui.Grid.Column;
+import com.vaadin.ui.Label;
+import com.vaadin.ui.Table;
+import com.vaadin.ui.Table.ColumnHeaderMode;
 
 public class MVPUtils {
 	private static final Logger LOGGER = LoggerFactory.getLogger(MVPUtils.class);
@@ -190,5 +196,34 @@ public class MVPUtils {
 				}
 			}
 		}
+	}
+	
+	private void injectIOCProviderDependencies(Object targetObject, Class<?> targetClazz) throws FMWException{
+		Reflections reflections = new Reflections(new ConfigurationBuilder()
+		.filterInputsBy(new FilterBuilder().includePackage(targetClazz.getName()))
+      .setUrls(ClasspathHelper.forPackage(targetClazz.getPackage().getName()))
+      .setScanners(new SubTypesScanner(), new FieldAnnotationsScanner()));
+		
+		boolean forceAccess = true;
+		Set<Field> annotatedFields = reflections.getFieldsAnnotatedWith(Dependency.class);
+		Set<Method> annotatedMethods = reflections.getMethodsAnnotatedWith(Dependency.class);
+		
+		try{
+			for(Field field : annotatedFields){
+				FieldUtils.writeField(field, targetObject, IOCHelper.getBean(field.getType()), forceAccess);
+			}
+			
+			for(Method method : annotatedMethods){
+				Class<?> paramTypes [] = method.getParameterTypes();
+				if(paramTypes.length != 1)
+					throw new FMWException("You have annotated the Method "+method.getName()+" with @"+Dependency.class.getSimpleName()+", " +
+							"but this method did not match the required one Parameter (exactly one) for Dependency Injection");
+				
+				MethodUtils.getAccessibleMethod(method).invoke(targetObject, IOCHelper.getBean(paramTypes[0]));
+			}
+		}catch(IllegalAccessException | IllegalArgumentException | InvocationTargetException ex){
+			throw new FMWException(ex);
+		}
+		
 	}
 }

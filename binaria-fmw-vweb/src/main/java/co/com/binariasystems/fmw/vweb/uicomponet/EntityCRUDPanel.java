@@ -1,5 +1,6 @@
 package co.com.binariasystems.fmw.vweb.uicomponet;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.sql.Timestamp;
 import java.text.MessageFormat;
@@ -25,6 +26,7 @@ import co.com.binariasystems.fmw.entity.cfg.EntityConfigurationManager;
 import co.com.binariasystems.fmw.entity.cfg.EntityConfigurator;
 import co.com.binariasystems.fmw.entity.manager.EntityCRUDOperationsManager;
 import co.com.binariasystems.fmw.entity.util.FMWEntityUtils;
+import co.com.binariasystems.fmw.exception.FMWException;
 import co.com.binariasystems.fmw.ioc.IOCHelper;
 import co.com.binariasystems.fmw.reflec.TypeHelper;
 import co.com.binariasystems.fmw.util.messagebundle.MessageBundleManager;
@@ -100,13 +102,13 @@ public class EntityCRUDPanel extends UIForm implements ClickListener{
 					cleanBtn.click();
 				}
 			});
-		}catch(Exception ex){
+		}catch(FMWException ex){
 			MessageDialog.showExceptions(ex);
 			ex.printStackTrace();
 		}
 	}
 	
-	private void initComponents() throws Exception {
+	private void initComponents() throws FMWException {
 		configurator = EntityConfigurationManager.getInstance().getConfigurator(entityClass);
 		entityConfigData = configurator.configure();
 		manager = EntityCRUDOperationsManager.getInstance(entityClass);
@@ -198,134 +200,140 @@ public class EntityCRUDPanel extends UIForm implements ClickListener{
 	
 	
 	
-	private Component createComponentForField(FieldConfigData fieldInfo) throws Exception{
+	private Component createComponentForField(FieldConfigData fieldInfo) throws FMWException{
 		Component resp = null;
 		EntityConfigUIControl controlType = fieldInfo.getFieldUIControl();
 		String captionKey = configurator.getFieldLabelMappings().get(fieldInfo.getFieldName());
 		if(captionKey == null)
 			captionKey = new StringBuilder("entity.").append(entityConfigData.getEntityClass().getSimpleName()).append(".").append(fieldInfo.getFieldName()).append(".caption").toString();
-		
-		if(controlType == EntityConfigUIControl.TEXTFIELD){
-			TextField widget = new TextField(StringUtils.defaultIfEmpty(getString(captionKey), captionKey));
-			widget.setImmediate(true);
-			widget.setMaxLength(TEXTFIELD_MAX_LENGTH);
-			
-			widget.setRequired(fieldInfo.getFieldName().equals(entityConfigData.getPkFieldName()) ? false : fieldInfo.isMandatory());
-			widget.setRequiredError(ValidationUtils.requiredErrorFor(widget.getCaption()));
-			widget.setValidationVisible(!fieldInfo.getFieldName().equals(entityConfigData.getPkFieldName()));
-			widget.setInvalidCommitted(true);
-			widget.setReadOnly(fieldInfo.getFieldName().equals(entityConfigData.getPkFieldName()));
-			widget.setNullRepresentation("");
-			if(TypeHelper.isNumericType(fieldInfo.getFieldType()))
-				widget.setConverter(fieldInfo.getFieldType());
-			
-			resp = widget;
-		}
-		else if(controlType == EntityConfigUIControl.PASSWORDFIELD){
-			PasswordField widget = new PasswordField(StringUtils.defaultIfEmpty(getString(captionKey), captionKey));
-			widget.setMaxLength(TEXTFIELD_MAX_LENGTH);
-			
-			widget.setRequired(fieldInfo.isMandatory());
-			widget.setRequiredError(ValidationUtils.requiredErrorFor(widget.getCaption()));
-			widget.setValidationVisible(true);
-			widget.setInvalidCommitted(true);
-			widget.setNullRepresentation("");
-			
-			resp = widget;
-		}
-		else if(controlType == EntityConfigUIControl.TEXTAREA){
-			TextArea widget = new TextArea(StringUtils.defaultIfEmpty(getString(captionKey), captionKey));
-			widget.setMaxLength(TEXTAREA_MAX_LENGTH);
-			
-			widget.setRequired(fieldInfo.isMandatory());
-			widget.setRequiredError(ValidationUtils.requiredErrorFor(widget.getCaption()));
-			widget.setValidationVisible(true);
-			widget.setInvalidCommitted(true);
-			widget.setNullRepresentation("");
-			
-			resp = widget;
-		}
-		else if(controlType == EntityConfigUIControl.DATEFIELD){
-			DateField widget = new DateField(StringUtils.defaultIfEmpty(getString(captionKey), captionKey));
-			widget.setDateFormat(FMWConstants.DATE_DEFAULT_FORMAT);
-			if(Timestamp.class.isAssignableFrom(fieldInfo.getFieldType()))
-				widget.setConverter(new DateToTimestampConverter());
-			
-			widget.setRequired(fieldInfo.isMandatory());
-			widget.setRequiredError(ValidationUtils.requiredErrorFor(widget.getCaption()));
-			widget.setValidationVisible(true);
-			widget.setInvalidCommitted(true);
-			
-			resp = widget;
-		}
-		else if(controlType == EntityConfigUIControl.COMBOBOX){
-			ComboBox widget = new ComboBox(StringUtils.defaultIfEmpty(getString(captionKey), captionKey));
-			
-			widget.setRequired(fieldInfo.isMandatory());
-			widget.setRequiredError(ValidationUtils.requiredErrorFor(widget.getCaption()));
-			widget.setValidationVisible(true);
-			widget.setInvalidCommitted(true);
-			
-			resp = widget;
-			
-		}
-		else if(controlType == EntityConfigUIControl.RADIO){
-			OptionGroup widget = new OptionGroup(StringUtils.defaultIfEmpty(getString(captionKey), captionKey));
-			
-			widget.setRequired(fieldInfo.isMandatory());
-			widget.setRequiredError(ValidationUtils.requiredErrorFor(widget.getCaption()));
-			widget.setValidationVisible(true);
-			widget.setInvalidCommitted(true);
-			
-			resp = widget;
-			
-		}
-		else if(controlType == EntityConfigUIControl.CHECKBOX){
-			CheckBox widget = new CheckBox(StringUtils.defaultIfEmpty(getString(captionKey), captionKey));
-			resp = widget;
-		}
-		else if(controlType == EntityConfigUIControl.SEARCHBOX){
-			SearcherField widget = new SearcherField(((RelationFieldConfigData)fieldInfo).getRelationEntityClass(), StringUtils.defaultIfEmpty(getString(captionKey), captionKey));
-			widget.setRequired(fieldInfo.isMandatory());
-			resp = widget;
-		}
-		
-		if(resp instanceof AbstractSelect){
-			if(fieldInfo.isEnumType()){
-				BeanItemContainer itemContainer = new BeanItemContainer(fieldInfo.getFieldType());
-				((AbstractSelect)resp).setContainerDataSource(itemContainer);
-				Class<Enum> enumTypeClazz = (Class)fieldInfo.getFieldType();
-				Method valuesMth = enumTypeClazz.getMethod("values", new Class[]{});
-				Enum[] vals = (Enum[])valuesMth.invoke(null, new Object[]{});
+		try{
+
+			if(controlType == EntityConfigUIControl.TEXTFIELD){
+				TextField widget = new TextField(StringUtils.defaultIfEmpty(getString(captionKey), captionKey));
+				widget.setImmediate(true);
+				widget.setMaxLength(TEXTFIELD_MAX_LENGTH);
 				
-				for(int i = 0; i < vals.length; i++){
-					Item item = ((AbstractSelect)resp).addItem(vals[i]);
-					((AbstractSelect)resp).setItemCaption(item, vals[i].name().replace("_", " "));
-				}
-			}else if(fieldInfo.getFixedValues() != null && fieldInfo.getFixedValues().length > 0){
-				BeanItemContainer itemContainer = new BeanItemContainer(fieldInfo.getFieldType());
-				((AbstractSelect)resp).setContainerDataSource(itemContainer);
-				for(Listable value : fieldInfo.getFixedValues()){
-					Item item = ((AbstractSelect)resp).addItem(value);
-					((AbstractSelect)resp).setItemCaption(item, value.getDescription());
-				}
-			}else{
-				EntityCRUDOperationsManager auxManager = EntityCRUDOperationsManager.getInstance(((RelationFieldConfigData)fieldInfo).getRelationEntityClass());
-				List<Object> fieldValues = auxManager.searchWithoutPaging(null);
-				BeanItemContainer itemContainer = new BeanItemContainer(fieldInfo.getFieldType(), fieldValues);
-				((AbstractSelect)resp).setContainerDataSource(itemContainer);
-				for(Object value : fieldValues){
-					Item item = ((AbstractSelect)resp).addItem(value);
-					((AbstractSelect)resp).setItemCaption(item, FMWEntityUtils.generateStringRepresentationForField(value, FMWConstants.PIPE));
+				widget.setRequired(fieldInfo.getFieldName().equals(entityConfigData.getPkFieldName()) ? false : fieldInfo.isMandatory());
+				widget.setRequiredError(ValidationUtils.requiredErrorFor(widget.getCaption()));
+				widget.setValidationVisible(!fieldInfo.getFieldName().equals(entityConfigData.getPkFieldName()));
+				widget.setInvalidCommitted(true);
+				widget.setReadOnly(fieldInfo.getFieldName().equals(entityConfigData.getPkFieldName()));
+				widget.setNullRepresentation("");
+				if(TypeHelper.isNumericType(fieldInfo.getFieldType()))
+					widget.setConverter(fieldInfo.getFieldType());
+				
+				resp = widget;
+			}
+			else if(controlType == EntityConfigUIControl.PASSWORDFIELD){
+				PasswordField widget = new PasswordField(StringUtils.defaultIfEmpty(getString(captionKey), captionKey));
+				widget.setMaxLength(TEXTFIELD_MAX_LENGTH);
+				
+				widget.setRequired(fieldInfo.isMandatory());
+				widget.setRequiredError(ValidationUtils.requiredErrorFor(widget.getCaption()));
+				widget.setValidationVisible(true);
+				widget.setInvalidCommitted(true);
+				widget.setNullRepresentation("");
+				
+				resp = widget;
+			}
+			else if(controlType == EntityConfigUIControl.TEXTAREA){
+				TextArea widget = new TextArea(StringUtils.defaultIfEmpty(getString(captionKey), captionKey));
+				widget.setMaxLength(TEXTAREA_MAX_LENGTH);
+				
+				widget.setRequired(fieldInfo.isMandatory());
+				widget.setRequiredError(ValidationUtils.requiredErrorFor(widget.getCaption()));
+				widget.setValidationVisible(true);
+				widget.setInvalidCommitted(true);
+				widget.setNullRepresentation("");
+				
+				resp = widget;
+			}
+			else if(controlType == EntityConfigUIControl.DATEFIELD){
+				DateField widget = new DateField(StringUtils.defaultIfEmpty(getString(captionKey), captionKey));
+				widget.setDateFormat(FMWConstants.DATE_DEFAULT_FORMAT);
+				if(Timestamp.class.isAssignableFrom(fieldInfo.getFieldType()))
+					widget.setConverter(new DateToTimestampConverter());
+				
+				widget.setRequired(fieldInfo.isMandatory());
+				widget.setRequiredError(ValidationUtils.requiredErrorFor(widget.getCaption()));
+				widget.setValidationVisible(true);
+				widget.setInvalidCommitted(true);
+				
+				resp = widget;
+			}
+			else if(controlType == EntityConfigUIControl.COMBOBOX){
+				ComboBox widget = new ComboBox(StringUtils.defaultIfEmpty(getString(captionKey), captionKey));
+				
+				widget.setRequired(fieldInfo.isMandatory());
+				widget.setRequiredError(ValidationUtils.requiredErrorFor(widget.getCaption()));
+				widget.setValidationVisible(true);
+				widget.setInvalidCommitted(true);
+				
+				resp = widget;
+				
+			}
+			else if(controlType == EntityConfigUIControl.RADIO){
+				OptionGroup widget = new OptionGroup(StringUtils.defaultIfEmpty(getString(captionKey), captionKey));
+				
+				widget.setRequired(fieldInfo.isMandatory());
+				widget.setRequiredError(ValidationUtils.requiredErrorFor(widget.getCaption()));
+				widget.setValidationVisible(true);
+				widget.setInvalidCommitted(true);
+				
+				resp = widget;
+				
+			}
+			else if(controlType == EntityConfigUIControl.CHECKBOX){
+				CheckBox widget = new CheckBox(StringUtils.defaultIfEmpty(getString(captionKey), captionKey));
+				resp = widget;
+			}
+			else if(controlType == EntityConfigUIControl.SEARCHBOX){
+				SearcherField widget = new SearcherField(((RelationFieldConfigData)fieldInfo).getRelationEntityClass(), StringUtils.defaultIfEmpty(getString(captionKey), captionKey));
+				widget.setRequired(fieldInfo.isMandatory());
+				resp = widget;
+			}
+			
+			if(resp instanceof AbstractSelect){
+				if(fieldInfo.isEnumType()){
+					BeanItemContainer itemContainer = new BeanItemContainer(fieldInfo.getFieldType());
+					((AbstractSelect)resp).setContainerDataSource(itemContainer);
+					Class<Enum> enumTypeClazz = (Class)fieldInfo.getFieldType();
+					Method valuesMth = enumTypeClazz.getMethod("values", new Class[]{});
+					Enum[] vals = (Enum[])valuesMth.invoke(null, new Object[]{});
+					
+					for(int i = 0; i < vals.length; i++){
+						Item item = ((AbstractSelect)resp).addItem(vals[i]);
+						((AbstractSelect)resp).setItemCaption(item, vals[i].name().replace("_", " "));
+					}
+				}else if(fieldInfo.getFixedValues() != null && fieldInfo.getFixedValues().length > 0){
+					BeanItemContainer itemContainer = new BeanItemContainer(fieldInfo.getFieldType());
+					((AbstractSelect)resp).setContainerDataSource(itemContainer);
+					for(Listable value : fieldInfo.getFixedValues()){
+						Item item = ((AbstractSelect)resp).addItem(value);
+						((AbstractSelect)resp).setItemCaption(item, value.getDescription());
+					}
+				}else{
+					EntityCRUDOperationsManager auxManager = EntityCRUDOperationsManager.getInstance(((RelationFieldConfigData)fieldInfo).getRelationEntityClass());
+					List<Object> fieldValues = auxManager.searchWithoutPaging(null);
+					BeanItemContainer itemContainer = new BeanItemContainer(fieldInfo.getFieldType(), fieldValues);
+					((AbstractSelect)resp).setContainerDataSource(itemContainer);
+					for(Object value : fieldValues){
+						Item item = ((AbstractSelect)resp).addItem(value);
+						((AbstractSelect)resp).setItemCaption(item, FMWEntityUtils.generateStringRepresentationForField(value, FMWConstants.PIPE));
+					}
 				}
 			}
+		}catch(NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException ex){
+			throw new FMWException(ex);
 		}
 		return resp;
 	}
 	
-	private void bindComponentsToModel() throws Exception{
+	private void bindComponentsToModel() throws FMWException{
 		Object bean = null;
-		bean = entityConfigData.getEntityClass().getConstructor().newInstance();
+		try {
+			bean = entityConfigData.getEntityClass().getConstructor().newInstance();
+		
 		beanItem = new BeanItem(bean, componentMap.keySet());
 		for(String fieldName :componentMap.keySet()){
 			Component comp = componentMap.get(fieldName);
@@ -335,6 +343,9 @@ public class EntityCRUDPanel extends UIForm implements ClickListener{
 				((SearcherField)comp).setPropertyDataSource(beanItem.getItemProperty(fieldName));
 		}
 		initialKeyValue = beanItem.getItemProperty(entityConfigData.getPkFieldName()).getValue();
+		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException ex) {
+			throw new FMWException(ex);
+		}
 	}
 	
 	private void bindControlEvents(){

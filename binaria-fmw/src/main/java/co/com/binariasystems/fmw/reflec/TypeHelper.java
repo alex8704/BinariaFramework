@@ -61,7 +61,7 @@ public class TypeHelper {
 		return resp;
 	}
 	
-	public static String objectToString(Object value) throws Exception{
+	public static String objectToString(Object value){
 		String resp = null;
 		Object obj = null;
 		if(value == null)

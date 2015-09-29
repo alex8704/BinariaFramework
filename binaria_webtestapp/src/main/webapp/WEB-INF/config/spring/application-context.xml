@@ -17,7 +17,7 @@
 		<property name="locations">
 			<list>
 				<value>/WEB-INF/config/spring/spring-properties.properties</value>
-				<value>/WEB-INF/config/spring/javamail.properties</value>
+				<value>classpath:javamail.properties</value>
 			</list>
 		</property>
 		<property name="ignoreUnresolvablePlaceholders" value="true" />

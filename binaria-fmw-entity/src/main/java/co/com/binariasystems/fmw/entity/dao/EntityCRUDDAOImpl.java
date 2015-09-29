@@ -64,7 +64,7 @@ public class EntityCRUDDAOImpl extends FMWAbstractDAO implements EntityCRUDDAO {
 		return respBuilder.toString();
 	}
 
-	public List<Object> searchWithoutPaging(String sqlStatement, MapSqlParameterSource paramSource, RowMapper<Object> rowMapper) throws Exception {
+	public List<Object> searchWithoutPaging(String sqlStatement, MapSqlParameterSource paramSource, RowMapper<Object> rowMapper) {
 		List<Object> data = getNamedParameterJdbcTemplate().query(sqlStatement, paramSource, rowMapper);
 		return data;
 	}

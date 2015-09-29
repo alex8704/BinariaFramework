@@ -1,16 +1,18 @@
 package co.com.binariasystems.fmw.entity.util;
 
+import java.lang.reflect.InvocationTargetException;
+
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import co.com.binariasystems.fmw.constants.FMWConstants;
-import co.com.binariasystems.fmw.dto.Listable;
 import co.com.binariasystems.fmw.entity.Entity;
 import co.com.binariasystems.fmw.entity.cfg.EntityConfigData;
 import co.com.binariasystems.fmw.entity.cfg.EntityConfigData.FieldConfigData;
 import co.com.binariasystems.fmw.entity.cfg.EntityConfigData.RelationFieldConfigData;
 import co.com.binariasystems.fmw.entity.cfg.EntityConfigurationManager;
 import co.com.binariasystems.fmw.entity.cfg.EntityConfigurator;
+import co.com.binariasystems.fmw.exception.FMWException;
 import co.com.binariasystems.fmw.ioc.IOCHelper;
 import co.com.binariasystems.fmw.reflec.TypeHelper;
 
@@ -18,7 +20,7 @@ public class FMWEntityUtils {
 	
 	private static String showOpeationsSql;
 	
-	public static EntityConfigData getEntityConfig(Class entityClazz) throws Exception{
+	public static EntityConfigData getEntityConfig(Class entityClazz) throws FMWException{
 		EntityConfigurator configurator = EntityConfigurationManager.getInstance().getConfigurator(entityClazz);
 		EntityConfigData entityConfigData = configurator.configure();
 		return entityConfigData;
@@ -38,38 +40,42 @@ public class FMWEntityUtils {
 		return generateStringRepresentationForField(fieldValue, FMWConstants.WHITE_SPACE);
 	}
 	
-	public static String generateStringRepresentationForField(Object fieldValue, String separator) throws Exception{
+	public static String generateStringRepresentationForField(Object fieldValue, String separator) throws FMWException{
 		if(fieldValue == null)
 			return "";
 		StringBuilder resp = new StringBuilder();
 		
-		if(TypeHelper.isBasicType(fieldValue.getClass()) || TypeHelper.isCollectionType(fieldValue.getClass()) 
-				|| Enum.class.isAssignableFrom(fieldValue.getClass()))
-			resp.append(TypeHelper.objectToString(fieldValue));
-		else if(!TypeHelper.isBasicType(fieldValue.getClass()) && fieldValue.getClass().isAnnotationPresent(Entity.class)){//No est tipo basico y es Entidad
-			EntityConfigData entityConfigData = getEntityConfig(fieldValue.getClass());
-			boolean hasDescriptionFields = entityConfigData.getSearchDescriptionFields() != null && entityConfigData.getSearchDescriptionFields().size() > 0;
-			String subFieldValue = null;
-			
-			if(hasDescriptionFields){
-				for(int i = 0; i < entityConfigData.getSearchDescriptionFields().size(); i++){
-					String fieldName = entityConfigData.getSearchDescriptionFields().get(i);
-					FieldConfigData subFieldCfg = entityConfigData.getFieldsData().get(fieldName);
-					if(subFieldCfg instanceof RelationFieldConfigData && !TypeHelper.isBasicType(subFieldCfg.getFieldType())){
-						subFieldValue = generateStringRepresentationForField(PropertyUtils.getProperty(fieldValue, subFieldCfg.getFieldName()), separator);
-					}else{
-						subFieldValue = TypeHelper.objectToString(PropertyUtils.getProperty(fieldValue, subFieldCfg.getFieldName()));
+		try{
+			if(TypeHelper.isBasicType(fieldValue.getClass()) || TypeHelper.isCollectionType(fieldValue.getClass()) 
+					|| Enum.class.isAssignableFrom(fieldValue.getClass()))
+				resp.append(TypeHelper.objectToString(fieldValue));
+			else if(!TypeHelper.isBasicType(fieldValue.getClass()) && fieldValue.getClass().isAnnotationPresent(Entity.class)){//No est tipo basico y es Entidad
+				EntityConfigData entityConfigData = getEntityConfig(fieldValue.getClass());
+				boolean hasDescriptionFields = entityConfigData.getSearchDescriptionFields() != null && entityConfigData.getSearchDescriptionFields().size() > 0;
+				String subFieldValue = null;
+				
+				if(hasDescriptionFields){
+					for(int i = 0; i < entityConfigData.getSearchDescriptionFields().size(); i++){
+						String fieldName = entityConfigData.getSearchDescriptionFields().get(i);
+						FieldConfigData subFieldCfg = entityConfigData.getFieldsData().get(fieldName);
+						if(subFieldCfg instanceof RelationFieldConfigData && !TypeHelper.isBasicType(subFieldCfg.getFieldType())){
+							subFieldValue = generateStringRepresentationForField(PropertyUtils.getProperty(fieldValue, subFieldCfg.getFieldName()), separator);
+						}else{
+							subFieldValue = TypeHelper.objectToString(PropertyUtils.getProperty(fieldValue, subFieldCfg.getFieldName()));
+						}
+						if(StringUtils.isNotBlank(subFieldValue)){
+							if(resp.length() > 0)
+								resp.append(StringUtils.defaultIfBlank(separator, FMWConstants.WHITE_SPACE));
+							resp.append(subFieldValue);
+						}
 					}
-					if(StringUtils.isNotBlank(subFieldValue)){
-						if(resp.length() > 0)
-							resp.append(StringUtils.defaultIfBlank(separator, FMWConstants.WHITE_SPACE));
-						resp.append(subFieldValue);
-					}
-				}
+				}else
+					resp.append(TypeHelper.objectToString(fieldValue));
 			}else
 				resp.append(TypeHelper.objectToString(fieldValue));
-		}else
-			resp.append(TypeHelper.objectToString(fieldValue));
+		}catch(FMWException | IllegalAccessException | InvocationTargetException | NoSuchMethodException ex){
+			throw new FMWException(ex);
+		}
 		
 		return resp.toString();
 	}

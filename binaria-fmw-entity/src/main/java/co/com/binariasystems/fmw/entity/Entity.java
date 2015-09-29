@@ -5,6 +5,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import co.com.binariasystems.fmw.entity.cfg.EnumKeyProperty;
+import co.com.binariasystems.fmw.entity.cfg.PKGenerationStrategy;
 import co.com.binariasystems.fmw.entity.validator.EntityValidator;
 
 /**
@@ -15,5 +17,7 @@ import co.com.binariasystems.fmw.entity.validator.EntityValidator;
 @Retention(value = RetentionPolicy.RUNTIME)
 public @interface Entity {
 	public abstract String table() default "";
+	public abstract PKGenerationStrategy pkGenerationStrategy() default PKGenerationStrategy.MAX_QUERY;
+	public abstract EnumKeyProperty enumKeyProperty() default EnumKeyProperty.NAME;
 	public abstract Class<? extends EntityValidator> validationClass() default EntityValidator.class;
 }

@@ -13,4 +13,7 @@ public class MenuOptionDTO extends MenuElement{
 		this.path = path;
 	}
 	
+	public static void main(String[] args) {
+		Class clazz = Gateway.class;
+	}
 }
