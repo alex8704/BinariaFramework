@@ -3,13 +3,13 @@ package co.com.binariasystems.webtestapp.ui;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
+import com.vaadin.data.Property.ValueChangeEvent;
+import com.vaadin.data.Property.ValueChangeListener;
+import com.vaadin.server.Page;
+import com.vaadin.ui.HorizontalSplitPanel;
+import com.vaadin.ui.Label;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
-
+import co.com.binariasystems.fmw.annotation.Dependency;
 import co.com.binariasystems.fmw.vweb.mvp.annotation.Init;
 import co.com.binariasystems.fmw.vweb.mvp.annotation.ViewController;
 import co.com.binariasystems.fmw.vweb.mvp.annotation.ViewController.OnLoad;
@@ -21,21 +21,13 @@ import co.com.binariasystems.webtestapp.business.AuthenticationBusiness;
 import co.com.binariasystems.webtestapp.dto.MenuModuleDTO;
 import co.com.binariasystems.webtestapp.dto.MenuOptionDTO;
 
-import com.vaadin.data.Property.ValueChangeEvent;
-import com.vaadin.data.Property.ValueChangeListener;
-import com.vaadin.server.Page;
-import com.vaadin.ui.HorizontalSplitPanel;
-import com.vaadin.ui.Label;
 
-
-@Component
-@Scope(value="session")
 @ViewController
 public class DashboardViewController extends AbstractViewController {
 	@ViewField private TreeMenu menuContainer;
 	@ViewField private HorizontalSplitPanel splitPanel;
 	@ViewField private Label welcomeLabel;
-	@Autowired
+	@Dependency
 	private AuthenticationBusiness authBusiness;
 	
 	@Init
@@ -101,22 +93,5 @@ public class DashboardViewController extends AbstractViewController {
 		menuContainer.setItems(opciones);
 	}
 	
-	@PostConstruct
-	protected void postConstruct(){
-		System.out.println("-------------------------------------");
-		System.out.println("Postconstructing "+DashboardViewController.class.getName());
-		System.out.println(authBusiness.dato());
-		System.out.println("-------------------------------------");
-	}
 	
-	@PreDestroy
-	protected void preDestroy(){
-		System.out.println("|||||||||||||||||||||||||||||||||||||");
-		System.out.println("|||||||||||||||||||||||||||||||||||||");
-		System.out.println("|||||||||||||||||||||||||||||||||||||");
-		System.out.println("Predestroying "+DashboardViewController.class.getName());
-		System.out.println("|||||||||||||||||||||||||||||||||||||");
-		System.out.println("|||||||||||||||||||||||||||||||||||||");
-		System.out.println("|||||||||||||||||||||||||||||||||||||");
-	}
 }

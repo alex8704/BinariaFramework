@@ -12,6 +12,7 @@ import org.reflections.Reflections;
 
 import com.vaadin.ui.Component;
 
+import co.com.binariasystems.fmw.exception.FMWException;
 import co.com.binariasystems.fmw.util.messagebundle.MessageBundleManager;
 import co.com.binariasystems.fmw.vweb.constants.VWebCommonConstants;
 import co.com.binariasystems.fmw.vweb.mvp.Initializable;
@@ -26,7 +27,7 @@ public class DefaultViewInstanceCreator implements ViewInstanceCreator {
 	private ControllerInstantiator controllerInstantiator;
 	
 	public DefaultViewInstanceCreator(){
-		controllerInstantiator = new IOCBasedControllerInstantiator();
+		controllerInstantiator = new DefaultControllerInstantiator();
 	}
 	
 
@@ -55,6 +56,9 @@ public class DefaultViewInstanceCreator implements ViewInstanceCreator {
 			if(viewHasEventHandlers)
 				request.getEventBus().addHandler(viewInstance);
 			
+			//Se inyectan las dependencias antes de invocar metodos de inicializacion
+			MVPUtils.injectIOCProviderDependencies(viewInstance, viewInfo.getViewClass());
+			
 			if(viewInstance instanceof Initializable)
 				((Initializable)viewInstance).init();
 			else if(StringUtils.isNoneEmpty(viewInfo.getInitMethod()))
@@ -73,7 +77,7 @@ public class DefaultViewInstanceCreator implements ViewInstanceCreator {
 			
 			
 			resp = new ViewAndController(viewInstance, uiContainer, controller);
-		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException | ParseException e) {
+		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException | ParseException | FMWException e) {
 			throw new ViewInstantiationException(e);
 		}
 

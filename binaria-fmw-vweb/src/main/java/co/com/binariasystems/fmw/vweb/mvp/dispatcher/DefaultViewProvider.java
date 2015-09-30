@@ -82,9 +82,14 @@ public class DefaultViewProvider implements ViewProvider {
 		
 		reflections = new Reflections(configBuilder);
 		
-		viewInstanceCreators.remove(defaultViewInstanceCreator);//Garantiza que no haya mas de una instancia del DefaultViewInstanceCreator
+		
 		for(ViewInstanceCreator viewInstanCreator : viewInstanceCreators){
+			defaultViewInstanceCreator = (viewInstanCreator instanceof DefaultViewInstanceCreator) ? viewInstanCreator : defaultViewInstanceCreator;
 			viewInstanCreator.init(reflections);
+		}
+		if(defaultViewInstanceCreator == null){
+			defaultViewInstanceCreator = new DefaultViewInstanceCreator();
+			defaultViewInstanceCreator.init(reflections);
 		}
 		
 		configureControllersContext();

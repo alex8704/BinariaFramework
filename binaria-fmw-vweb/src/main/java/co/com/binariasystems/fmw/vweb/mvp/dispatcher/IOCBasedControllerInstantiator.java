@@ -6,6 +6,7 @@ import java.lang.reflect.Method;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.reflect.MethodUtils;
 
+import co.com.binariasystems.fmw.exception.FMWException;
 import co.com.binariasystems.fmw.ioc.IOCHelper;
 import co.com.binariasystems.fmw.util.messagebundle.MessageBundleManager;
 import co.com.binariasystems.fmw.vweb.mvp.Initializable;
@@ -21,10 +22,10 @@ public class IOCBasedControllerInstantiator implements ControllerInstantiator {
 	public Object instantiateController(ViewInfo viewInfo, RequestData request, Object viewInstance) throws ViewInstantiationException {
 		Object controller = null;
 		ControllerInfo controllerInfo = viewInfo.getControllerInfo();
-		controller = IOCHelper.getBean(controllerInfo.getControllerClass());
 		boolean hasEventHandlers = false;
 		
 		try{
+			controller = controllerInfo.getControllerClass().newInstance();
 			for(Method method : controllerInfo.getControllerClass().getMethods()){
 				if(method.getParameterTypes() != null && method.getParameterTypes().length > 0){
 					if(MessageBundleManager.class.isAssignableFrom(method.getParameterTypes()[0]))
@@ -42,12 +43,13 @@ public class IOCBasedControllerInstantiator implements ControllerInstantiator {
 			//Se hace binding de los campos que coincida con los del view, antes de llamar al metodo
 			//Inicializador del Controller
 			MVPUtils.copyHomonymFieldsFromViewToController(viewInfo, viewInstance, controller);
+			MVPUtils.injectIOCProviderDependencies(controller, controllerInfo.getControllerClass());
 			
 			if(controller instanceof Initializable)
 				((Initializable)controller).init();
 			else if(StringUtils.isNoneEmpty(controllerInfo.getInitMethod()))
 				MethodUtils.getAccessibleMethod(controllerInfo.getControllerClass().getMethod(controllerInfo.getInitMethod())).invoke(controller);
-		}catch(IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException ex){
+		}catch(IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException | FMWException | InstantiationException ex){
 			throw new ViewInstantiationException(ex);
 		}
 		

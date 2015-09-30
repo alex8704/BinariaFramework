@@ -11,10 +11,19 @@
 		<value>co.com.binariasystems.webtestapp</value>
 	</util:list>
 	
+	<bean id="defaultViewInstanceCreator" class="co.com.binariasystems.fmw.vweb.mvp.dispatcher.DefaultViewInstanceCreator">
+		<property name="controllerInstantiator">
+			<bean class="co.com.binariasystems.fmw.vweb.mvp.dispatcher.IOCBasedControllerInstantiator"></bean>
+		</property>
+	</bean>
+	
+	<bean id="entityCRUDViewInstanceCreator" class="co.com.binariasystems.fmw.vweb.mvp.dispatcher.EntityCRUDViewInstanceCreator"></bean>
+	
 	<bean id="viewProvider" class="co.com.binariasystems.fmw.vweb.mvp.dispatcher.DefaultViewProvider">
 		<property name="viewInstanceCreators">
 			<list value-type="co.com.binariasystems.fmw.vweb.mvp.dispatcher.ViewInstanceCreator">
-				<bean class="co.com.binariasystems.fmw.vweb.mvp.dispatcher.EntityCRUDViewInstanceCreator"></bean>
+				<ref bean="defaultViewInstanceCreator"/>
+				<ref bean="entityCRUDViewInstanceCreator"/>
 			</list>
 		</property>
 		<property name="viewsPackages" ref="application.mvp.viewProvider.viewsPackages"/>
