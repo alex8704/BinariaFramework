@@ -17,6 +17,8 @@ import org.reflections.scanners.TypeAnnotationsScanner;
 import org.reflections.util.ClasspathHelper;
 import org.reflections.util.ConfigurationBuilder;
 import org.reflections.util.FilterBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import co.com.binariasystems.fmw.exception.FMWException;
 import co.com.binariasystems.fmw.util.messagebundle.PropertiesManager;
@@ -44,11 +46,12 @@ import co.com.binariasystems.fmw.vweb.mvp.views.DefaultResourceNotFoundView;
 import com.vaadin.ui.Component;
 
 public class DefaultViewProvider implements ViewProvider {
+	private static final Logger LOGGER = LoggerFactory.getLogger(DefaultViewProvider.class);
 	private Map<String, String> packagesNamespaces = new HashMap<String, String>();
 	private Map<String, NamespaceInfo> namespacesContext = new HashMap<String, NamespaceInfo>();
 	private Map<String, ViewInfo> viewsContext = new HashMap<String, ViewInfo>();
 	private Map<String, ControllerInfo> controllersContext = new HashMap<String, ControllerInfo>();
-	private ViewInstanceCreator defaultViewInstanceCreator = new DefaultViewInstanceCreator();
+	private ViewInstanceCreator defaultViewInstanceCreator;
 	private List<ViewInstanceCreator> viewInstanceCreators = new LinkedList<ViewInstanceCreator>();
 	private ViewInfo forbiddenView;
 	private ViewInfo resourceNotFoundView;
@@ -57,6 +60,7 @@ public class DefaultViewProvider implements ViewProvider {
 	private List<String> viewsPackages;
 	private Reflections reflections;
 	private String scanningExcludedPackages;
+	private boolean showConfigurationDebugInfo;
 	
 	public void configure(ServletContext servletContext)  throws ViewConfigurationException{
 		FilterBuilder packagesFilter = new FilterBuilder();
@@ -91,11 +95,17 @@ public class DefaultViewProvider implements ViewProvider {
 			defaultViewInstanceCreator = new DefaultViewInstanceCreator();
 			defaultViewInstanceCreator.init(reflections);
 		}
+		//Para Garantizar que el defaultViewInstanceCreator, no haga parte del
+		//Grupo de InstanceCretors personalizados
+		viewInstanceCreators.remove(defaultViewInstanceCreator);
 		
 		configureControllersContext();
 		configureNamespacesContext();
 		configureViewsContext();
 		ensureDefaultPublicViews();
+		
+		if(showConfigurationDebugInfo)
+			printConfigurationDebugInfo();
 	}
 	
 	public void configure() throws ViewConfigurationException{
@@ -400,6 +410,12 @@ public class DefaultViewProvider implements ViewProvider {
 		
 		return viewInfo;
 	}
+	
+	private void printConfigurationDebugInfo(){
+		LOGGER.info("Discovered and Configured Views on Application Classpath");
+		for(String viewUrl : viewsContext.keySet())
+			LOGGER.info("{} : {}", viewUrl, viewsContext.get(viewUrl).getViewClass());
+	}
 
 	public List<ViewInstanceCreator> getViewInstanceCreators() {
 		return viewInstanceCreators;
@@ -415,6 +431,14 @@ public class DefaultViewProvider implements ViewProvider {
 
 	public void setViewsPackages(List<String> viewsPackages) {
 		this.viewsPackages = viewsPackages;
+	}
+
+	public boolean isShowConfigurationDebugInfo() {
+		return showConfigurationDebugInfo;
+	}
+
+	public void setShowConfigurationDebugInfo(boolean showConfigurationDebugInfo) {
+		this.showConfigurationDebugInfo = showConfigurationDebugInfo;
 	}
 	
 }

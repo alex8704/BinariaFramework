@@ -27,6 +27,7 @@
 			</list>
 		</property>
 		<property name="viewsPackages" ref="application.mvp.viewProvider.viewsPackages"/>
+		<property name="showConfigurationDebugInfo" value="true"/>
 	</bean>
 	
 	<bean id="viewDispatcher" class="co.com.binariasystems.fmw.vweb.mvp.dispatcher.ViewDispatcherImpl" scope="session">
