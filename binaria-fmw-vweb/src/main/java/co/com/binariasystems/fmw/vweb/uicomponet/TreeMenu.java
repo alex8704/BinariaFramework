@@ -10,6 +10,10 @@ import co.com.binariasystems.fmw.vweb.util.VWebUtils;
 
 import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.util.HierarchicalContainer;
+import com.vaadin.data.util.ObjectProperty;
+import com.vaadin.data.util.filter.SimpleStringFilter;
+import com.vaadin.event.FieldEvents.TextChangeEvent;
+import com.vaadin.event.FieldEvents.TextChangeListener;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.AbstractSelect.ItemDescriptionGenerator;
 import com.vaadin.ui.Component;
@@ -45,9 +49,9 @@ public class TreeMenu extends VerticalLayout {
 		if(showSearcher)
 			setShowSearcher();
 		setItems(items);
-		
+		bindEvents();
 	}
-	
+
 	private void buildComponent(){
 		searchTxT = new TextField();
 		searchTxT.setInputPrompt(VWebUtils.getCommonString(VWebCommonConstants.COMMON_COMPONENTS_SEARCH_LABEL));
@@ -59,11 +63,14 @@ public class TreeMenu extends VerticalLayout {
 		descriptionsGenerator = new TreeMenuItemDescriptionGenerator();
 		styleGenerator = new TreeMenuItemStyleGenerator();
 		
+		treeDs.addContainerProperty("caption", String.class, "");
+		
 		tree = new Tree(title, treeDs);
 		tree.setImmediate(true);
 		tree.setItemDescriptionGenerator(descriptionsGenerator);
 		tree.setItemStyleGenerator(styleGenerator);
-		tree.setItemStyleGenerator(null);
+		tree.setItemCaptionPropertyId("caption");
+//		tree.setItemStyleGenerator(null);
 		tree.setWidth(100, Unit.PERCENTAGE);
 		
 		addComponent(searchTxT);
@@ -74,6 +81,19 @@ public class TreeMenu extends VerticalLayout {
 		
 		searchTxT.setVisible(false);
 	}
+	
+	private void bindEvents() {
+		searchTxT.addTextChangeListener(new TextChangeListener() {
+			@Override
+			public void textChange(TextChangeEvent event) {
+				treeDs.removeAllContainerFilters();
+				if(showSearcher && StringUtils.isNotEmpty(event.getText())){
+					SimpleStringFilter filter = new SimpleStringFilter("caption", event.getText(), true, true);
+					treeDs.addContainerFilter(filter);
+				}
+			}
+		});
+	}
 
 	public TreeMenu setTitle(String title) {
 		tree.setCaption(title);
@@ -82,6 +102,7 @@ public class TreeMenu extends VerticalLayout {
 
 	public TreeMenu setShowSearcher() {
 		searchTxT.setVisible(true);
+		showSearcher = true;
 		return this;
 	}
 
@@ -102,7 +123,8 @@ public class TreeMenu extends VerticalLayout {
 	
 	private void addItemRecursively(MenuElement item, MenuElement parent){
 		treeDs.addItem(item);
-		tree.setItemCaption(item, item.getCaption());
+		treeDs.getItem(item).addItemProperty("caption", new ObjectProperty<String>(item.getCaption()));
+		//tree.setItemCaption(item, item.getCaption());
 		
 		if(parent != null)
 			treeDs.setParent(item, parent);
