@@ -4,13 +4,9 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
-import co.com.binariasystems.fmw.vweb.constants.VWebCommonConstants;
-import co.com.binariasystems.fmw.vweb.uicomponet.treemenu.MenuElement;
-import co.com.binariasystems.fmw.vweb.util.VWebUtils;
-
+import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.util.HierarchicalContainer;
-import com.vaadin.data.util.ObjectProperty;
 import com.vaadin.data.util.filter.SimpleStringFilter;
 import com.vaadin.event.FieldEvents.TextChangeEvent;
 import com.vaadin.event.FieldEvents.TextChangeListener;
@@ -22,6 +18,10 @@ import com.vaadin.ui.Tree;
 import com.vaadin.ui.Tree.ItemStyleGenerator;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
+
+import co.com.binariasystems.fmw.vweb.constants.VWebCommonConstants;
+import co.com.binariasystems.fmw.vweb.uicomponet.treemenu.MenuElement;
+import co.com.binariasystems.fmw.vweb.util.VWebUtils;
 
 public class TreeMenu extends VerticalLayout {
 	private TextField searchTxT;
@@ -70,7 +70,6 @@ public class TreeMenu extends VerticalLayout {
 		tree.setItemDescriptionGenerator(descriptionsGenerator);
 		tree.setItemStyleGenerator(styleGenerator);
 		tree.setItemCaptionPropertyId("caption");
-//		tree.setItemStyleGenerator(null);
 		tree.setWidth(100, Unit.PERCENTAGE);
 		
 		addComponent(searchTxT);
@@ -121,10 +120,11 @@ public class TreeMenu extends VerticalLayout {
 	}
 	
 	
+	@SuppressWarnings("unchecked")
 	private void addItemRecursively(MenuElement item, MenuElement parent){
 		treeDs.addItem(item);
-		treeDs.getItem(item).addItemProperty("caption", new ObjectProperty<String>(item.getCaption()));
-		//tree.setItemCaption(item, item.getCaption());
+		Property<String> property = treeDs.getItem(item).getItemProperty("caption");
+		property.setValue(item.getCaption());
 		
 		if(parent != null)
 			treeDs.setParent(item, parent);

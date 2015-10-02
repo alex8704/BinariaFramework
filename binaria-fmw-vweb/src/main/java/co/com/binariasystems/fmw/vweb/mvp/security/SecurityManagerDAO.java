@@ -6,6 +6,6 @@ public interface SecurityManagerDAO{
 	//Ya que cada aplicacion tendra su propio modelo de datos de Seguridad
 	
 	
-	public boolean isAuthorized(String resourceUrl) throws Exception;
+	public boolean isAuthorized(String resourceUrl);
 	
 }
