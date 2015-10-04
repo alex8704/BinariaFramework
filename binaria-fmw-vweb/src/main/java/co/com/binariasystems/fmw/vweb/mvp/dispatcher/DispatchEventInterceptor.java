@@ -3,34 +3,47 @@ package co.com.binariasystems.fmw.vweb.mvp.dispatcher;
 import static co.com.binariasystems.fmw.vweb.mvp.security.model.AuthorizationAndAuthenticationInfo.RESOURCE_URL_ARG;
 
 import org.aspectj.lang.ProceedingJoinPoint;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import co.com.binariasystems.fmw.vweb.mvp.event.RequestDispatchEvent;
 import co.com.binariasystems.fmw.vweb.mvp.security.SecurityManager;
 import co.com.binariasystems.fmw.vweb.mvp.security.model.AuthorizationAndAuthenticationInfo;
 
 public class DispatchEventInterceptor {
+	private static final Logger LOGGER = LoggerFactory.getLogger(DispatchEventInterceptor.class);
+	
 	private SecurityManager securityManager;
 	private boolean dummy;
 	
 	public void intercept(ProceedingJoinPoint joinPoint) throws ViewDispatchException{
 		RequestDispatchEvent dispatchEvent = (RequestDispatchEvent)joinPoint.getArgs()[0];
-		AuthorizationAndAuthenticationInfo authInfo = new AuthorizationAndAuthenticationInfo()
-				.set(RESOURCE_URL_ARG, dispatchEvent.getString(RequestDispatchEvent.URL_PROPERTY));
+		String requestedUrl = dispatchEvent.getString(RequestDispatchEvent.URL_PROPERTY);
+		
+		
+		AuthorizationAndAuthenticationInfo authInfo = new AuthorizationAndAuthenticationInfo().set(RESOURCE_URL_ARG, requestedUrl);
 		boolean authenticated = securityManager.isAuthenticated(authInfo);
 		boolean authorized = false;
 		try{
 			if(authenticated){
 				authorized = securityManager.isAuthorized(authInfo);
 			}else 
-				authorized = securityManager.isPublicView(dispatchEvent.getString(RequestDispatchEvent.URL_PROPERTY));
-			
+				authorized = securityManager.isPublicView(requestedUrl);
 			String targetUrl = ViewProvider.SPECIAL_VIEWS_URL+"?"+ViewProvider.AUTHENTICATION_VIEW_PARAM_IDENTIFIER;//Por defecto se tiene la url de autenticacion
-			targetUrl = authorized ? dispatchEvent.getString(RequestDispatchEvent.URL_PROPERTY) : (authenticated ? securityManager.getForbiddenViewUrl() : targetUrl);
+			targetUrl = authorized ? requestedUrl : (authenticated ? securityManager.getForbiddenViewUrl() : targetUrl);
+			
+			printDebugInformation(authorized, requestedUrl, targetUrl);
+			
 			dispatchEvent.set(RequestDispatchEvent.URL_PROPERTY, targetUrl);
 			joinPoint.proceed(new Object[]{dispatchEvent});
 		}catch(Throwable ex){
 			throw new ViewDispatchException(ex);
 		}
+	}
+	
+	private void printDebugInformation(boolean authorized, String requestedUrl, String targetUrl){
+		if(!authorized)
+			LOGGER.warn("Detected Unauthorized access to resource {}, redirecting to {}", requestedUrl, targetUrl);
 	}
 
 	public SecurityManager getSecurityManager() {

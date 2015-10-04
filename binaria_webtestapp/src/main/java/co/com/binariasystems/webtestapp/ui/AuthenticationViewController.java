@@ -1,13 +1,5 @@
 package co.com.binariasystems.webtestapp.ui;
 
-import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.authc.AuthenticationException;
-import org.apache.shiro.authc.ExcessiveAttemptsException;
-import org.apache.shiro.authc.IncorrectCredentialsException;
-import org.apache.shiro.authc.LockedAccountException;
-import org.apache.shiro.authc.UnknownAccountException;
-import org.apache.shiro.authc.UsernamePasswordToken;
-import org.apache.shiro.subject.Subject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +12,7 @@ import com.vaadin.ui.PasswordField;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 
+import co.com.binariasystems.fmw.annotation.Dependency;
 import co.com.binariasystems.fmw.ioc.IOCHelper;
 import co.com.binariasystems.fmw.util.mail.SimpleMailMessage;
 import co.com.binariasystems.fmw.util.messagebundle.PropertiesManager;
@@ -31,6 +24,8 @@ import co.com.binariasystems.fmw.vweb.mvp.annotation.ViewController.OnUnLoad;
 import co.com.binariasystems.fmw.vweb.mvp.annotation.ViewField;
 import co.com.binariasystems.fmw.vweb.mvp.controller.AbstractViewController;
 import co.com.binariasystems.fmw.vweb.mvp.security.SecurityManager;
+import co.com.binariasystems.fmw.vweb.mvp.security.model.AuthorizationAndAuthenticationInfo;
+import co.com.binariasystems.fmw.vweb.mvp.security.model.FMWSecurityException;
 import co.com.binariasystems.fmw.vweb.uicomponet.MessageDialog;
 import co.com.binariasystems.fmw.vweb.uicomponet.MessageDialog.Type;
 import co.com.binariasystems.fmw.vweb.uicomponet.UIForm;
@@ -48,6 +43,8 @@ public class AuthenticationViewController extends AbstractViewController{
 	private PropertiesManager mailProperties;
 	@Autowired
 	private AuthenticationBusiness authBusiness;
+	@Dependency
+	private SecurityManager securityManager;
 	
 	@Init
 	public void initController(){
@@ -61,30 +58,29 @@ public class AuthenticationViewController extends AbstractViewController{
 					log.warn("Debe digitar sus datos de usuario para continuar.");
 					return;
 				}
-				Subject subject = SecurityUtils.getSubject();
-				UsernamePasswordToken authToken = new UsernamePasswordToken((String)item.getItemProperty("usernameField").getValue(), (String)item.getItemProperty("passwordField").getValue());
+				AuthorizationAndAuthenticationInfo authInfo = new AuthorizationAndAuthenticationInfo()
+				.set(AuthorizationAndAuthenticationInfo.USERNAME_ARG, (String)item.getItemProperty("usernameField").getValue())
+				.set(AuthorizationAndAuthenticationInfo.USERPASSWORD_ARG, (String)item.getItemProperty("passwordField").getValue());
+				
 				
 				try{
-					subject.login(authToken);
+					securityManager.authenticate(authInfo);
 					System.out.println(authBusiness.dato());
-					//sendAuthenticationMail();
+					sendAuthenticationMail();
 					new MessageDialog("Bienvenido", "La validaci\u00f3n de las credenciales de autenticaci\u00f3n ha sida satisfactoria", Type.INFORMATION)
 					.addYesClickListener(new ClickListener() {
 						@Override
 						public void buttonClick(ClickEvent event) {
-							SecurityManager secMgr = IOCHelper.getBean(SecurityManager.class);
-							UI.getCurrent().getPage().setUriFragment(secMgr.getDashBoardViewUrl());
+							UI.getCurrent().getPage().setUriFragment(securityManager.getDashBoardViewUrl());
 						}
 					}).show();
 					
 					log.debug("La validaci\u00f3n de las credenciales de autenticaci\u00f3n ha sida satisfactoria");
-				}catch ( UnknownAccountException | IncorrectCredentialsException | LockedAccountException | ExcessiveAttemptsException ex) {
+				}catch ( FMWSecurityException ex) {
 					MessageDialog.showExceptions(ex);
 					log.error(ex.toString());
-				}  catch (AuthenticationException  ae ) {
-					MessageDialog.showExceptions(ae);
-					log.error(ae.toString());
 				}
+				System.out.println("SE LOGRO AUTENTICAR? "+securityManager.isAuthenticated(authInfo));
 				
 			}
 		});

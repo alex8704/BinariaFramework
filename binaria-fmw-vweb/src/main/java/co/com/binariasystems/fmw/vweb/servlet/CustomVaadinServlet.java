@@ -5,14 +5,14 @@ import javax.servlet.http.Cookie;
 
 import org.apache.commons.lang3.LocaleUtils;
 
-import co.com.binariasystems.fmw.vweb.constants.VWebCommonConstants;
-
 import com.vaadin.server.ServiceException;
 import com.vaadin.server.SessionInitEvent;
 import com.vaadin.server.SessionInitListener;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinService;
 import com.vaadin.server.VaadinServlet;
+
+import co.com.binariasystems.fmw.vweb.constants.VWebCommonConstants;
 
 public class CustomVaadinServlet extends VaadinServlet {
 	@Override

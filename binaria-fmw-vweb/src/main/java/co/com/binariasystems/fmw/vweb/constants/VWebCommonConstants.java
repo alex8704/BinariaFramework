@@ -4,6 +4,7 @@ import co.com.binariasystems.fmw.vweb.resources.messages.messages;
 
 public interface VWebCommonConstants {
 	public static final String COMMON_MESSAGES_PROPERTIES_FILENAME = messages.class.getPackage().getName() + ".common_messages";
+	public static final String DEFAULT_AUTH_MESSAGES_PATH = messages.class.getPackage().getName() + ".auth_messages";
 	public static final String ENTITY_STRINGS_PROPERTIES_FILENAME = messages.class.getPackage().getName() + ".entities_strings";
 	public static final String APP_MVP_VIEWPROVIDER_VIEWS_PACKAGES_IOC_KEY = "application.mvp.viewProvider.viewsPackages";
 	public static final String ENTITYCRUD_VIEWCREATOR_URLPATTERN = "((/)[a-zA-Z_0-9]+)*((/_masterentity/)([a-zA-Z_0-9]*))";
