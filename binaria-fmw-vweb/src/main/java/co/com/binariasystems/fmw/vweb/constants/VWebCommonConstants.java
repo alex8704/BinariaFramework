@@ -63,5 +63,6 @@ public interface VWebCommonConstants {
 	public static final String USER_LANGUAGE_APPCOOKIE = "binaria-webapp-user-lang";
 	public static final String USER_LANGUAGE_SESSION_ATTRIBUTE = "_VWEBAPP_CURRENT_USER_LANGUAJE";
 	
+	public static final String SECURITY_SUBJECT_ATTRIBUTE = org.atmosphere.cpr.FrameworkConfig.SECURITY_SUBJECT;
 	
 }

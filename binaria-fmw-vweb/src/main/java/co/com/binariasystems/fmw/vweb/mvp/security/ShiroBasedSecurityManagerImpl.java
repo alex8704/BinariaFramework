@@ -52,13 +52,13 @@ public class ShiroBasedSecurityManagerImpl implements SecurityManager {
 
 	@Override
 	public boolean isAuthorized(AuthorizationAndAuthenticationInfo authInfo) throws FMWSecurityException {
-		Subject currentUser = SecurityUtils.getSubject();
+		Subject currentUser = getCurrentSecurityUser(authInfo);
 		return (getDashBoardViewUrl().equals(authInfo.getString(RESOURCE_URL_ARG)) || isPublicView(RESOURCE_URL_ARG) || currentUser.isPermitted(RESOURCE_URL_ARG));
 	}
 
 	@Override
 	public void authenticate(AuthorizationAndAuthenticationInfo authInfo) throws FMWSecurityException {
-		Subject currentUser = SecurityUtils.getSubject();
+		Subject currentUser = getCurrentSecurityUser(authInfo);
 		UsernamePasswordToken authToken = new UsernamePasswordToken(
 				authInfo.getString(AuthorizationAndAuthenticationInfo.USERNAME_ARG), 
 				authInfo.getString(AuthorizationAndAuthenticationInfo.USERPASSWORD_ARG));
@@ -74,12 +74,19 @@ public class ShiroBasedSecurityManagerImpl implements SecurityManager {
 
 	@Override
 	public boolean isAuthenticated(AuthorizationAndAuthenticationInfo authInfo) {
-		return SecurityUtils.getSubject().isAuthenticated();
+		return getCurrentSecurityUser(authInfo).isAuthenticated();
 	}
 
 	@Override
 	public void logout(AuthorizationAndAuthenticationInfo authInfo) throws FMWSecurityException {
-		SecurityUtils.getSubject().logout();
+		getCurrentSecurityUser(authInfo).logout();
+	}
+	
+	
+	private Subject getCurrentSecurityUser(AuthorizationAndAuthenticationInfo authInfo){
+		Subject currentSubject = authInfo.get(AuthorizationAndAuthenticationInfo.SECURITY_SUBJECT_ARG, Subject.class);
+		
+		return currentSubject != null ? currentSubject : SecurityUtils.getSubject();
 	}
 
 }

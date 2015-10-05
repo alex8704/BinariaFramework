@@ -1,19 +1,12 @@
 package co.com.binariasystems.webtestapp.ui;
 
+import static co.com.binariasystems.fmw.vweb.constants.VWebCommonConstants.SECURITY_SUBJECT_ATTRIBUTE;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.vaadin.data.util.PropertysetItem;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.PasswordField;
-import com.vaadin.ui.TextField;
-import com.vaadin.ui.UI;
-
 import co.com.binariasystems.fmw.annotation.Dependency;
-import co.com.binariasystems.fmw.ioc.IOCHelper;
 import co.com.binariasystems.fmw.util.mail.SimpleMailMessage;
 import co.com.binariasystems.fmw.util.messagebundle.PropertiesManager;
 import co.com.binariasystems.fmw.util.velocity.VelocityMailSender;
@@ -31,6 +24,15 @@ import co.com.binariasystems.fmw.vweb.uicomponet.MessageDialog.Type;
 import co.com.binariasystems.fmw.vweb.uicomponet.UIForm;
 import co.com.binariasystems.webtestapp.business.AuthenticationBusiness;
 
+import com.vaadin.data.util.PropertysetItem;
+import com.vaadin.server.VaadinService;
+import com.vaadin.ui.Button;
+import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.Button.ClickListener;
+import com.vaadin.ui.PasswordField;
+import com.vaadin.ui.TextField;
+import com.vaadin.ui.UI;
+
 
 @ViewController
 public class AuthenticationViewController extends AbstractViewController{
@@ -45,6 +47,8 @@ public class AuthenticationViewController extends AbstractViewController{
 	private AuthenticationBusiness authBusiness;
 	@Dependency
 	private SecurityManager securityManager;
+	@Dependency
+	private VelocityMailSender mailSender;
 	
 	@Init
 	public void initController(){
@@ -60,7 +64,8 @@ public class AuthenticationViewController extends AbstractViewController{
 				}
 				AuthorizationAndAuthenticationInfo authInfo = new AuthorizationAndAuthenticationInfo()
 				.set(AuthorizationAndAuthenticationInfo.USERNAME_ARG, (String)item.getItemProperty("usernameField").getValue())
-				.set(AuthorizationAndAuthenticationInfo.USERPASSWORD_ARG, (String)item.getItemProperty("passwordField").getValue());
+				.set(AuthorizationAndAuthenticationInfo.USERPASSWORD_ARG, (String)item.getItemProperty("passwordField").getValue())
+				.set(AuthorizationAndAuthenticationInfo.SECURITY_SUBJECT_ARG, VaadinService.getCurrentRequest().getAttribute(SECURITY_SUBJECT_ATTRIBUTE));
 				
 				
 				try{
@@ -89,12 +94,10 @@ public class AuthenticationViewController extends AbstractViewController{
 	
 	private void sendAuthenticationMail(){
 		try{
-			VelocityMailSender mailSender = IOCHelper.getBean(VelocityMailSender.class);
 			SimpleMailMessage msg = new SimpleMailMessage();
 			msg.setFrom(mailProperties.getString("mail.smtp.user"));
 			msg.setTo("alexander_8704@hotmail.com");
 			msg.setSubject("[Mensaje Simple]");
-			
 			mailSender.send(msg, "/simple-tmpl.vm", null);
 		}catch(Exception ex){
 			ex.printStackTrace();

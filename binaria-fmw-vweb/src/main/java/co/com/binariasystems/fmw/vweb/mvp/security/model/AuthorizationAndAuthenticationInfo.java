@@ -12,6 +12,7 @@ public class AuthorizationAndAuthenticationInfo implements Serializable {
 	public static final String USERNAME_ARG = "USERNAME_ARG";
 	public static final String RESOURCE_URL_ARG = "RESOURCE_URL_ARG";
 	public static final String USERPASSWORD_ARG = "USERPASSWORD_ARG";
+	public static final String SECURITY_SUBJECT_ARG = "SECURITY_SUBJECT_ARG";
 	
 	protected Map<String, Object> dataMap = new HashMap<String, Object>();
 	

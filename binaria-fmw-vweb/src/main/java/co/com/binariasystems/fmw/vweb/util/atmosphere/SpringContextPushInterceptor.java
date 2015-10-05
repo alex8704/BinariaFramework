@@ -15,11 +15,14 @@ public class SpringContextPushInterceptor extends AtmosphereInterceptorAdapter{
 	private static final String REQUEST_ATTRIBUTES_ATTRIBUTE =
 			RequestContextListener.class.getName() + ".REQUEST_ATTRIBUTES";
 	
+	public static final String SUBJECT_KEY = SpringContextPushInterceptor.class.getName() + "_SUBJECT_KEY";
+	
 	@Override
 	public Action inspect(AtmosphereResource r) {
 		HttpServletRequest request = r.getRequest();
 		ServletRequestAttributes attributes = new ServletRequestAttributes(request);
 		request.setAttribute(REQUEST_ATTRIBUTES_ATTRIBUTE, attributes);
+		//request.setAttribute(SUBJECT_KEY, SecurityUtils.getSubject());
 		LocaleContextHolder.setLocale(request.getLocale());
 		RequestContextHolder.setRequestAttributes(attributes);
 		

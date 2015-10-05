@@ -100,7 +100,10 @@
 		<init-param>
 			<description>My Own Atmosphere Interceptors</description>
 			<param-name>org.atmosphere.cpr.AtmosphereInterceptor</param-name>
-			<param-value>co.com.binariasystems.fmw.vweb.util.atmosphere.SpringContextPushInterceptor</param-value>
+			<param-value>
+				co.com.binariasystems.fmw.vweb.util.atmosphere.SpringContextPushInterceptor,
+				org.atmosphere.interceptor.ShiroInterceptor
+			</param-value>
 		</init-param>
 		<load-on-startup>1</load-on-startup>
 		<async-supported>true</async-supported>

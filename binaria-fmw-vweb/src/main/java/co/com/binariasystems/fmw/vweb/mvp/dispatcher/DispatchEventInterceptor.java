@@ -1,5 +1,6 @@
 package co.com.binariasystems.fmw.vweb.mvp.dispatcher;
 
+import static co.com.binariasystems.fmw.vweb.constants.VWebCommonConstants.SECURITY_SUBJECT_ATTRIBUTE;
 import static co.com.binariasystems.fmw.vweb.mvp.security.model.AuthorizationAndAuthenticationInfo.RESOURCE_URL_ARG;
 
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -9,6 +10,8 @@ import org.slf4j.LoggerFactory;
 import co.com.binariasystems.fmw.vweb.mvp.event.RequestDispatchEvent;
 import co.com.binariasystems.fmw.vweb.mvp.security.SecurityManager;
 import co.com.binariasystems.fmw.vweb.mvp.security.model.AuthorizationAndAuthenticationInfo;
+
+import com.vaadin.server.VaadinService;
 
 public class DispatchEventInterceptor {
 	private static final Logger LOGGER = LoggerFactory.getLogger(DispatchEventInterceptor.class);
@@ -21,7 +24,10 @@ public class DispatchEventInterceptor {
 		String requestedUrl = dispatchEvent.getString(RequestDispatchEvent.URL_PROPERTY);
 		
 		
-		AuthorizationAndAuthenticationInfo authInfo = new AuthorizationAndAuthenticationInfo().set(RESOURCE_URL_ARG, requestedUrl);
+		AuthorizationAndAuthenticationInfo authInfo = new AuthorizationAndAuthenticationInfo()
+		.set(RESOURCE_URL_ARG, requestedUrl)
+		.set(AuthorizationAndAuthenticationInfo.SECURITY_SUBJECT_ARG, VaadinService.getCurrentRequest().getAttribute(SECURITY_SUBJECT_ATTRIBUTE));
+		
 		boolean authenticated = securityManager.isAuthenticated(authInfo);
 		boolean authorized = false;
 		try{
