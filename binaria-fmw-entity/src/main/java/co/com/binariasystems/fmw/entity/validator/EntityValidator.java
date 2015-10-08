@@ -8,8 +8,8 @@ import co.com.binariasystems.fmw.entity.exception.EntityCRUDValidationException;
  * @author Alexander Castro O.
  */
 
-public interface EntityValidator {
-	public void beforeInsert(Object masterBean) throws EntityCRUDValidationException;
-	public void beforeUpdate(Object masterBean) throws EntityCRUDValidationException;
-	public void beforeDelete(Object masterBean) throws EntityCRUDValidationException;
+public interface EntityValidator<T> {
+	public void beforeInsert(T masterBean) throws EntityCRUDValidationException;
+	public void beforeUpdate(T masterBean) throws EntityCRUDValidationException;
+	public void beforeDelete(T masterBean) throws EntityCRUDValidationException;
 }

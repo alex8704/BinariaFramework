@@ -46,7 +46,7 @@
 		</entry>
 		<entry key="co.com.binariasystems.webtestapp.dto.Gateway">
 			<bean class="co.com.binariasystems.fmw.entity.cfg.DefaultEntityConfigurator">
-				<property name="titleKey" value="Maestro Suscriptores"></property>
+				<property name="titleKey" value="Maestro Gateways"></property>
 				<property name="deleteEnabled" value="true" />
 				<property name="enumKeyProperty" ref="EnumKeyProperty.NAME" />
 				<property name="PKGenerationStrategy" ref="PKGenerationStrategy.IDENTITY" />
@@ -64,7 +64,7 @@
 		</entry>
 		<entry key="co.com.binariasystems.webtestapp.dto.Medidor">
 			<bean class="co.com.binariasystems.fmw.entity.cfg.DefaultEntityConfigurator">
-				<property name="titleKey" value="Maestro Suscriptores"></property>
+				<property name="titleKey" value="Maestro Medidores"></property>
 				<property name="deleteEnabled" value="true" />
 				<property name="enumKeyProperty" ref="EnumKeyProperty.NAME" />
 				<property name="PKGenerationStrategy" ref="PKGenerationStrategy.IDENTITY" />

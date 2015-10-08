@@ -115,7 +115,7 @@ public class EntityCRUDOperationsManager {
 
 			if (fieldName.equals(entityConfigData.getPkFieldName())) {
 
-				colNamesBuilder.append(first ? "" : ", ").append(fieldName);
+				colNamesBuilder.append(first ? "" : ", ").append(fieldCfg.getColumnName());
 				if (configurator.getPKGenerationStrategy() == PKGenerationStrategy.SEQUENCE) {
 					String seqTemplate = mm.getString(DBUtil.getCurrentDBMS().name().toLowerCase() + ".sequence.next.sentence.template");
 					String seqName = "seq_" + entityConfigData.getTable();
@@ -573,6 +573,7 @@ public class EntityCRUDOperationsManager {
 		return resp.toString();
 	}
 
+	@SuppressWarnings("unchecked")
 	private void applyValidations(Object entityBean, CRUDOperation operation) throws EntityCRUDValidationException {
 		if (entityValidator == null)
 			return;
