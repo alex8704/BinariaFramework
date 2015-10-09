@@ -8,11 +8,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import co.com.binariasystems.fmw.vweb.mvp.annotation.UIEventHandler;
 import co.com.binariasystems.fmw.vweb.mvp.event.UIEvent;
 
 class EventMethodCache implements Serializable{
-	
 	
 	private static final long serialVersionUID = -3835595439788993624L;
 	
@@ -111,7 +113,7 @@ class EventDispatcher implements Serializable{
 
 
 public class EventBusImpl implements EventBus, Serializable {
-	
+	private static final Logger LOGGER = LoggerFactory.getLogger(EventBusImpl.class);
 	private static final long serialVersionUID = 5500479291713928578L;
 	
 	private static final EventMethodCache eventMethodChache = new EventMethodCache();
@@ -152,7 +154,7 @@ public class EventBusImpl implements EventBus, Serializable {
 		}
 		else
 			added = scanHandlerAndCreateEventDispatcher(handler);
-		System.out.println(getClass().getSimpleName()+".addHandler(<"+handler.getClass().getSimpleName()+">) --> "+(added ? "added" : "not added"));
+		LOGGER.info(getClass().getSimpleName()+".addHandler(<"+handler.getClass().getSimpleName()+">) --> "+(added ? "added" : "not added"));
 	}
 	
 	

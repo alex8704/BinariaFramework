@@ -580,9 +580,9 @@ public class EntityCRUDOperationsManager {
 		if (operation == CRUDOperation.INSERT)
 			entityValidator.beforeInsert(entityBean);
 		else if (operation == CRUDOperation.UPDATE)
-			entityValidator.beforeInsert(entityBean);
+			entityValidator.beforeUpdate(entityBean);
 		else if (operation == CRUDOperation.DELETE)
-			entityValidator.beforeInsert(entityBean);
+			entityValidator.beforeDelete(entityBean);
 	}
 
 	

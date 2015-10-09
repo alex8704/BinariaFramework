@@ -13,7 +13,7 @@ public class SuscriptorValidator implements EntityValidator<Suscriptor> {
 
 	@Override
 	public void beforeUpdate(Suscriptor masterBean) throws EntityCRUDValidationException {
-		
+		throw new EntityCRUDValidationException("Esta vaina esta loca jejejejejejejeje");
 	}
 
 	@Override

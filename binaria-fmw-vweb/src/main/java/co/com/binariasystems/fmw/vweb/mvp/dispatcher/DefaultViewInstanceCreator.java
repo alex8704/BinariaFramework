@@ -5,6 +5,8 @@ package co.com.binariasystems.fmw.vweb.mvp.dispatcher;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.text.ParseException;
+import java.util.Observable;
+import java.util.Observer;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.reflect.MethodUtils;
@@ -75,6 +77,11 @@ public class DefaultViewInstanceCreator implements ViewInstanceCreator {
 			
 			controller = (controllerInfo != null) ? controllerInstantiator.instantiateController(viewInfo, request, viewInstance) : null;
 			
+			if(controller instanceof Observable){
+				if(viewInstance instanceof Observer)
+					((Observable)controller).addObserver((Observer)viewInstance);
+			}
+			
 			
 			resp = new ViewAndController(viewInstance, uiContainer, controller);
 		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException | ParseException | FMWException e) {
@@ -83,6 +90,7 @@ public class DefaultViewInstanceCreator implements ViewInstanceCreator {
 
 		return resp;
 	}
+	
 
 	@Override
 	public void init(Reflections reflections) {

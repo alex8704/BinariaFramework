@@ -25,7 +25,7 @@ public abstract class AbstractFormView extends UIForm {
 		this.eventBus = eventBus;
 	}
 	
-	protected void fireEvent(UIEvent event){
+	protected void fireEvent(UIEvent<?> event){
 		eventBus.fireEvent(event);
 	}
 

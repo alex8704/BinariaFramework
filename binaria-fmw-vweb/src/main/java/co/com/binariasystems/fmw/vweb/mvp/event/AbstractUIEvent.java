@@ -7,7 +7,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-public class AbstractUIEvent implements UIEvent{
+public abstract class AbstractUIEvent<ID_TYPE> implements UIEvent<ID_TYPE>{
 
 	public AbstractUIEvent() {
 	}
@@ -15,7 +15,7 @@ public class AbstractUIEvent implements UIEvent{
 	protected Map<String, Object> dataMap = new HashMap<String, Object>();
 
 	@Override
-	public UIEvent set(String key, Object data) {
+	public UIEvent<ID_TYPE> set(String key, Object data) {
 		dataMap.put(key, data);
 		return this;
 	}

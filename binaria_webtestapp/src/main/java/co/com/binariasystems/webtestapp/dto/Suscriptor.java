@@ -10,7 +10,7 @@ import co.com.binariasystems.fmw.entity.FieldValue;
 import co.com.binariasystems.fmw.entity.FieldValues;
 import co.com.binariasystems.fmw.entity.Key;
 import co.com.binariasystems.fmw.entity.SearchTarget;
-@Entity(table="suscriptores")
+@Entity(table="suscriptores", validationClass=SuscriptorValidator.class)
 @SearchTarget(descriptionFields={"identificacion", "nombre"})
 public class Suscriptor extends AbstractDTO{
 	@Key(column="id_suscriptor")
