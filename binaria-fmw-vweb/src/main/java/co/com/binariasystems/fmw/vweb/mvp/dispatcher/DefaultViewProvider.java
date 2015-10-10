@@ -19,6 +19,9 @@ import org.reflections.util.ConfigurationBuilder;
 import org.reflections.util.FilterBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.context.ServletContextAware;
+
+import com.vaadin.ui.Component;
 
 import co.com.binariasystems.fmw.exception.FMWException;
 import co.com.binariasystems.fmw.util.messagebundle.PropertiesManager;
@@ -43,9 +46,7 @@ import co.com.binariasystems.fmw.vweb.mvp.dispatcher.data.ViewInfo;
 import co.com.binariasystems.fmw.vweb.mvp.views.DefaultForbiddenView;
 import co.com.binariasystems.fmw.vweb.mvp.views.DefaultResourceNotFoundView;
 
-import com.vaadin.ui.Component;
-
-public class DefaultViewProvider implements ViewProvider {
+public class DefaultViewProvider implements ViewProvider, ServletContextAware {
 	private static final Logger LOGGER = LoggerFactory.getLogger(DefaultViewProvider.class);
 	private Map<String, String> packagesNamespaces = new HashMap<String, String>();
 	private Map<String, NamespaceInfo> namespacesContext = new HashMap<String, NamespaceInfo>();
@@ -61,8 +62,9 @@ public class DefaultViewProvider implements ViewProvider {
 	private Reflections reflections;
 	private String scanningExcludedPackages;
 	private boolean showConfigurationDebugInfo;
+	private ServletContext servletContext;
 	
-	public void configure(ServletContext servletContext)  throws ViewConfigurationException{
+	public void configure()  throws ViewConfigurationException{
 		FilterBuilder packagesFilter = new FilterBuilder();
 		if(viewsPackages != null && viewsPackages.size() > 0){
 			for(String packageName : viewsPackages)
@@ -106,10 +108,6 @@ public class DefaultViewProvider implements ViewProvider {
 		
 		if(showConfigurationDebugInfo)
 			printConfigurationDebugInfo();
-	}
-	
-	public void configure() throws ViewConfigurationException{
-		configure(null);
 	}
 	
 	private void configureControllersContext() throws ViewConfigurationException{
@@ -439,6 +437,11 @@ public class DefaultViewProvider implements ViewProvider {
 
 	public void setShowConfigurationDebugInfo(boolean showConfigurationDebugInfo) {
 		this.showConfigurationDebugInfo = showConfigurationDebugInfo;
+	}
+
+	@Override
+	public void setServletContext(ServletContext servletContext) {
+		this.servletContext = servletContext;
 	}
 	
 }

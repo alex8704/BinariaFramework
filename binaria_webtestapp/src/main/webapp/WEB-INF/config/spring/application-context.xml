@@ -9,6 +9,10 @@
 		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.0.xsd
 		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd">
 	
+	<!-- **********************************************************************************************************
+			DATA BASE TRANSACTIONS, PROPERTIES AND GLOBAL ENVIRONMENT VARIABLES CONFIGURATION
+	 ********************************************************************************************************** -->
+	
 	<context:annotation-config />
 	<context:component-scan base-package="co.com.binariasystems"/>
 	
@@ -18,6 +22,7 @@
 			<list>
 				<value>/WEB-INF/config/spring/spring-properties.properties</value>
 				<value>classpath:javamail.properties</value>
+				<value>classpath:pesistence.properties</value>
 			</list>
 		</property>
 		<property name="ignoreUnresolvablePlaceholders" value="true" />
@@ -32,8 +37,7 @@
 		<constructor-arg value="co.com.binariasystems.webtestapp.ui.AppUI" />
 	</bean>
 
-	<jee:jndi-lookup id="mainDS" jndi-name="jdbc/WebtestMainDS"
-		resource-ref="true"></jee:jndi-lookup>
+	<jee:jndi-lookup id="mainDS" jndi-name="jdbc/WebtestMainDS" resource-ref="true"></jee:jndi-lookup>
 
 	<!-- No se usan transacciones manejadas por el Servidor de Aplicaciones 
 		ya que Posiblemente se realice despliegue sobre un simple Contenedor de Sevlets 
@@ -45,6 +49,37 @@
 
 	<tx:annotation-driven transaction-manager="transactionManager" />
 
+	
+	<!-- **********************************************************************************************************
+									JAVA PERSISTECE CONFIGURATIONS
+	 ********************************************************************************************************** -->
+	
+	
+	<bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+<!-- 		<property name="persistenceXmlLocation" value="classpath:META-INF/persistence.xml" /> -->
+		<property name="persistenceUnitName" value="Webtest_PU" />
+		<property name="packagesToScan" value="co.com.binariasystems.webtestapp.dto"/>
+		<property name="dataSource" ref="mainDS" />
+		<property name="jpaVendorAdapter" ref="jpaVendorAdapter" />
+		<property name="jpaProperties">
+			<props>
+				<prop key="hibernate.show_sql">${jpaImpl.show_sql}</prop>
+			</props>
+		</property>
+	</bean>
+
+	<bean id="jpaVendorAdapter" class="org.springframework.orm.jpa.vendor.EclipseLinkJpaVendorAdapter">
+		<property name="database" value="${databaseSystem}" />
+		<property name="showSql" value="${jpaImpl.show_sql}"/>
+		<property name="generateDdl" value="${jpaImpl.generateDdl}"/>
+	</bean>
+	
+	<bean id="persistenceExceptionTranslationPostProcessor" class="org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor" />
+	
+	
+	<!-- **********************************************************************************************************
+									JAVAMAIL-VELOCITY MECHANISM CONFIGURATION
+	 ********************************************************************************************************** -->
 
 	<bean id="velocityEngineFactory"
 		class="co.com.binariasystems.fmw.util.velocity.VelocityEngineFactoryWebHelper">
@@ -78,7 +113,6 @@
 		<property name="mailSender" ref="mailSender"/>
 		<property name="velocityEngineFactory" ref="velocityEngineFactory"/>
 	</bean>
-
 
 	<import resource="business-context.xml" />
 	<import resource="fmwentity-config-context.xml" />

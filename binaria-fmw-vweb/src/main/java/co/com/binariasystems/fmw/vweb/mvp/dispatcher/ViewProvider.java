@@ -1,7 +1,5 @@
 package co.com.binariasystems.fmw.vweb.mvp.dispatcher;
 
-import javax.servlet.ServletContext;
-
 import co.com.binariasystems.fmw.exception.FMWException;
 import co.com.binariasystems.fmw.vweb.mvp.dispatcher.data.RequestData;
 import co.com.binariasystems.fmw.vweb.mvp.dispatcher.data.ViewAndController;
@@ -22,6 +20,5 @@ public interface ViewProvider {
 	public String getDashboardViewUrl();
 	public String getForbiddenViewUrl();
 	public void configure() throws ViewConfigurationException;
-	public void configure(ServletContext servletContext) throws ViewConfigurationException;
 	
 }

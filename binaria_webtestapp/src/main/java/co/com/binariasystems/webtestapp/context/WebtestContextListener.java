@@ -45,15 +45,6 @@ public class WebtestContextListener implements ServletContextListener {
     	LOGGER.info(VWebCommonConstants.APP_ENTITIES_MESSAGES_FILE_IOC_KEY + ": " + entitiesStringsFilePath);
     	LOGGER.info(FMWEntityConstants.ENTITY_OPERATIONS_SHOWSQL_IOC_KEY + ": " + entityOperatiosShowSql);
     	
-    	
-    	ViewProvider viewProvider = IOCHelper.getBean(ViewProvider.class);
-    	if(viewProvider != null)
-			try {
-				viewProvider.configure(sce.getServletContext());
-			} catch (ViewConfigurationException e) {
-				LOGGER.error(e.getMessage(), e);
-			}
-    	
     }
 
 	/**

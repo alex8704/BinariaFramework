@@ -71,7 +71,7 @@ public class AuthenticationViewController extends AbstractViewController{
 				try{
 					securityManager.authenticate(authInfo);
 					System.out.println(authBusiness.dato());
-					sendAuthenticationMail();
+					//sendAuthenticationMail();
 					new MessageDialog("Bienvenido", "La validaci\u00f3n de las credenciales de autenticaci\u00f3n ha sida satisfactoria", Type.INFORMATION)
 					.addYesClickListener(new ClickListener() {
 						@Override

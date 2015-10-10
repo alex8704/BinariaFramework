@@ -22,7 +22,7 @@
 
 	<bean id="entityCRUDViewInstanceCreator" class="co.com.binariasystems.fmw.vweb.mvp.dispatcher.EntityCRUDViewInstanceCreator"></bean>
 
-	<bean id="viewProvider" class="co.com.binariasystems.fmw.vweb.mvp.dispatcher.DefaultViewProvider">
+	<bean id="viewProvider" class="co.com.binariasystems.fmw.vweb.mvp.dispatcher.DefaultViewProvider" init-method="configure">
 		<property name="viewInstanceCreators">
 			<list value-type="co.com.binariasystems.fmw.vweb.mvp.dispatcher.ViewInstanceCreator">
 				<ref bean="defaultViewInstanceCreator" />
