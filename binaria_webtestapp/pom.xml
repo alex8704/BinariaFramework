@@ -267,6 +267,7 @@
 					<target>${project.target.version}</target>
 				</configuration>
 			</plugin>
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-resources-plugin</artifactId>
@@ -344,32 +345,6 @@
 					<scanIntervalSeconds>2</scanIntervalSeconds>
 				</configuration>
 			</plugin>
-			<plugin>
-				<groupId>org.bsc.maven</groupId>
-				<artifactId>maven-processor-plugin</artifactId>
-				<version>2.2.4</version>
-				<executions>
-					<execution>
-						<id>process</id>
-						<goals>
-							<goal>process</goal>
-						</goals>
-						<phase>generate-sources</phase>
-						<configuration>
-							<processors>
-								<processor>org.hibernate.jpamodelgen.JPAMetaModelEntityProcessor</processor>
-							</processors>
-						</configuration>
-					</execution>
-				</executions>
-				<dependencies>
-					<dependency>
-						<groupId>org.hibernate</groupId>
-						<artifactId>hibernate-jpamodelgen</artifactId>
-						<version>4.3.8.Final</version>
-					</dependency>
-				</dependencies>
-			</plugin>
 		</plugins>
 
 		<pluginManagement>
@@ -406,6 +381,33 @@
 						</lifecycleMappingMetadata>
 					</configuration>
 				</plugin>
+				
+<!-- 				<plugin> -->
+<!-- 				<groupId>org.bsc.maven</groupId> -->
+<!-- 				<artifactId>maven-processor-plugin</artifactId> -->
+<!-- 				<version>2.2.4</version> -->
+<!-- 				<executions> -->
+<!-- 					<execution> -->
+<!-- 						<id>process</id> -->
+<!-- 						<goals> -->
+<!-- 							<goal>process</goal> -->
+<!-- 						</goals> -->
+<!-- 						<phase>generate-sources</phase> -->
+<!-- 						<configuration> -->
+<!-- 							<processors> -->
+<!-- 								<processor>org.hibernate.jpamodelgen.JPAMetaModelEntityProcessor</processor> -->
+<!-- 							</processors> -->
+<!-- 						</configuration> -->
+<!-- 					</execution> -->
+<!-- 				</executions> -->
+<!-- 				<dependencies> -->
+<!-- 					<dependency> -->
+<!-- 						<groupId>org.hibernate</groupId> -->
+<!-- 						<artifactId>hibernate-jpamodelgen</artifactId> -->
+<!-- 						<version>4.3.8.Final</version> -->
+<!-- 					</dependency> -->
+<!-- 				</dependencies> -->
+<!-- 			</plugin>			 -->
 			</plugins>
 		</pluginManagement>
 

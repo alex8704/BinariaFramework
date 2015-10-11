@@ -79,6 +79,7 @@
 	</bean>
 	
 	<bean id="persistenceExceptionTranslationPostProcessor" class="org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor" />
+	
 	<jpa:repositories base-package="co.com.binariasystems.webtestapp.dto"/>
 	
 	<!-- **********************************************************************************************************
