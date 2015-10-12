@@ -17,7 +17,7 @@
 			DATA BASE TRANSACTIONS, PROPERTIES AND GLOBAL ENVIRONMENT VARIABLES CONFIGURATION
 	 ********************************************************************************************************** -->
 	
-	<context:annotation-config />
+<!-- 	<context:annotation-config /> -->
 	<context:component-scan base-package="co.com.binariasystems"/>
 	
 	<bean
@@ -62,7 +62,7 @@
 	<bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
 <!-- 		<property name="persistenceXmlLocation" value="classpath:META-INF/persistence.xml" /> -->
 		<property name="persistenceUnitName" value="Webtest_PU" />
-		<property name="packagesToScan" value="co.com.binariasystems.webtestapp.dto"/>
+		<property name="packagesToScan" value="co.com.binariasystems.webtestapp.entity"/>
 		<property name="dataSource" ref="mainDS" />
 		<property name="jpaVendorAdapter" ref="jpaVendorAdapter" />
 		<property name="jpaProperties">
@@ -80,7 +80,7 @@
 	
 	<bean id="persistenceExceptionTranslationPostProcessor" class="org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor" />
 	
-	<jpa:repositories base-package="co.com.binariasystems.webtestapp.dto"/>
+	<jpa:repositories base-package="co.com.binariasystems.webtestapp.dataaccess"/>
 	
 	<!-- **********************************************************************************************************
 									JAVAMAIL-VELOCITY MECHANISM CONFIGURATION
