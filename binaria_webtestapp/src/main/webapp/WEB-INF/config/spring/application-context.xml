@@ -26,7 +26,7 @@
 			<list>
 				<value>/WEB-INF/config/spring/spring-properties.properties</value>
 				<value>classpath:javamail.properties</value>
-				<value>classpath:pesistence.properties</value>
+				<value>classpath:persistence.properties</value>
 			</list>
 		</property>
 		<property name="ignoreUnresolvablePlaceholders" value="true" />

@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>binaria-fmw-entity</artifactId>
 	<properties>
-		<spring.version>4.0.5.RELEASE</spring.version>
+		<spring.version>4.2.0.RELEASE</spring.version>
 		<project.source.version>1.7</project.source.version>
 		<project.target.version>1.7</project.target.version>
 		<slf4j.version>1.7.12</slf4j.version>
