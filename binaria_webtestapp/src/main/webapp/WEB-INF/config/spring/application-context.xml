@@ -41,11 +41,8 @@
 		<constructor-arg value="co.com.binariasystems.webtestapp.ui.AppUI" />
 	</bean>
 
-	<jee:jndi-lookup id="mainDS" jndi-name="jdbc/WebtestMainDS" resource-ref="true"></jee:jndi-lookup>
+	<jee:jndi-lookup id="mainDS" jndi-name="java:/jdbc/WebtestMainDS" resource-ref="true"></jee:jndi-lookup>
 
-	<!-- No se usan transacciones manejadas por el Servidor de Aplicaciones 
-		ya que Posiblemente se realice despliegue sobre un simple Contenedor de Sevlets 
-		<tx:jta-transaction-manager/> -->
 	<tx:jta-transaction-manager />
 	<!-- <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager"> -->
 	<!-- <property name="dataSource" ref="siamsDS"/> -->
@@ -65,18 +62,27 @@
 		<property name="packagesToScan" value="co.com.binariasystems.webtestapp.entity"/>
 		<property name="dataSource" ref="mainDS" />
 		<property name="jpaVendorAdapter" ref="jpaVendorAdapter" />
+		<property name="loadTimeWeaver">
+			<bean class="org.springframework.instrument.classloading.InstrumentationLoadTimeWeaver"/>
+		</property>
 		<property name="jpaProperties">
 			<props>
-				<prop key="hibernate.show_sql">${jpaImpl.show_sql}</prop>
+				<prop key="eclipselink.weaving">static</prop>
 			</props>
 		</property>
 	</bean>
-
-	<bean id="jpaVendorAdapter" class="org.springframework.orm.jpa.vendor.EclipseLinkJpaVendorAdapter">
+	
+	<bean id="jpaVendorAdapter" class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
 		<property name="database" value="${databaseSystem}" />
 		<property name="showSql" value="${jpaImpl.show_sql}"/>
 		<property name="generateDdl" value="${jpaImpl.generateDdl}"/>
 	</bean>
+	
+<!-- 	<bean id="jpaVendorAdapter" class="org.springframework.orm.jpa.vendor.EclipseLinkJpaVendorAdapter"> -->
+<!-- 		<property name="database" value="${databaseSystem}" /> -->
+<!-- 		<property name="showSql" value="${jpaImpl.show_sql}"/> -->
+<!-- 		<property name="generateDdl" value="${jpaImpl.generateDdl}"/> -->
+<!-- 	</bean> -->
 	
 	<bean id="persistenceExceptionTranslationPostProcessor" class="org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor" />
 	

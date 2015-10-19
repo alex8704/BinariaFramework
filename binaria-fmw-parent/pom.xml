@@ -5,12 +5,33 @@
 	<artifactId>binaria-fmw-parent</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
-	
+
 	<properties>
 		<project.source.version>1.7</project.source.version>
 		<project.target.version>1.7</project.target.version>
 	</properties>
-	
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>io.spring.platform</groupId>
+				<artifactId>platform-bom</artifactId>
+				<version>2.0.0.BUILD-SNAPSHOT</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+	<repositories>
+		<repository>
+			<id>spring-snapshots</id>
+			<name>Spring Snapshots</name>
+			<url>http://repo.spring.io/snapshot</url>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
+	</repositories>
 	<modules>
 		<module>../binaria-fmw</module>
 		<module>../binaria-fmw-util</module>
@@ -23,13 +44,11 @@
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
-			<version>3.3.2</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>commons-beanutils</groupId>
 			<artifactId>commons-beanutils</artifactId>
-			<version>1.9.2</version>
 			<scope>provided</scope>
 		</dependency>
 	</dependencies>
@@ -46,5 +65,5 @@
 			</plugin>
 		</plugins>
 	</build>
-	
+
 </project>
