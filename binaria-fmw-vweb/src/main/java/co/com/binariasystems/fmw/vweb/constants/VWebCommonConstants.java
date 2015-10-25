@@ -39,6 +39,8 @@ public interface VWebCommonConstants {
 	public static final String EVENTBUS_LOOKUP_ID = "eventBus";
 	
 	public static final String UIFORM_REQUIRED_ERROR = "uiform.requirederror";
+	public static final String LINK_LABEL_TEMPLATE_TEXT = "linkLabel.templateText";
+	public static final String LINK_LABEL_DISABLE_TEMPLATE_TEXT = "linkLabel.disable.templateText";
 	
 	public static final String DEFMSG_ERRORS_FOUND = "defaultmsg.errors.found";
 	public static final String DEFMSG_NUMBERRANGE_VIOLATED = "defaultmsg.numberrange.violated";
@@ -47,6 +49,7 @@ public interface VWebCommonConstants {
 	public static final String PAGER_NROWS_FOUND = "pager.wasNrows.found";
 	public static final String PAGER_NO_ROWS_FORSHOW = "pager.noRows.forShow";
 	public static final String PAGER_PAGE_CAPTION = "pager.page.caption";
+	public static final String PAGER_PAGE_OF_CAPTION = "pager.page_of.caption";
 	public static final String PAGER_ROWS_CAPTION = "pager.rows.caption";
 	
 	public static final String DOWNLOADS_TMP_DIR = "/opt/app/siasms_externals/downloads";
@@ -64,5 +67,12 @@ public interface VWebCommonConstants {
 	public static final String USER_LANGUAGE_SESSION_ATTRIBUTE = "_VWEBAPP_CURRENT_USER_LANGUAJE";
 	
 	public static final String SECURITY_SUBJECT_ATTRIBUTE = org.atmosphere.cpr.FrameworkConfig.SECURITY_SUBJECT;
+	
+	public static final String PAGER_CLASS = "fmw-pager";
+	public static final String PAGER_FIRSTP_CLASS = "pager-firstp-link";
+	public static final String PAGER_LASTP_CLASS = "pager-lastp-link";
+	public static final String PAGER_NEXTP_CLASS = "pager-next-link";
+	public static final String PAGER_BACKP_CLASS = "pager-back-link";
+	public static final String LINKLABEL_NODEC_CLASS = "link-label-nodec";
 	
 }

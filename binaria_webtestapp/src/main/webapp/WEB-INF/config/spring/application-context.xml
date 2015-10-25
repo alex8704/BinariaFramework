@@ -41,7 +41,7 @@
 		<constructor-arg value="co.com.binariasystems.webtestapp.ui.AppUI" />
 	</bean>
 
-	<jee:jndi-lookup id="mainDS" jndi-name="java:/jdbc/WebtestMainDS" resource-ref="true"></jee:jndi-lookup>
+	<jee:jndi-lookup id="mainDS" jndi-name="jdbc/WebtestMainDS" resource-ref="true"></jee:jndi-lookup>
 
 	<tx:jta-transaction-manager />
 	<!-- <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager"> -->
@@ -72,17 +72,17 @@
 		</property>
 	</bean>
 	
-	<bean id="jpaVendorAdapter" class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
-		<property name="database" value="${databaseSystem}" />
-		<property name="showSql" value="${jpaImpl.show_sql}"/>
-		<property name="generateDdl" value="${jpaImpl.generateDdl}"/>
-	</bean>
-	
-<!-- 	<bean id="jpaVendorAdapter" class="org.springframework.orm.jpa.vendor.EclipseLinkJpaVendorAdapter"> -->
+<!-- 	<bean id="jpaVendorAdapter" class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter"> -->
 <!-- 		<property name="database" value="${databaseSystem}" /> -->
 <!-- 		<property name="showSql" value="${jpaImpl.show_sql}"/> -->
 <!-- 		<property name="generateDdl" value="${jpaImpl.generateDdl}"/> -->
 <!-- 	</bean> -->
+	
+	<bean id="jpaVendorAdapter" class="org.springframework.orm.jpa.vendor.EclipseLinkJpaVendorAdapter">
+		<property name="database" value="${databaseSystem}" />
+		<property name="showSql" value="${jpaImpl.show_sql}"/>
+		<property name="generateDdl" value="${jpaImpl.generateDdl}"/>
+	</bean>
 	
 	<bean id="persistenceExceptionTranslationPostProcessor" class="org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor" />
 	

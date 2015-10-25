@@ -6,6 +6,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.vaadin.data.util.PropertysetItem;
+import com.vaadin.server.VaadinService;
+import com.vaadin.ui.Button;
+import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.Button.ClickListener;
+import com.vaadin.ui.PasswordField;
+import com.vaadin.ui.TextField;
+import com.vaadin.ui.UI;
+
 import co.com.binariasystems.fmw.annotation.Dependency;
 import co.com.binariasystems.fmw.util.mail.SimpleMailMessage;
 import co.com.binariasystems.fmw.util.messagebundle.PropertiesManager;
@@ -19,19 +28,11 @@ import co.com.binariasystems.fmw.vweb.mvp.controller.AbstractViewController;
 import co.com.binariasystems.fmw.vweb.mvp.security.SecurityManager;
 import co.com.binariasystems.fmw.vweb.mvp.security.model.AuthorizationAndAuthenticationInfo;
 import co.com.binariasystems.fmw.vweb.mvp.security.model.FMWSecurityException;
+import co.com.binariasystems.fmw.vweb.uicomponet.FormValidationException;
 import co.com.binariasystems.fmw.vweb.uicomponet.MessageDialog;
 import co.com.binariasystems.fmw.vweb.uicomponet.MessageDialog.Type;
 import co.com.binariasystems.fmw.vweb.uicomponet.UIForm;
 import co.com.binariasystems.webtestapp.business.AuthenticationBusiness;
-
-import com.vaadin.data.util.PropertysetItem;
-import com.vaadin.server.VaadinService;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.PasswordField;
-import com.vaadin.ui.TextField;
-import com.vaadin.ui.UI;
 
 
 @ViewController
@@ -58,17 +59,14 @@ public class AuthenticationViewController extends AbstractViewController{
 		logInBtn.addClickListener(new ClickListener() {
 			@Override
 			public void buttonClick(ClickEvent event) {
-				if(!form.validate()){
-					log.warn("Debe digitar sus datos de usuario para continuar.");
-					return;
-				}
-				AuthorizationAndAuthenticationInfo authInfo = new AuthorizationAndAuthenticationInfo()
-				.set(AuthorizationAndAuthenticationInfo.USERNAME_ARG, (String)item.getItemProperty("usernameField").getValue())
-				.set(AuthorizationAndAuthenticationInfo.USERPASSWORD_ARG, (String)item.getItemProperty("passwordField").getValue())
-				.set(AuthorizationAndAuthenticationInfo.SECURITY_SUBJECT_ARG, VaadinService.getCurrentRequest().getAttribute(SECURITY_SUBJECT_ATTRIBUTE));
-				
-				
 				try{
+					form.validate();
+					
+					AuthorizationAndAuthenticationInfo authInfo = new AuthorizationAndAuthenticationInfo()
+							.set(AuthorizationAndAuthenticationInfo.USERNAME_ARG, (String)item.getItemProperty("usernameField").getValue())
+							.set(AuthorizationAndAuthenticationInfo.USERPASSWORD_ARG, (String)item.getItemProperty("passwordField").getValue())
+							.set(AuthorizationAndAuthenticationInfo.SECURITY_SUBJECT_ARG, VaadinService.getCurrentRequest().getAttribute(SECURITY_SUBJECT_ATTRIBUTE));
+					
 					securityManager.authenticate(authInfo);
 					System.out.println(authBusiness.dato());
 					//sendAuthenticationMail();
@@ -82,10 +80,12 @@ public class AuthenticationViewController extends AbstractViewController{
 					
 					log.debug("La validaci\u00f3n de las credenciales de autenticaci\u00f3n ha sida satisfactoria");
 				}catch ( FMWSecurityException ex) {
-					MessageDialog.showExceptions(ex);
 					log.error(ex.toString());
+					MessageDialog.showExceptions(ex);
+				} catch (FormValidationException ex) {
+					log.warn("Debe digitar sus datos de usuario para continuar.");
+					MessageDialog.showValidationErrors(null, ex.getMessage());
 				}
-				System.out.println("SE LOGRO AUTENTICAR? "+securityManager.isAuthenticated(authInfo));
 				
 			}
 		});

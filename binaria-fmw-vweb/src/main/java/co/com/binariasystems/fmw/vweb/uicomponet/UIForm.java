@@ -2,16 +2,12 @@ package co.com.binariasystems.fmw.vweb.uicomponet;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-
-import co.com.binariasystems.fmw.vweb.constants.VWebCommonConstants;
-import co.com.binariasystems.fmw.vweb.uicomponet.MessageDialog.Type;
-import co.com.binariasystems.fmw.vweb.util.VWebUtils;
-import co.com.binariasystems.fmw.vweb.util.ValidationUtils;
 
 import com.vaadin.data.Validator;
 import com.vaadin.data.Validator.InvalidValueException;
@@ -41,6 +37,10 @@ import com.vaadin.ui.Slider;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.Upload;
 import com.vaadin.ui.VerticalLayout;
+
+import co.com.binariasystems.fmw.constants.FMWConstants;
+import co.com.binariasystems.fmw.vweb.constants.VWebCommonConstants;
+import co.com.binariasystems.fmw.vweb.util.VWebUtils;
 
 /*
  * Clase que representa un formulario para capturar/mostrar informacion
@@ -271,7 +271,7 @@ public class UIForm extends HorizontalLayout{
 		return this;
 	}
 
-	public boolean validate(){
+	public boolean isValid(){
 		boolean hasErrors = false;
 		List<InvalidValueException> exs = new ArrayList<Validator.InvalidValueException>();
 		for(Component comp : childComponents){
@@ -286,21 +286,46 @@ public class UIForm extends HorizontalLayout{
 			}	
 		}
 		if(hasErrors)
-			showInvalidValueMessages(exs);
+			MessageDialog.showValidationErrors(null, getInvalidValueMessages(exs, true));
 		return !hasErrors;
 	}
 	
-	public void showInvalidValueMessages(List<InvalidValueException> exs){
+	public void validate() throws FormValidationException{
+		validate(true);
+	}
+	
+	public void validate(boolean formated) throws FormValidationException{
+		boolean hasErrors = false;
+		List<InvalidValueException> exs = new ArrayList<Validator.InvalidValueException>();
+		for(Component comp : childComponents){
+			if(comp instanceof AbstractField){
+				AbstractField field = ((AbstractField)comp);
+				try{
+				field.validate();
+				}catch (InvalidValueException ex) {
+					exs.add(ex);
+					hasErrors = true;
+				}
+			}	
+		}
+		if(!hasErrors) return;
+		FormValidationException ex = new FormValidationException(getInvalidValueMessages(exs, formated));
+		ex.setValidationMessages(Arrays.asList(getInvalidValueMessages(exs, false).split("\\"+FMWConstants.PIPE)));
+		throw ex;
+	}
+	
+	
+	private String getInvalidValueMessages(List<InvalidValueException> exs, boolean formated){
 		StringBuilder msgBuilder = new StringBuilder()
-		.append("<ul class='err-msgs-applist'>");
+		.append(formated ? "<ul class='err-msgs-applist'>" : "");
 		for(InvalidValueException cause: exs){
 			if(!StringUtils.isEmpty(cause.getMessage()))
-				msgBuilder.append("<li>").append(cause.getMessage()).append("</li>");
+				msgBuilder.append(formated ? "<li>" : (msgBuilder.length() == 0 ? "" : FMWConstants.PIPE)).append(cause.getMessage()).append(formated ? "</li>" : "");
 			for(InvalidValueException subex : cause.getCauses())
-				msgBuilder.append("<li>").append(subex.getMessage()).append("</li>");
+				msgBuilder.append(formated ? "<li>" : (msgBuilder.length() == 0 ? "" : FMWConstants.PIPE)).append(subex.getMessage()).append(formated ? "</li>" : "");
 		}
-		msgBuilder.append("</ul>");
-		MessageDialog.showValidationErrors(null, msgBuilder.toString());
+		msgBuilder.append(formated ? "</ul>" : "");
+		return msgBuilder.toString();
 	}
 	
 	public void initFocus(){

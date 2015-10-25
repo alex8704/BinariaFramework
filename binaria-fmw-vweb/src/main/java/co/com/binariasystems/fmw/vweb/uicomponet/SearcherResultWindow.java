@@ -11,28 +11,6 @@ import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import co.com.binariasystems.fmw.constants.FMWConstants;
-import co.com.binariasystems.fmw.dto.Listable;
-import co.com.binariasystems.fmw.entity.cfg.EntityConfigData;
-import co.com.binariasystems.fmw.entity.cfg.EntityConfigData.AuditFieldConfigData;
-import co.com.binariasystems.fmw.entity.cfg.EntityConfigData.FieldConfigData;
-import co.com.binariasystems.fmw.entity.cfg.EntityConfigData.RelationFieldConfigData;
-import co.com.binariasystems.fmw.entity.cfg.EntityConfigUIControl;
-import co.com.binariasystems.fmw.entity.cfg.EntityConfigurationManager;
-import co.com.binariasystems.fmw.entity.cfg.EntityConfigurator;
-import co.com.binariasystems.fmw.entity.criteria.Criteria;
-import co.com.binariasystems.fmw.entity.manager.EntityCRUDOperationsManager;
-import co.com.binariasystems.fmw.entity.util.FMWEntityUtils;
-import co.com.binariasystems.fmw.ioc.IOCHelper;
-import co.com.binariasystems.fmw.reflec.TypeHelper;
-import co.com.binariasystems.fmw.util.messagebundle.MessageBundleManager;
-import co.com.binariasystems.fmw.util.pagination.ListPage;
-import co.com.binariasystems.fmw.vweb.constants.VWebCommonConstants;
-import co.com.binariasystems.fmw.vweb.uicomponet.Pager.PagerMode;
-import co.com.binariasystems.fmw.vweb.uicomponet.pager.PageChangeEvent;
-import co.com.binariasystems.fmw.vweb.uicomponet.pager.PageChangeHandler;
-import co.com.binariasystems.fmw.vweb.util.VWebUtils;
-
 import com.vaadin.data.Item;
 import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.BeanItemContainer;
@@ -59,6 +37,30 @@ import com.vaadin.ui.UI;
 import com.vaadin.ui.Window;
 import com.vaadin.ui.themes.ValoTheme;
 
+import co.com.binariasystems.fmw.constants.FMWConstants;
+import co.com.binariasystems.fmw.dto.Listable;
+import co.com.binariasystems.fmw.entity.cfg.EntityConfigData;
+import co.com.binariasystems.fmw.entity.cfg.EntityConfigData.AuditFieldConfigData;
+import co.com.binariasystems.fmw.entity.cfg.EntityConfigData.FieldConfigData;
+import co.com.binariasystems.fmw.entity.cfg.EntityConfigData.RelationFieldConfigData;
+import co.com.binariasystems.fmw.entity.cfg.EntityConfigUIControl;
+import co.com.binariasystems.fmw.entity.cfg.EntityConfigurationManager;
+import co.com.binariasystems.fmw.entity.cfg.EntityConfigurator;
+import co.com.binariasystems.fmw.entity.criteria.Criteria;
+import co.com.binariasystems.fmw.entity.manager.EntityCRUDOperationsManager;
+import co.com.binariasystems.fmw.entity.util.FMWEntityUtils;
+import co.com.binariasystems.fmw.exception.FMWUncheckedException;
+import co.com.binariasystems.fmw.ioc.IOCHelper;
+import co.com.binariasystems.fmw.reflec.TypeHelper;
+import co.com.binariasystems.fmw.util.exception.FMWExceptionUtils;
+import co.com.binariasystems.fmw.util.messagebundle.MessageBundleManager;
+import co.com.binariasystems.fmw.util.pagination.ListPage;
+import co.com.binariasystems.fmw.vweb.constants.VWebCommonConstants;
+import co.com.binariasystems.fmw.vweb.uicomponet.Pager.PagerMode;
+import co.com.binariasystems.fmw.vweb.uicomponet.pager.PageChangeEvent;
+import co.com.binariasystems.fmw.vweb.uicomponet.pager.PageChangeHandler;
+import co.com.binariasystems.fmw.vweb.util.VWebUtils;
+
 /**
  * @author Alexander
  *
@@ -76,7 +78,7 @@ public class SearcherResultWindow extends Window implements ClickListener{
 	private Map<String, Component> componentMap = new HashMap<String, Component>();
 	private BeanItem beanItem;
 	private Pager<Object> pager;
-	private PageChangeHandler<Object> pageChangeHanlder;
+	private PageChangeHandler<Object, Object> pageChangeHanlder;
 	private Table resultsTable;
 	
 	private MessageBundleManager entityStrings = MessageBundleManager.forPath(
@@ -351,9 +353,14 @@ public class SearcherResultWindow extends Window implements ClickListener{
 		searchBtn.addClickListener(this);
 		searchAllBtn.addClickListener(this);
 		cleanBtn.addClickListener(this);
-		pageChangeHanlder = new PageChangeHandler<Object>() {
-			public ListPage<Object> loadPage(PageChangeEvent event) throws Exception {
-				return manager.searchForFmwComponent(event.getFilterDTO(), event.getInitialRow(), event.getRowsByPage(), conditions);
+		pageChangeHanlder = new PageChangeHandler<Object, Object>() {
+			public ListPage<Object> loadPage(PageChangeEvent<Object> event) throws FMWUncheckedException {
+				try {
+					return manager.searchForFmwComponent(event.getFilterDTO(), event.getInitialRow(), event.getRowsByPage(), conditions);
+				} catch (Exception e) {
+					Throwable cause = FMWExceptionUtils.prettyMessageException(e);
+					throw new FMWUncheckedException(cause.getMessage(), cause);
+				}
 			}
 		};
 		

@@ -118,4 +118,18 @@ $v-caption-font-weight: $v-font-weight;
 	  .v-select-option.v-radiobutton {
 	    padding-right: 10px;
 	}
+	
+	.fmw-pager{
+		font-size: 9pt;
+	}
+	
+	.pager-firstp-link, .pager-lastp-link, .pager-next-link, .pager-back-link{
+		text-decoration: none;
+		font-weight: bold;
+	}
+	
+	.link-label-nodec{
+		text-decoration: none;
+		font-weight: bold;
+	}
 }

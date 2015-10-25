@@ -5,13 +5,6 @@ import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 
-import co.com.binariasystems.fmw.util.pagination.ListPage;
-import co.com.binariasystems.fmw.vweb.constants.UIConstants;
-import co.com.binariasystems.fmw.vweb.constants.VWebCommonConstants;
-import co.com.binariasystems.fmw.vweb.uicomponet.pager.PageChangeEvent;
-import co.com.binariasystems.fmw.vweb.uicomponet.pager.PageChangeHandler;
-import co.com.binariasystems.fmw.vweb.util.VWebUtils;
-
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.util.ObjectProperty;
@@ -28,6 +21,13 @@ import com.vaadin.ui.Link;
 import com.vaadin.ui.NativeSelect;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.TextField;
+
+import co.com.binariasystems.fmw.util.pagination.ListPage;
+import co.com.binariasystems.fmw.vweb.constants.UIConstants;
+import co.com.binariasystems.fmw.vweb.constants.VWebCommonConstants;
+import co.com.binariasystems.fmw.vweb.uicomponet.pager.PageChangeEvent;
+import co.com.binariasystems.fmw.vweb.uicomponet.pager.PageChangeHandler;
+import co.com.binariasystems.fmw.vweb.util.VWebUtils;
 
 public class Pager<T> extends Observable {
 	public enum PagerMode {PAGE_PAGINATION, ROW_PAGINATION}
@@ -60,7 +60,7 @@ public class Pager<T> extends Observable {
 	private ObjectProperty<Integer> currentPageProperty = new ObjectProperty<Integer>(currentPage);
 	private ObjectProperty<Integer> rowsByPageProperty = new ObjectProperty<Integer>(rowsByPage);
 	private Object searchDTO;
-	private PageChangeHandler<T> pageChangeHandler;
+	private PageChangeHandler pageChangeHandler;
 	private int maxPagesInMemory = 1000;
 	private ListPage<T> pageList = new ListPage<T>();
 	private IntegerRangeValidator rangeValidator;
@@ -346,7 +346,7 @@ public class Pager<T> extends Observable {
 		rangeValidator.setMaxValue(max);
 	}
 	
-	public void setPageChangeHandler(PageChangeHandler<T> handler){
+	public void setPageChangeHandler(PageChangeHandler handler){
 		pageChangeHandler = handler;
 	}
 

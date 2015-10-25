@@ -3,12 +3,15 @@ package co.com.binariasystems.fmw.vweb.uicomponet.pager;
 import co.com.binariasystems.fmw.event.FMWEvent;
 import co.com.binariasystems.fmw.vweb.uicomponet.Pager;
 
-public class PageChangeEvent implements FMWEvent{
+public class PageChangeEvent<FILTER_TYPE> implements FMWEvent{
 	private int oldPage;
 	private int page;
 	private int rowsByPage;
-	private Object filterDTO;
+	private int pagesPerGroup;
+	private FILTER_TYPE filterDTO;
 	private Pager pager;
+	
+	
 	public int getOldPage() {
 		return oldPage;
 	}
@@ -27,10 +30,10 @@ public class PageChangeEvent implements FMWEvent{
 	public void setRowsByPage(int rowsByPage) {
 		this.rowsByPage = rowsByPage;
 	}
-	public Object getFilterDTO() {
+	public FILTER_TYPE getFilterDTO() {
 		return filterDTO;
 	}
-	public void setFilterDTO(Object filterDTO) {
+	public void setFilterDTO(FILTER_TYPE filterDTO) {
 		this.filterDTO = filterDTO;
 	}
 	public Pager getPager() {
@@ -49,5 +52,13 @@ public class PageChangeEvent implements FMWEvent{
 	public int getFinalRow(){
 		return getInitialRow() + rowsByPage;
 	}
+	public int getPagesPerGroup() {
+		return pagesPerGroup;
+	}
+	public void setPagesPerGroup(int pagesPerGroup) {
+		this.pagesPerGroup = pagesPerGroup;
+	}
+	
+	
 	
 }

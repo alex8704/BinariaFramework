@@ -15,31 +15,6 @@ import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import co.com.binariasystems.fmw.constants.FMWConstants;
-import co.com.binariasystems.fmw.dto.Listable;
-import co.com.binariasystems.fmw.entity.cfg.EntityConfigData;
-import co.com.binariasystems.fmw.entity.cfg.EntityConfigData.AuditFieldConfigData;
-import co.com.binariasystems.fmw.entity.cfg.EntityConfigData.FieldConfigData;
-import co.com.binariasystems.fmw.entity.cfg.EntityConfigData.RelationFieldConfigData;
-import co.com.binariasystems.fmw.entity.cfg.EntityConfigUIControl;
-import co.com.binariasystems.fmw.entity.cfg.EntityConfigurationManager;
-import co.com.binariasystems.fmw.entity.cfg.EntityConfigurator;
-import co.com.binariasystems.fmw.entity.manager.EntityCRUDOperationsManager;
-import co.com.binariasystems.fmw.entity.util.FMWEntityUtils;
-import co.com.binariasystems.fmw.exception.FMWException;
-import co.com.binariasystems.fmw.ioc.IOCHelper;
-import co.com.binariasystems.fmw.reflec.TypeHelper;
-import co.com.binariasystems.fmw.util.messagebundle.MessageBundleManager;
-import co.com.binariasystems.fmw.util.pagination.ListPage;
-import co.com.binariasystems.fmw.vweb.constants.VWebCommonConstants;
-import co.com.binariasystems.fmw.vweb.uicomponet.MessageDialog.Type;
-import co.com.binariasystems.fmw.vweb.uicomponet.Pager.PagerMode;
-import co.com.binariasystems.fmw.vweb.uicomponet.pager.PageChangeEvent;
-import co.com.binariasystems.fmw.vweb.uicomponet.pager.PageChangeHandler;
-import co.com.binariasystems.fmw.vweb.util.VWebUtils;
-import co.com.binariasystems.fmw.vweb.util.ValidationUtils;
-import co.com.binariasystems.fmw.vweb.util.converter.DateToTimestampConverter;
-
 import com.vaadin.data.Item;
 import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.BeanItemContainer;
@@ -57,6 +32,33 @@ import com.vaadin.ui.PasswordField;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.TextField;
 
+import co.com.binariasystems.fmw.constants.FMWConstants;
+import co.com.binariasystems.fmw.dto.Listable;
+import co.com.binariasystems.fmw.entity.cfg.EntityConfigData;
+import co.com.binariasystems.fmw.entity.cfg.EntityConfigData.AuditFieldConfigData;
+import co.com.binariasystems.fmw.entity.cfg.EntityConfigData.FieldConfigData;
+import co.com.binariasystems.fmw.entity.cfg.EntityConfigData.RelationFieldConfigData;
+import co.com.binariasystems.fmw.entity.cfg.EntityConfigUIControl;
+import co.com.binariasystems.fmw.entity.cfg.EntityConfigurationManager;
+import co.com.binariasystems.fmw.entity.cfg.EntityConfigurator;
+import co.com.binariasystems.fmw.entity.manager.EntityCRUDOperationsManager;
+import co.com.binariasystems.fmw.entity.util.FMWEntityUtils;
+import co.com.binariasystems.fmw.exception.FMWException;
+import co.com.binariasystems.fmw.exception.FMWUncheckedException;
+import co.com.binariasystems.fmw.ioc.IOCHelper;
+import co.com.binariasystems.fmw.reflec.TypeHelper;
+import co.com.binariasystems.fmw.util.exception.FMWExceptionUtils;
+import co.com.binariasystems.fmw.util.messagebundle.MessageBundleManager;
+import co.com.binariasystems.fmw.util.pagination.ListPage;
+import co.com.binariasystems.fmw.vweb.constants.VWebCommonConstants;
+import co.com.binariasystems.fmw.vweb.uicomponet.MessageDialog.Type;
+import co.com.binariasystems.fmw.vweb.uicomponet.Pager.PagerMode;
+import co.com.binariasystems.fmw.vweb.uicomponet.pager.PageChangeEvent;
+import co.com.binariasystems.fmw.vweb.uicomponet.pager.PageChangeHandler;
+import co.com.binariasystems.fmw.vweb.util.VWebUtils;
+import co.com.binariasystems.fmw.vweb.util.ValidationUtils;
+import co.com.binariasystems.fmw.vweb.util.converter.DateToTimestampConverter;
+
 public class EntityCRUDPanel extends UIForm implements ClickListener{
 	private Class entityClass;
 	private Button saveBtn;
@@ -71,7 +73,7 @@ public class EntityCRUDPanel extends UIForm implements ClickListener{
 	private EntityCRUDOperationsManager manager;
 	private Map<String, Component> componentMap = new HashMap<String, Component>();
 	private Pager<Object> pager;
-	private PageChangeHandler<Object> pageChangeHanlder;
+	private PageChangeHandler<Object, Object> pageChangeHanlder;
 	private Object initialKeyValue;
 	
 	private BeanItem beanItem;
@@ -357,10 +359,15 @@ public class EntityCRUDPanel extends UIForm implements ClickListener{
 		if(deleteBtn == null) return;
 			deleteBtn.addClickListener(this);
 			
-		pageChangeHanlder = new PageChangeHandler<Object>() {
+		pageChangeHanlder = new PageChangeHandler<Object, Object>() {
 			@Override
-			public ListPage<Object> loadPage(PageChangeEvent event) throws Exception {
-				return manager.search(event.getFilterDTO(), event.getInitialRow(), event.getRowsByPage(), null);
+			public ListPage<Object> loadPage(PageChangeEvent<Object> event) throws FMWUncheckedException{
+				try {
+					return manager.search(event.getFilterDTO(), event.getInitialRow(), event.getRowsByPage(), null);
+				} catch (Exception e) {
+					Throwable cause = FMWExceptionUtils.prettyMessageException(e);
+					throw new FMWUncheckedException(cause.getMessage(), cause);
+				}
 			}
 		};
 		
@@ -404,7 +411,7 @@ public class EntityCRUDPanel extends UIForm implements ClickListener{
 	}
 	
 	private void handleSave() throws Exception{
-		if(!validate())
+		if(!isValid())
 			return;
 		
 		MessageDialog md = new MessageDialog(saveBtn.getCaption(), MessageFormat.format(VWebUtils.getCommonString(VWebCommonConstants.MASTER_CRUD_AREYOU_SURE_CONTINUE), saveBtn.getCaption()), Type.QUESTION);
@@ -430,7 +437,7 @@ public class EntityCRUDPanel extends UIForm implements ClickListener{
 				beanItem.getItemProperty(entityConfigData.getPkFieldName()).getValue() == null)
 			return;
 		
-		if(!validate())
+		if(!isValid())
 			return;
 		
 		MessageDialog md = new MessageDialog(editBtn.getCaption(), MessageFormat.format(VWebUtils.getCommonString(VWebCommonConstants.MASTER_CRUD_AREYOU_SURE_CONTINUE), editBtn.getCaption()), Type.QUESTION);
