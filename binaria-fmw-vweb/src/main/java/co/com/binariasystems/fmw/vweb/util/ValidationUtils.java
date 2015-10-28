@@ -63,23 +63,25 @@ public class ValidationUtils {
 	
 	private static void ensureInit(){
 		if(!initialized){
-			NULL_VALID_MF = new MessageFormat(VWebUtils.getCommonString(REQUIRED_MESSAGE_TEMPLATE_KEY));
-			MINDATE_VALID_MF = new MessageFormat(VWebUtils.getCommonString(VALUE_AT_LEAST_THAN_MESSAGE_TEMPLATE_KEY));
-			MAXDATE_VALID_MF = new MessageFormat(VWebUtils.getCommonString(VALUE_MAXIMUM_OF_MESSAGE_TEMPLATE_KEY));
-			DATERANGE_VALID_MF = new MessageFormat(VWebUtils.getCommonString(VALUE_BETWEEN_MESSAGE_TEMPLATE_KEY));
-			MININTEGER_VALID_MF = new MessageFormat(VWebUtils.getCommonString(VALUE_AT_LEAST_THAN_MESSAGE_TEMPLATE_KEY));
-			MAXINTEGER_VALID_MF = new MessageFormat(VWebUtils.getCommonString(VALUE_MAXIMUM_OF_MESSAGE_TEMPLATE_KEY));
-			INTEGERRANGE_VALID_MF = new MessageFormat(VWebUtils.getCommonString(VALUE_BETWEEN_MESSAGE_TEMPLATE_KEY));
-			MINDOUBLE_VALID_MF = new MessageFormat(VWebUtils.getCommonString(VALUE_AT_LEAST_THAN_MESSAGE_TEMPLATE_KEY));
-			MAXDOUBLE_VALID_MF = new MessageFormat(VWebUtils.getCommonString(VALUE_MAXIMUM_OF_MESSAGE_TEMPLATE_KEY));
-			DOUBLERANGE_VALID_MF = new MessageFormat(VWebUtils.getCommonString(VALUE_BETWEEN_MESSAGE_TEMPLATE_KEY));
-			MINSTRING_LENGTH_VALID_MF = new MessageFormat(VWebUtils.getCommonString(LENGTH_AT_LEAST_THAN_MESSAGE_TEMPLATE_KEY));
-			MAXSTRING_LENGTH_VALID_MF = new MessageFormat(VWebUtils.getCommonString(LENGTH_MAXIMUM_OF_MESSAGE_TEMPLATE_KEY));
-			STRING_LENGTH_RANGE_VALID_MF = new MessageFormat(VWebUtils.getCommonString(LENGTH_BETWEEN_MESSAGE_TEMPLATE_KEY));
-			EMAIL_VALID_MF = new MessageFormat(VWebUtils.getCommonString(EMAIL_FORMAT_MESSAGE_TEMPLATE_KEY));
-			REGEXP_VALID_MF = new MessageFormat(VWebUtils.getCommonString(REGEXP_FORMAT_MESSAGE_TEMPLATE_KEY));
-			REGEXP_VALID_EXAMPLE_MF = new MessageFormat(VWebUtils.getCommonString(REGEXP_WITH_EXAMPLE_FORMAT_MESSAGE_TEMPLATE_KEY));
-			initialized = true;
+			synchronized(ValidationUtils.class){
+				NULL_VALID_MF = new MessageFormat(VWebUtils.getCommonString(REQUIRED_MESSAGE_TEMPLATE_KEY));
+				MINDATE_VALID_MF = new MessageFormat(VWebUtils.getCommonString(VALUE_AT_LEAST_THAN_MESSAGE_TEMPLATE_KEY));
+				MAXDATE_VALID_MF = new MessageFormat(VWebUtils.getCommonString(VALUE_MAXIMUM_OF_MESSAGE_TEMPLATE_KEY));
+				DATERANGE_VALID_MF = new MessageFormat(VWebUtils.getCommonString(VALUE_BETWEEN_MESSAGE_TEMPLATE_KEY));
+				MININTEGER_VALID_MF = new MessageFormat(VWebUtils.getCommonString(VALUE_AT_LEAST_THAN_MESSAGE_TEMPLATE_KEY));
+				MAXINTEGER_VALID_MF = new MessageFormat(VWebUtils.getCommonString(VALUE_MAXIMUM_OF_MESSAGE_TEMPLATE_KEY));
+				INTEGERRANGE_VALID_MF = new MessageFormat(VWebUtils.getCommonString(VALUE_BETWEEN_MESSAGE_TEMPLATE_KEY));
+				MINDOUBLE_VALID_MF = new MessageFormat(VWebUtils.getCommonString(VALUE_AT_LEAST_THAN_MESSAGE_TEMPLATE_KEY));
+				MAXDOUBLE_VALID_MF = new MessageFormat(VWebUtils.getCommonString(VALUE_MAXIMUM_OF_MESSAGE_TEMPLATE_KEY));
+				DOUBLERANGE_VALID_MF = new MessageFormat(VWebUtils.getCommonString(VALUE_BETWEEN_MESSAGE_TEMPLATE_KEY));
+				MINSTRING_LENGTH_VALID_MF = new MessageFormat(VWebUtils.getCommonString(LENGTH_AT_LEAST_THAN_MESSAGE_TEMPLATE_KEY));
+				MAXSTRING_LENGTH_VALID_MF = new MessageFormat(VWebUtils.getCommonString(LENGTH_MAXIMUM_OF_MESSAGE_TEMPLATE_KEY));
+				STRING_LENGTH_RANGE_VALID_MF = new MessageFormat(VWebUtils.getCommonString(LENGTH_BETWEEN_MESSAGE_TEMPLATE_KEY));
+				EMAIL_VALID_MF = new MessageFormat(VWebUtils.getCommonString(EMAIL_FORMAT_MESSAGE_TEMPLATE_KEY));
+				REGEXP_VALID_MF = new MessageFormat(VWebUtils.getCommonString(REGEXP_FORMAT_MESSAGE_TEMPLATE_KEY));
+				REGEXP_VALID_EXAMPLE_MF = new MessageFormat(VWebUtils.getCommonString(REGEXP_WITH_EXAMPLE_FORMAT_MESSAGE_TEMPLATE_KEY));
+				initialized = true;
+			}
 		}
 	}
 	
