@@ -31,7 +31,7 @@ public class DashboarView extends AbstractView{
 	private Label welcomeLabel;
 	private LinkLabel linkLabel;
 	private Pager2<Object, Object> pager;
-	private Pager2<Object, Object> pager2;
+	
 	
 	@ViewBuild
 	public Component init(){
@@ -41,8 +41,6 @@ public class DashboarView extends AbstractView{
 		linkLabel = new LinkLabel("Este es mi LinkLabel");
 		
 		pager = new Pager2<Object, Object>();
-		pager2 = new Pager2<Object, Object>();
-		pager2.setWidth("100%");
 		
 		menuContainer = new TreeMenu();
 		menuContainer.setWidth(200, Unit.PIXELS);
@@ -51,7 +49,6 @@ public class DashboarView extends AbstractView{
 		rightPanel.addComponent(welcomeLabel);
 		rightPanel.addComponent(linkLabel);
 		rightPanel.addComponent(pager);
-		rightPanel.addComponent(pager2);
 		
 		splitPanel.setFirstComponent(menuContainer);
 		splitPanel.setSecondComponent(rightPanel);

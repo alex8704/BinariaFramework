@@ -4,6 +4,12 @@ import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.List;
 
+import co.com.binariasystems.fmw.util.pagination.ListPage;
+import co.com.binariasystems.fmw.vweb.constants.VWebCommonConstants;
+import co.com.binariasystems.fmw.vweb.uicomponet.pager.PageChangeEvent;
+import co.com.binariasystems.fmw.vweb.uicomponet.pager.PageChangeHandler;
+import co.com.binariasystems.fmw.vweb.util.VWebUtils;
+
 import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.util.ObjectProperty;
 import com.vaadin.data.validator.IntegerRangeValidator;
@@ -13,12 +19,6 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.themes.ValoTheme;
-
-import co.com.binariasystems.fmw.util.pagination.ListPage;
-import co.com.binariasystems.fmw.vweb.constants.VWebCommonConstants;
-import co.com.binariasystems.fmw.vweb.uicomponet.pager.PageChangeEvent;
-import co.com.binariasystems.fmw.vweb.uicomponet.pager.PageChangeHandler;
-import co.com.binariasystems.fmw.vweb.util.VWebUtils;
 
 public class Pager2<FILTER_TYPE, RESULT_TYPE> extends HorizontalLayout implements ValueChangeListener {
 	public static final Integer[] ROWS_BY_PAGE_ITEMS = {10, 15, 20};
@@ -83,7 +83,7 @@ public class Pager2<FILTER_TYPE, RESULT_TYPE> extends HorizontalLayout implement
 		lastPLink = new LinkLabel(">>");
 		
 		filler = new Label("");
-		rangeValidator = new IntegerRangeValidator("", 0, 5);
+		rangeValidator = new IntegerRangeValidator("", 0, 0);
 		
 		//Layouts auxiliares
 		HorizontalLayout pageSizePanel = new HorizontalLayout();
@@ -138,7 +138,7 @@ public class Pager2<FILTER_TYPE, RESULT_TYPE> extends HorizontalLayout implement
 		rowsByPageConfCmb.setImmediate(true);
 		
 		bindEvents();
-		reset();
+		resetConstrains();
 	}
 	
 	private void bindEvents(){
@@ -148,7 +148,8 @@ public class Pager2<FILTER_TYPE, RESULT_TYPE> extends HorizontalLayout implement
 	}
 	
 	private void currentPagePropertyValueChange(){
-		firePageChangeEvent();
+		if(currentPage() > 0)
+			firePageChangeEvent();
 	}
 	
 	private void pageCountPropertyValueChange(){
@@ -207,6 +208,8 @@ public class Pager2<FILTER_TYPE, RESULT_TYPE> extends HorizontalLayout implement
 		
 		currentCacheGroup = (int)Math.ceil((float)currentPage() / (float)maxCachedPages);
 		setPageData(extractCurrentPageData());
+		if(pageList.getRowCount() <= 0)
+			currentPageProperty.setValue(0);
 	}
 	
 	private PageChangeEvent<FILTER_TYPE> createPageChangeEvent(){
@@ -240,6 +243,10 @@ public class Pager2<FILTER_TYPE, RESULT_TYPE> extends HorizontalLayout implement
 	public void valueChange(com.vaadin.data.Property.ValueChangeEvent event) {
 		if(currentPageProperty.equals(event.getProperty()))
 			currentPagePropertyValueChange();
+		else if(pageCountProperty.equals(event.getProperty()))
+			pageCountPropertyValueChange();
+		else if(rowsByPageProperty.equals(event.getProperty()))
+			rowsByPagePropertyValueChange();
 	}
 	
 	public void setFilterDto(FILTER_TYPE filterDto){
@@ -251,6 +258,10 @@ public class Pager2<FILTER_TYPE, RESULT_TYPE> extends HorizontalLayout implement
 		this.maxCachedPages = max < 1 ? 1 : max;
 	}
 	
+	public void setPageChangeHandler(PageChangeHandler<FILTER_TYPE, RESULT_TYPE> pageChangeHandler) {
+		this.pageChangeHandler = pageChangeHandler;
+	}
+
 	private void setPageData(List<RESULT_TYPE> data){
 		
 	}
