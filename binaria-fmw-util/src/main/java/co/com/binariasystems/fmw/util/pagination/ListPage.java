@@ -6,6 +6,19 @@ import java.util.List;
 public class ListPage<T> {
 	private List<T> data;
 	private int rowCount;
+	
+	public ListPage(){
+	}
+
+	public ListPage(List<T> data){
+		this.data = data;
+	}
+	
+	public ListPage(List<T> data, int rowCount){
+		this.data = data;
+		this.rowCount = rowCount;
+	}
+	
 	public List<T> getData() {
 		if(data == null)
 			data = new LinkedList<T>();

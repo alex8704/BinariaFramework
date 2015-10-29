@@ -13,6 +13,7 @@ import co.com.binariasystems.fmw.vweb.mvp.annotation.ViewField;
 import co.com.binariasystems.fmw.vweb.mvp.controller.AbstractViewController;
 import co.com.binariasystems.fmw.vweb.uicomponet.LinkLabel;
 import co.com.binariasystems.fmw.vweb.uicomponet.LinkLabel.ClickHandler;
+import co.com.binariasystems.fmw.vweb.uicomponet.LinkLabel.LinkClickEvent;
 import co.com.binariasystems.fmw.vweb.uicomponet.Pager2;
 import co.com.binariasystems.fmw.vweb.uicomponet.TreeMenu;
 import co.com.binariasystems.fmw.vweb.uicomponet.pager.PageChangeEvent;
@@ -25,6 +26,7 @@ import co.com.binariasystems.webtestapp.dto.MenuOptionDTO;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.server.Page;
+import com.vaadin.ui.Grid;
 import com.vaadin.ui.HorizontalSplitPanel;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
@@ -40,23 +42,23 @@ public class DashboardViewController extends AbstractViewController {
 	@ViewField private Pager2<Object, Object> pager;
 	@ViewField private LinkLabel linkLabel;
 	private List<Object> items = new ArrayList<Object>();
+	@ViewField private Grid grid;
 	
 	@Init
 	public void inicializar(){
 		System.out.println("Inicializando Dashboard Controller");
 		linkLabel.setClickHandler(new ClickHandler() {
 			@Override
-			public void handleClick() {
+			public void handleClick(LinkClickEvent event) {
 				Notification.show("Haz clickado el link button", Notification.Type.HUMANIZED_MESSAGE);
 			}
 		});
 		
-//		for(int i=1; i <= 100; i++)
-//			items.add("Objeto "+i);
+		for(int i=1; i <= 100; i++)
+			items.add("Objeto "+i);
 		menuContainer.addValueChangeListener(new ValueChangeListener() {
 			@Override
 			public void valueChange(ValueChangeEvent event) {
-				System.out.println("Selected: "+(event.getProperty().getValue() == null ? null : event.getProperty().getValue().getClass()));
 				if(event.getProperty().getValue() instanceof MenuOptionDTO){
 					MenuOptionDTO opcion = (MenuOptionDTO)event.getProperty().getValue();
 					Page.getCurrent().setUriFragment(opcion.getPath());
@@ -64,13 +66,12 @@ public class DashboardViewController extends AbstractViewController {
 			}
 		});
 		
+		pager.setPageDataTargetForGrid(grid);
+		
 		pager.setPageChangeHandler(new PageChangeHandler<Object, Object>() {
 			@Override
 			public ListPage<Object> loadPage(PageChangeEvent<Object> event) throws FMWUncheckedException {
-				ListPage<Object> resp = new ListPage<Object>();
-				resp.setData(items.subList(event.getInitialRow(), event.getFinalRow() > items.size() ? items.size() : event.getFinalRow()));
-				resp.setRowCount(items.size());
-				return resp;
+				return new ListPage<Object>(items.subList(event.getInitialRow(), event.getFinalRow() > items.size() ? items.size() : event.getFinalRow()), items.size());
 			}
 		});
 	}

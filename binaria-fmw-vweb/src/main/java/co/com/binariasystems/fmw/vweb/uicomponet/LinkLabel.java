@@ -4,6 +4,9 @@ import java.text.MessageFormat;
 
 import org.apache.commons.lang3.StringUtils;
 
+import co.com.binariasystems.fmw.vweb.constants.VWebCommonConstants;
+import co.com.binariasystems.fmw.vweb.util.VWebUtils;
+
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.CustomField;
@@ -11,8 +14,6 @@ import com.vaadin.ui.JavaScript;
 import com.vaadin.ui.JavaScriptFunction;
 import com.vaadin.ui.Label;
 
-import co.com.binariasystems.fmw.vweb.constants.VWebCommonConstants;
-import co.com.binariasystems.fmw.vweb.util.VWebUtils;
 import elemental.json.JsonArray;
 
 public class LinkLabel extends CustomField<String>{
@@ -42,11 +43,6 @@ public class LinkLabel extends CustomField<String>{
 		return String.class;
 	}
 	
-//	@Override
-//	public void setValue(String newStringValue) {
-//		super.setValue(textFmt.format(new Object[]{functionName, StringUtils.defaultString(newStringValue)}));
-//	}
-	
 	public void setClickHandler(ClickHandler clickHandler){
 		this.clickHandler = clickHandler;
 		if(this.clickHandler != null){
@@ -63,7 +59,7 @@ public class LinkLabel extends CustomField<String>{
 		
 		@Override
 		public void call(JsonArray arguments) {
-			handler.handleClick();
+			handler.handleClick(new LinkClickEvent(LinkLabel.this));
 		}
 		
 	}
@@ -83,7 +79,24 @@ public class LinkLabel extends CustomField<String>{
 	}
 	
 	public static interface ClickHandler{
-		public void handleClick();
+		public void handleClick(LinkClickEvent event);
+	}
+	
+	public static class LinkClickEvent{
+		private LinkLabel linkLabel;
+		
+		public LinkClickEvent(LinkLabel linkLabel){
+			this.linkLabel = linkLabel;
+		}
+		
+		public LinkLabel getLinkLabel() {
+			return linkLabel;
+		}
+
+		public void setLinkLabel(LinkLabel linkLabel) {
+			this.linkLabel = linkLabel;
+		}
+		
 	}
 	
 }

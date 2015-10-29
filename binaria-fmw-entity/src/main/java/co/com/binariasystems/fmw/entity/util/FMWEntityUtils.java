@@ -1,6 +1,7 @@
 package co.com.binariasystems.fmw.entity.util;
 
 import java.lang.reflect.InvocationTargetException;
+import java.text.MessageFormat;
 
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -19,6 +20,9 @@ import co.com.binariasystems.fmw.reflec.TypeHelper;
 public class FMWEntityUtils {
 	
 	private static String showOpeationsSql;
+	private static final String ENTITY_FORM_TITLE_FMT = "entity.{0}.form.title";
+	private static final String ENTITY_LABELS_FMT = "entity.{0}.{1}.caption";
+	
 	
 	public static EntityConfigData getEntityConfig(Class entityClazz) throws FMWException{
 		EntityConfigurator configurator = EntityConfigurationManager.getInstance().getConfigurator(entityClazz);
@@ -85,6 +89,22 @@ public class FMWEntityUtils {
 			showOpeationsSql = StringUtils.defaultIfEmpty(IOCHelper.getBean(FMWEntityConstants.ENTITY_OPERATIONS_SHOWSQL_IOC_KEY, String.class), "false").toLowerCase();
 		}
 		return showOpeationsSql.equals(Boolean.TRUE.toString());
+	}
+	
+	public static String getEntityLabelsFormat(){
+		return ENTITY_LABELS_FMT;
+	}
+	
+	public static String getEntityFormTitleFormat(){
+		return ENTITY_FORM_TITLE_FMT;
+	}
+	
+	public static MessageFormat createEntityLabelsMessageFormat(){
+		return new MessageFormat(getEntityLabelsFormat());
+	}
+	
+	public static MessageFormat createEntityFormTitleMessageFormat(){
+		return new MessageFormat(getEntityFormTitleFormat());
 	}
 	
 	

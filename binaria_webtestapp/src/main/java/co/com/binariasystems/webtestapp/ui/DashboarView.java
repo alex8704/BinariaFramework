@@ -13,9 +13,11 @@ import co.com.binariasystems.fmw.vweb.uicomponet.UIForm;
 
 import com.vaadin.data.Item;
 import com.vaadin.data.util.HierarchicalContainer;
+import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.server.Sizeable.Unit;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Component;
+import com.vaadin.ui.Grid;
 import com.vaadin.ui.HorizontalSplitPanel;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Tree;
@@ -31,7 +33,7 @@ public class DashboarView extends AbstractView{
 	private Label welcomeLabel;
 	private LinkLabel linkLabel;
 	private Pager2<Object, Object> pager;
-	
+	private Grid grid;
 	
 	@ViewBuild
 	public Component init(){
@@ -40,7 +42,13 @@ public class DashboarView extends AbstractView{
 		welcomeLabel = new Label("Welcome My People");
 		linkLabel = new LinkLabel("Este es mi LinkLabel");
 		
+		grid = new Grid();
+		grid.addColumn("valor");
+		grid.getColumn("valor").setHeaderCaption("Valor");
+		
+		
 		pager = new Pager2<Object, Object>();
+		pager.setMaxCachedPages(5);
 		
 		menuContainer = new TreeMenu();
 		menuContainer.setWidth(200, Unit.PIXELS);
@@ -48,6 +56,7 @@ public class DashboarView extends AbstractView{
 		
 		rightPanel.addComponent(welcomeLabel);
 		rightPanel.addComponent(linkLabel);
+		rightPanel.addComponent(grid);
 		rightPanel.addComponent(pager);
 		
 		splitPanel.setFirstComponent(menuContainer);

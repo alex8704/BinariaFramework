@@ -50,7 +50,7 @@ public class PageChangeEvent<FILTER_TYPE> implements FMWEvent{
 	}
 	
 	public int getFinalRow(){
-		return getInitialRow() + rowsByPage;
+		return getInitialRow() + (rowsByPage * pagesPerGroup);
 	}
 	public int getPagesPerGroup() {
 		return pagesPerGroup;

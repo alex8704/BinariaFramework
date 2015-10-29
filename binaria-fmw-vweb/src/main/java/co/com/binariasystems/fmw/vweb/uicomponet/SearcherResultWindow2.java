@@ -1,72 +1,64 @@
 package co.com.binariasystems.fmw.vweb.uicomponet;
 
 import java.lang.reflect.Method;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.beanutils.BeanUtils;
-import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang3.StringUtils;
-
-import com.vaadin.data.Item;
-import com.vaadin.data.util.BeanItem;
-import com.vaadin.data.util.BeanItemContainer;
-import com.vaadin.event.ItemClickEvent;
-import com.vaadin.event.ItemClickEvent.ItemClickListener;
-import com.vaadin.server.Page;
-import com.vaadin.ui.AbstractSelect;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.CheckBox;
-import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.DateField;
-import com.vaadin.ui.Field;
-import com.vaadin.ui.OptionGroup;
-import com.vaadin.ui.PasswordField;
-import com.vaadin.ui.Table;
-import com.vaadin.ui.Table.Align;
-import com.vaadin.ui.Table.ColumnGenerator;
-import com.vaadin.ui.TextArea;
-import com.vaadin.ui.TextField;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.Window;
-import com.vaadin.ui.themes.ValoTheme;
 
 import co.com.binariasystems.fmw.constants.FMWConstants;
 import co.com.binariasystems.fmw.dto.Listable;
 import co.com.binariasystems.fmw.entity.cfg.EntityConfigData;
-import co.com.binariasystems.fmw.entity.cfg.EntityConfigData.AuditFieldConfigData;
-import co.com.binariasystems.fmw.entity.cfg.EntityConfigData.FieldConfigData;
-import co.com.binariasystems.fmw.entity.cfg.EntityConfigData.RelationFieldConfigData;
 import co.com.binariasystems.fmw.entity.cfg.EntityConfigUIControl;
 import co.com.binariasystems.fmw.entity.cfg.EntityConfigurationManager;
 import co.com.binariasystems.fmw.entity.cfg.EntityConfigurator;
+import co.com.binariasystems.fmw.entity.cfg.EntityConfigData.AuditFieldConfigData;
+import co.com.binariasystems.fmw.entity.cfg.EntityConfigData.FieldConfigData;
+import co.com.binariasystems.fmw.entity.cfg.EntityConfigData.RelationFieldConfigData;
 import co.com.binariasystems.fmw.entity.criteria.Criteria;
 import co.com.binariasystems.fmw.entity.manager.EntityCRUDOperationsManager;
 import co.com.binariasystems.fmw.entity.util.FMWEntityUtils;
-import co.com.binariasystems.fmw.exception.FMWUncheckedException;
 import co.com.binariasystems.fmw.ioc.IOCHelper;
 import co.com.binariasystems.fmw.reflec.TypeHelper;
-import co.com.binariasystems.fmw.util.exception.FMWExceptionUtils;
 import co.com.binariasystems.fmw.util.messagebundle.MessageBundleManager;
-import co.com.binariasystems.fmw.util.pagination.ListPage;
 import co.com.binariasystems.fmw.vweb.constants.VWebCommonConstants;
 import co.com.binariasystems.fmw.vweb.uicomponet.Pager.PagerMode;
-import co.com.binariasystems.fmw.vweb.uicomponet.pager.PageChangeEvent;
+import co.com.binariasystems.fmw.vweb.uicomponet.SearcherResultWindow.PrimaryFieldColumnGenerator;
+import co.com.binariasystems.fmw.vweb.uicomponet.SearcherResultWindow.RelationFieldColumnGenerator;
+import co.com.binariasystems.fmw.vweb.uicomponet.SearcherResultWindow.SimpleFieldColumnGenerator;
 import co.com.binariasystems.fmw.vweb.uicomponet.pager.PageChangeHandler;
+import co.com.binariasystems.fmw.vweb.util.LocaleMessagesUtil;
 import co.com.binariasystems.fmw.vweb.util.VWebUtils;
 
-/**
- * @author Alexander
- *
- */
-public class SearcherResultWindow extends Window implements ClickListener{
-	private Class<? extends Object> entityClass;
+import com.vaadin.data.Item;
+import com.vaadin.data.util.BeanItem;
+import com.vaadin.data.util.BeanItemContainer;
+import com.vaadin.server.Sizeable.Unit;
+import com.vaadin.ui.Button;
+import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.Button.ClickListener;
+import com.vaadin.ui.Table.Align;
+import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.ui.AbstractSelect;
+import com.vaadin.ui.CheckBox;
+import com.vaadin.ui.ComboBox;
+import com.vaadin.ui.Component;
+import com.vaadin.ui.DateField;
+import com.vaadin.ui.Grid;
+import com.vaadin.ui.Grid.SelectionMode;
+import com.vaadin.ui.OptionGroup;
+import com.vaadin.ui.PasswordField;
+import com.vaadin.ui.Table;
+import com.vaadin.ui.TextArea;
+import com.vaadin.ui.TextField;
+import com.vaadin.ui.Window;
+
+public class SearcherResultWindow2<T> extends Window implements ClickListener {
+	private Class<T> entityClazz;
 	private UIForm form;
 	private Button cleanBtn;
 	private Button searchBtn;
@@ -79,48 +71,41 @@ public class SearcherResultWindow extends Window implements ClickListener{
 	private BeanItem beanItem;
 	private Pager<Object> pager;
 	private PageChangeHandler<Object, Object> pageChangeHanlder;
-	private Table resultsTable;
-	
-	private MessageBundleManager entityStrings = MessageBundleManager.forPath(
-			StringUtils.defaultIfBlank(IOCHelper.getBean(VWebCommonConstants.APP_ENTITIES_MESSAGES_FILE_IOC_KEY, String.class), VWebCommonConstants.ENTITY_STRINGS_PROPERTIES_FILENAME),
-			IOCHelper.getBean(FMWConstants.APPLICATION_DEFAULT_CLASS_FOR_RESOURCE_LOAD_IOC_KEY, Class.class));
+	private Grid resultsGrid;
 	
 	private static final int TEXTFIELD_MAX_LENGTH = 100;
 	private static final int TEXTAREA_MAX_LENGTH = 4000;
 	private static final float BUTTONS_WIDTH = 100.0f;
 	private static final Unit BUTTONS_WIDTH_UNIT = Unit.PIXELS;
-	private Object selectedValue;
+	private T selectedValue;
 	private Criteria conditions;
 	
-	protected SearcherResultWindow(Class<? extends Object> entityClass){
-		super();
-		setModal(true);
-		setWidth(900, Unit.PIXELS);
-		setHeight(Page.getCurrent().getBrowserWindowHeight() - 25, Unit.PIXELS);
-		this.entityClass = entityClass;
-		try{
-			initComponents();
-			addAttachListener(new AttachListener() {
-				
-				public void attach(AttachEvent event) {
-					//cleanBtn.click();
-				}
-			});
-		}catch(Exception ex){
-			MessageDialog.showExceptions(ex);
-			ex.printStackTrace();
+	private MessageFormat labelsFmt;
+	
+	private MessageBundleManager entityStrings = MessageBundleManager.forPath(
+			StringUtils.defaultIfBlank(IOCHelper.getBean(VWebCommonConstants.APP_ENTITIES_MESSAGES_FILE_IOC_KEY, String.class), VWebCommonConstants.ENTITY_STRINGS_PROPERTIES_FILENAME),
+			IOCHelper.getBean(FMWConstants.APPLICATION_DEFAULT_CLASS_FOR_RESOURCE_LOAD_IOC_KEY, Class.class));
+	
+	private boolean attached;
+	
+	public SearcherResultWindow2(Class<T> entityClazz) {
+		this.entityClazz = entityClazz;
+	}
+	
+	@Override
+	public void attach() {
+		super.attach();
+		if(!attached){
+			initContent();
+			attached = !attached;
 		}
 	}
 	
-	
-	private void initComponents() throws Exception {
-		configurator = EntityConfigurationManager.getInstance().getConfigurator(entityClass);
+	public void initContent(){
+		configurator = EntityConfigurationManager.getInstance().getConfigurator(entityClazz);
 		entityConfigData = configurator.configure();
-		manager = EntityCRUDOperationsManager.getInstance(entityClass);
+		manager = EntityCRUDOperationsManager.getInstance(entityClazz);
 		
-		String defTitleKey = new StringBuilder("entity.").append(entityConfigData.getEntityClass().getSimpleName()).append(".form.title").toString();
-		String titleKey =  StringUtils.defaultIfEmpty(configurator.getTitleKey(), defTitleKey);
-		String title = StringUtils.defaultIfEmpty(getString(titleKey), titleKey);
 		setCaption("::: "+VWebUtils.getCommonString(VWebCommonConstants.SEARCH_WIN_CAPTION)+" :::");
 		form = new UIForm(null,100, Unit.PERCENTAGE);
 		List<FieldConfigData> controlsList = sortByUIControlTypePriority(entityConfigData.getFieldsData(), entityConfigData.getPkFieldName());
@@ -154,22 +139,20 @@ public class SearcherResultWindow extends Window implements ClickListener{
 		searchAllBtn = new Button(VWebUtils.getCommonString(VWebCommonConstants.MASTER_CRUD_MSG_SEARCHALLCAPTION));
 		cleanBtn = new Button(VWebUtils.getCommonString(VWebCommonConstants.MASTER_CRUD_MSG_CLEANCAPTION));
 		BeanItemContainer<Object> resultsTableDataSource = new BeanItemContainer<Object>((Class)entityConfigData.getEntityClass());
-		resultsTable = new Table("Resultados de Busqueda");
-		resultsTable.setContainerDataSource(resultsTableDataSource);
-		resultsTable.setSelectable(true);
+		resultsGrid = new Grid("Resultados de Busqueda", resultsTableDataSource);//Table("Resultados de Busqueda");
+		resultsGrid.setSelectionMode(SelectionMode.SINGLE);
 		
 		List<String> visibleCols = new LinkedList<String>();
 		visibleCols.add(entityConfigData.getPkFieldName());
 		boolean hasDescriptionFields = entityConfigData.getSearchDescriptionFields() != null && entityConfigData.getSearchDescriptionFields().size() > 0;
 		
-		SimpleFieldColumnGenerator simpleColumnGenerator = new SimpleFieldColumnGenerator();
-		resultsTable.addGeneratedColumn(entityConfigData.getPkFieldName(), new PrimaryFieldColumnGenerator());
+//		SimpleFieldColumnGenerator simpleColumnGenerator = new SimpleFieldColumnGenerator();
+//		resultsTable.addGeneratedColumn(entityConfigData.getPkFieldName(), new PrimaryFieldColumnGenerator());
 		
-		for(String fieldName : entityConfigData.getFieldsData().keySet()){
-			FieldConfigData fieldCfg = entityConfigData.getFieldsData().get(fieldName);
-			if(fieldName.equals(entityConfigData.getPkFieldName())) continue;
-			if(hasDescriptionFields && entityConfigData.getSearchDescriptionFields().contains(fieldName)){
-				visibleCols.add(fieldName);
+		for(FieldConfigData fieldCfg : entityConfigData.getFieldsData().values()){
+			if(fieldCfg.getFieldName().equals(entityConfigData.getPkFieldName())) continue;
+			if(hasDescriptionFields && entityConfigData.getSearchDescriptionFields().contains(fieldCfg.getFieldName())){
+				visibleCols.add(fieldCfg.getFieldName());
 				if(fieldCfg instanceof RelationFieldConfigData && !TypeHelper.isBasicType(fieldCfg.getFieldType()))
 					resultsTable.addGeneratedColumn(fieldName, new RelationFieldColumnGenerator((RelationFieldConfigData)fieldCfg));
 				else
@@ -209,8 +192,6 @@ public class SearcherResultWindow extends Window implements ClickListener{
 		handleClean();
 	}
 	
-	
-	
 	/**
 	 * Metodo usado internamente anter de crear los componentes graficos, para definir
 	 * el orden de generacion de cada campo teniendo en cuenta un mecanismo de prioridades
@@ -222,18 +203,16 @@ public class SearcherResultWindow extends Window implements ClickListener{
 	 */
 	private List<FieldConfigData> sortByUIControlTypePriority(Map<String, FieldConfigData> fieldsDataMap, String PKFieldName){
 		List<FieldConfigData> resp = new ArrayList<EntityConfigData.FieldConfigData>();
+		int index = 0;
 		for(String fieldName : fieldsDataMap.keySet()){
-			FieldConfigData fcd = fieldsDataMap.get(fieldName);
-			if(fcd instanceof AuditFieldConfigData) continue;
+			FieldConfigData fieldCfgdData = fieldsDataMap.get(fieldName);
+			if(fieldCfgdData instanceof AuditFieldConfigData) continue;
 			if(fieldName.equals(PKFieldName))
-				resp.add(0, fcd);
+				resp.add(0, fieldCfgdData);
 			else{
-				int i = 0;
-				for(i = 0; i < resp.size(); i++){
-					if(fcd.getFieldUIControl().ordinal() < resp.get(i).getFieldUIControl().ordinal())
-						break;
-				}
-				resp.add(i, fcd);
+				for(index = 0; index < resp.size(); index++)
+					if(fieldCfgdData.getFieldUIControl().ordinal() < resp.get(index).getFieldUIControl().ordinal()) break;
+				resp.add(index, fieldCfgdData);
 			}
 		}
 		
@@ -336,193 +315,13 @@ public class SearcherResultWindow extends Window implements ClickListener{
 		return resp;
 	}
 	
-	private void bindComponentsToModel() throws Exception{
-		Object bean = null;
-		bean = entityConfigData.getEntityClass().getConstructor().newInstance();
-		beanItem = new BeanItem(bean, componentMap.keySet());
-		for(String fieldName :componentMap.keySet()){
-			Component comp = componentMap.get(fieldName);
-			if(comp instanceof Field)
-				((Field)comp).setPropertyDataSource(beanItem.getItemProperty(fieldName));
-			else if(comp instanceof SearcherField)
-				((SearcherField)comp).setPropertyDataSource(beanItem.getItemProperty(fieldName));
-		}
-	}
-	
-	private void bindControlEvents(){
-		searchBtn.addClickListener(this);
-		searchAllBtn.addClickListener(this);
-		cleanBtn.addClickListener(this);
-		pageChangeHanlder = new PageChangeHandler<Object, Object>() {
-			public ListPage<Object> loadPage(PageChangeEvent<Object> event) throws FMWUncheckedException {
-				try {
-					return manager.searchForFmwComponent(event.getFilterDTO(), event.getInitialRow(), event.getRowsByPage(), conditions);
-				} catch (Exception e) {
-					Throwable cause = FMWExceptionUtils.prettyMessageException(e);
-					throw new FMWUncheckedException(cause.getMessage(), cause);
-				}
-			}
-		};
-		
-		pager.setPageChangeHandler(pageChangeHanlder);
-		
-		pager.addObserver(new Pager.TableDataLoadObserver(resultsTable));
-		
-		resultsTable.addItemClickListener(new ItemClickListener() {
-			public void itemClick(ItemClickEvent event) {
-				if(event.isDoubleClick()){
-					selectedValue = event.getItemId();
-					close();
-				}
-			}
-		});
-	}
-	
-	public void buttonClick(ClickEvent event) {
-		try{
-			if(event.getButton() == searchBtn || event.getButton() == searchAllBtn)
-				handleSearch(event.getButton());
-			else if(event.getButton() == cleanBtn)
-				handleClean();
-		}catch(Exception ex){
-			MessageDialog.showExceptions(ex);
-			ex.printStackTrace();
-		}finally{
-			form.initFocus();
-		}
-	}
-	
-	private void handleSearch(Button button) throws Exception{
-		if(button == searchAllBtn)
-			handleClean();
-		pager.setSearchDTO(BeanUtils.cloneBean(beanItem.getBean()));
-	}
-
-	private void handleClean() throws Exception{
-		Object emptyBean = entityConfigData.getEntityClass().getConstructor().newInstance();
-		for(Object propertyId : beanItem.getItemPropertyIds()){
-			beanItem.getItemProperty(propertyId).setValue(PropertyUtils.getProperty(emptyBean, (String)propertyId));
-		}
-		pager.reset();
-		selectedValue = null;
-		form.initFocus();
-	}
-	
-	public boolean openSearch(Object param, boolean openAlthoughFound){
-		boolean wasOpened = true;
-		cleanBtn.click();
-		if(param != null){
-			beanItem.getItemProperty(entityConfigData.getSearchFieldName()).setValue(param);
-			searchBtn.click();
-			if(resultsTable.getContainerDataSource().size() == 1 && !openAlthoughFound){
-				selectedValue = resultsTable.firstItemId();
-				wasOpened = false;
-			}
-		}
-		
-		if(wasOpened)
-			UI.getCurrent().addWindow(this);
-		return wasOpened;
-	}
-	
-	public void openSearchByPk(Object param){
-		cleanBtn.click();
-		if(param != null){
-			beanItem.getItemProperty(entityConfigData.getPkFieldName()).setValue(param);
-			searchBtn.click();
-			if(resultsTable.getContainerDataSource().size() == 1){
-				selectedValue = resultsTable.firstItemId();
-			}
-		}
-	}
-	
 	private String getString(String key){
-		return entityStrings.getString(key);
+		return LocaleMessagesUtil.getLocalizedMessage(entityStrings, key);
 	}
 	
-	public Object getSelectedValue(){
-		return selectedValue;
-	}
 	
-	public void clearValue(){
-		selectedValue = null;
-	}
-	
-	private class SimpleFieldColumnGenerator implements ColumnGenerator{
-		public Object generateCell(Table source, final Object itemId, Object columnId){
-			String resp = null;
-			if(columnId != null){
-				try {
-					resp = TypeHelper.objectToString(source.getItem(itemId).getItemProperty(columnId).getValue());
-				} catch (Exception e) {
-					e.printStackTrace();
-					Object propVal = source.getItem(itemId).getItemProperty(columnId).getValue();
-					resp = propVal != null ? propVal.toString() : "-";
-				}
-			}
-			return resp;
-		}
-	}
-	
-	private class RelationFieldColumnGenerator implements ColumnGenerator{
-		private RelationFieldConfigData fieldCfg;
+	@Override
+	public void buttonClick(ClickEvent event) {
 		
-		private RelationFieldColumnGenerator(){
-			
-		}
-		public RelationFieldColumnGenerator(RelationFieldConfigData fieldCfg){
-			this();
-			this.fieldCfg = fieldCfg;
-		}
-		
-		public Object generateCell(Table source, final Object itemId, Object columnId){
-			String resp = null;
-			if(columnId != null){
-				try {
-					resp = FMWEntityUtils.generateStringRepresentationForField(source.getItem(itemId).getItemProperty(columnId).getValue(), FMWConstants.WHITE_SPACE);
-				} catch (Exception e) {
-					Object propVal = source.getItem(itemId).getItemProperty(columnId).getValue();
-					resp = propVal != null ? propVal.toString() : "-";
-				}
-			}
-			return resp;
-		}
 	}
-	
-	
-	/**
-	 * Generador de la Columna del Campo Principal
-	 * 
-	 * @author Alexander
-	 *
-	 */
-	private class PrimaryFieldColumnGenerator implements ColumnGenerator{
-		public Object generateCell(Table source, final Object itemId, Object columnId){
-			if(columnId != null){
-				Button resp = new Button(source.getItem(itemId).getItemProperty(columnId).getValue().toString());
-				resp.addStyleName(ValoTheme.BUTTON_LINK);
-				resp.addClickListener(new ClickListener() {
-					public void buttonClick(ClickEvent event) {
-						selectedValue = itemId;
-						SearcherResultWindow.this.close();
-					}
-				});
-				return resp;
-			}
-			return null;
-		}
-	}
-
-
-	public Criteria getConditions() {
-		return conditions;
-	}
-
-
-	public void setConditions(Criteria conditions) {
-		this.conditions = conditions;
-	}
-	
-	
-	
 }

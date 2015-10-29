@@ -6,6 +6,8 @@ import java.util.List;
 
 import co.com.binariasystems.fmw.util.pagination.ListPage;
 import co.com.binariasystems.fmw.vweb.constants.VWebCommonConstants;
+import co.com.binariasystems.fmw.vweb.uicomponet.LinkLabel.ClickHandler;
+import co.com.binariasystems.fmw.vweb.uicomponet.LinkLabel.LinkClickEvent;
 import co.com.binariasystems.fmw.vweb.uicomponet.pager.PageChangeEvent;
 import co.com.binariasystems.fmw.vweb.uicomponet.pager.PageChangeHandler;
 import co.com.binariasystems.fmw.vweb.util.VWebUtils;
@@ -14,13 +16,16 @@ import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.util.ObjectProperty;
 import com.vaadin.data.validator.IntegerRangeValidator;
 import com.vaadin.data.validator.NullValidator;
+import com.vaadin.ui.Alignment;
 import com.vaadin.ui.ComboBox;
+import com.vaadin.ui.Grid;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
+import com.vaadin.ui.Table;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.themes.ValoTheme;
 
-public class Pager2<FILTER_TYPE, RESULT_TYPE> extends HorizontalLayout implements ValueChangeListener {
+public class Pager2<FILTER_TYPE, RESULT_TYPE> extends HorizontalLayout implements ValueChangeListener, ClickHandler {
 	public static final Integer[] ROWS_BY_PAGE_ITEMS = {10, 15, 20};
 	public static enum PagerMode {PAGE, ITEM}
 	
@@ -44,9 +49,11 @@ public class Pager2<FILTER_TYPE, RESULT_TYPE> extends HorizontalLayout implement
 	private PagerMode pagerMode = PagerMode.PAGE;
 	private ListPage<RESULT_TYPE> pageList = new ListPage<RESULT_TYPE>();
 	private PageChangeHandler<FILTER_TYPE, RESULT_TYPE> pageChangeHandler;
+	private PageDataTarget<RESULT_TYPE> pageDataTarget;
 	private FILTER_TYPE filterDto;
 	private int maxCachedPages=1;
 	private int currentCacheGroup;
+	private boolean attached;//Usada internamente como bandera para no volver a crear todos los componentes
 	
 	
 	public Pager2(){
@@ -66,7 +73,10 @@ public class Pager2<FILTER_TYPE, RESULT_TYPE> extends HorizontalLayout implement
 	@Override
 	public void attach() {
 		super.attach();
-		initContent();
+		if(!attached){
+			initContent();
+			attached = !attached;
+		}
 	}
 	
 	private void initContent() {
@@ -99,7 +109,6 @@ public class Pager2<FILTER_TYPE, RESULT_TYPE> extends HorizontalLayout implement
 		
 		pageSizePanel.addComponents(rowsByPageConfLbl, rowsByPageConfCmb);
 		currentPagePanel.addComponents(firstPLink, backPLink, currentPageLeftLbl, currentPageTxt, currentPageRightLbl, totalPagesLbl, nextPLink, lastPLink);
-		
 		
 		pageSizePanel.setSpacing(true);
 		currentPagePanel.setSpacing(true);
@@ -134,6 +143,18 @@ public class Pager2<FILTER_TYPE, RESULT_TYPE> extends HorizontalLayout implement
 		setExpandRatio(foundItemsLbl, 1.0f);
 		addStyleName(VWebCommonConstants.PAGER_CLASS);
 		
+		setComponentAlignment(foundItemsLbl, Alignment.MIDDLE_LEFT);
+		
+		pageSizePanel.setComponentAlignment(rowsByPageConfLbl, Alignment.MIDDLE_LEFT);
+		
+		currentPagePanel.setComponentAlignment(firstPLink, Alignment.MIDDLE_LEFT);
+		currentPagePanel.setComponentAlignment(backPLink, Alignment.MIDDLE_LEFT);
+		currentPagePanel.setComponentAlignment(currentPageLeftLbl, Alignment.MIDDLE_LEFT);
+		currentPagePanel.setComponentAlignment(currentPageRightLbl, Alignment.MIDDLE_LEFT);
+		currentPagePanel.setComponentAlignment(totalPagesLbl, Alignment.MIDDLE_LEFT);
+		currentPagePanel.setComponentAlignment(nextPLink, Alignment.MIDDLE_LEFT);
+		currentPagePanel.setComponentAlignment(lastPLink, Alignment.MIDDLE_LEFT);
+		
 		currentPageTxt.setImmediate(true);
 		rowsByPageConfCmb.setImmediate(true);
 		
@@ -145,13 +166,21 @@ public class Pager2<FILTER_TYPE, RESULT_TYPE> extends HorizontalLayout implement
 	private void bindEvents(){
 		currentPageProperty.addValueChangeListener(this);
 		pageCountProperty.addValueChangeListener(this);
-		rowsByPageProperty.addValueChangeListener(this);		
+		rowsByPageProperty.addValueChangeListener(this);
+		firstPLink.setClickHandler(this);
+		backPLink.setClickHandler(this);
+		nextPLink.setClickHandler(this);
+		lastPLink.setClickHandler(this);
 	}
 	
 	private void currentPagePropertyValueChange(){
 		currentCacheGroup = currentPage() > 0 ? currentCacheGroup : 0;
-		if(currentPage() > 0)
+		if(currentPage() > 0){
 			firePageChangeEvent();
+			if(pageList.getRowCount() <= 0)
+				currentPageProperty.setValue(0);
+		}
+		
 	}
 	
 	private void pageCountPropertyValueChange(){
@@ -163,12 +192,12 @@ public class Pager2<FILTER_TYPE, RESULT_TYPE> extends HorizontalLayout implement
 	}
 	
 	private void resetConstrains(){
-		rangeValidator.setMinValue(pageList.getRowCount() > 0 ? 1 : 0);
+		rangeValidator.setMinValue(pageCount() > 0 ? 1 : 0);
 		rangeValidator.setMaxValue(pageCount());
-		firstPLink.setEnabled(currentPage() > rangeValidator.getMinValue());
-		backPLink.setEnabled(currentPage() > rangeValidator.getMinValue());
-		nextPLink.setEnabled(currentPage() < rangeValidator.getMaxValue());
-		lastPLink.setEnabled(currentPage() < rangeValidator.getMaxValue());
+		firstPLink.setEnabled(pageCount() > 0 && currentPage() > rangeValidator.getMinValue());
+		backPLink.setEnabled(pageCount() > 0 && currentPage() > rangeValidator.getMinValue());
+		nextPLink.setEnabled(pageCount() > 0 && currentPage() < rangeValidator.getMaxValue());
+		lastPLink.setEnabled(pageCount() > 0 && currentPage() < rangeValidator.getMaxValue());
 	}
 	
 	public void reset(){
@@ -196,29 +225,26 @@ public class Pager2<FILTER_TYPE, RESULT_TYPE> extends HorizontalLayout implement
 	}
 	
 	private void firePageChangeEvent(){
-		if(currentCacheGroup > 0 && isCachedPage(currentPage())){
-			setPageData(extractCurrentPageData());
-			return;
-		}
 		if(pageChangeHandler == null) return;
 		
-		pageList = pageChangeHandler.loadPage(createPageChangeEvent());
+		if(!isCachedPage(currentPage())){
+			currentCacheGroup = (int)Math.ceil((float)currentPage() / (float)maxCachedPages);
+			pageList = pageChangeHandler.loadPage(createPageChangeEvent());
+		}
+		
 		pageCountProperty.setValue((int)Math.ceil((float)pageList.getRowCount() / (float)rowsByPageProperty.getValue()));
 		if(pageList.getRowCount() > 0)
 			foundItemsLbl.setValue(MessageFormat.format(VWebUtils.getCommonString(VWebCommonConstants.PAGER_NROWS_FOUND), pageList.getRowCount()));
 		else
 			foundItemsLbl.setValue(VWebUtils.getCommonString(VWebCommonConstants.PAGER_NO_ROWS_FORSHOW));
-		
-		currentCacheGroup = (int)Math.ceil((float)currentPage() / (float)maxCachedPages);
 		setPageData(extractCurrentPageData());
-		if(pageList.getRowCount() <= 0)
-			currentPageProperty.setValue(0);
 	}
 	
 	private PageChangeEvent<FILTER_TYPE> createPageChangeEvent(){
 		PageChangeEvent<FILTER_TYPE> event = new PageChangeEvent<FILTER_TYPE>();
+		int calculatedPage = maxCachedPages == 1 ? currentPage() : ((maxCachedPages * currentCacheGroup) - maxCachedPages) + 1;
 		event.setFilterDTO(this.filterDto);
-		event.setPage(currentPage());
+		event.setPage(calculatedPage);
 		event.setPager(null);
 		event.setRowsByPage(rowsByPage());
 		event.setPagesPerGroup(maxCachedPages);
@@ -239,7 +265,7 @@ public class Pager2<FILTER_TYPE, RESULT_TYPE> extends HorizontalLayout implement
 		int cachedGroupPage = (currentPage() - initialCachedPage) + 1;
 		int lastIdx = rowsByPage() * cachedGroupPage;
 		int firstIdx = lastIdx - rowsByPage();
-		return pageList.getData().subList(firstIdx, lastIdx > pageList.getRowCount() ? pageList.getRowCount() : lastIdx);
+		return pageList.getData().subList(firstIdx, lastIdx > pageList.getData().size() ? pageList.getData().size() : lastIdx);
 	}
 	
 	@Override
@@ -250,6 +276,18 @@ public class Pager2<FILTER_TYPE, RESULT_TYPE> extends HorizontalLayout implement
 			pageCountPropertyValueChange();
 		else if(rowsByPageProperty.equals(event.getProperty()))
 			rowsByPagePropertyValueChange();
+	}
+	
+	@Override
+	public void handleClick(LinkClickEvent event) {
+		if(firstPLink.equals(event.getLinkLabel()))
+			currentPageProperty.setValue(rangeValidator.getMinValue());
+		else if(backPLink.equals(event.getLinkLabel()))
+			currentPageProperty.setValue(currentPage() - 1);
+		else if(nextPLink.equals(event.getLinkLabel()))
+			currentPageProperty.setValue(currentPage() + 1);
+		else if(lastPLink.equals(event.getLinkLabel()))
+			currentPageProperty.setValue(rangeValidator.getMaxValue());
 	}
 	
 	public void setFilterDto(FILTER_TYPE filterDto){
@@ -264,8 +302,21 @@ public class Pager2<FILTER_TYPE, RESULT_TYPE> extends HorizontalLayout implement
 	public void setPageChangeHandler(PageChangeHandler<FILTER_TYPE, RESULT_TYPE> pageChangeHandler) {
 		this.pageChangeHandler = pageChangeHandler;
 	}
+	
+	public void setPageDataTarget(PageDataTarget<RESULT_TYPE> pageDataTarget){
+		this.pageDataTarget = pageDataTarget;
+	}
+	
+	public void setPageDataTargetForGrid(Grid grid){
+		this.pageDataTarget = new GridPageDataTarget<RESULT_TYPE>(grid);
+	}
+	
+	public void setPageDataTargetForTable(Table table){
+		this.pageDataTarget = new TablePageDataTarget<RESULT_TYPE>(table);
+	}
 
 	private void setPageData(List<RESULT_TYPE> data){
-		
+		if(pageDataTarget != null)
+			pageDataTarget.refreshPageData(data);
 	}
 }
