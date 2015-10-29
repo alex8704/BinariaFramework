@@ -139,6 +139,7 @@ public class Pager2<FILTER_TYPE, RESULT_TYPE> extends HorizontalLayout implement
 		
 		bindEvents();
 		resetConstrains();
+		reset();
 	}
 	
 	private void bindEvents(){
