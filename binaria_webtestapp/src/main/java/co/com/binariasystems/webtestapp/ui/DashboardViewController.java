@@ -3,12 +3,6 @@ package co.com.binariasystems.webtestapp.ui;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.vaadin.data.Property.ValueChangeEvent;
-import com.vaadin.data.Property.ValueChangeListener;
-import com.vaadin.server.Page;
-import com.vaadin.ui.HorizontalSplitPanel;
-import com.vaadin.ui.Label;
-
 import co.com.binariasystems.fmw.annotation.Dependency;
 import co.com.binariasystems.fmw.exception.FMWUncheckedException;
 import co.com.binariasystems.fmw.util.pagination.ListPage;
@@ -17,6 +11,8 @@ import co.com.binariasystems.fmw.vweb.mvp.annotation.ViewController;
 import co.com.binariasystems.fmw.vweb.mvp.annotation.ViewController.OnLoad;
 import co.com.binariasystems.fmw.vweb.mvp.annotation.ViewField;
 import co.com.binariasystems.fmw.vweb.mvp.controller.AbstractViewController;
+import co.com.binariasystems.fmw.vweb.uicomponet.LinkLabel;
+import co.com.binariasystems.fmw.vweb.uicomponet.LinkLabel.ClickHandler;
 import co.com.binariasystems.fmw.vweb.uicomponet.Pager2;
 import co.com.binariasystems.fmw.vweb.uicomponet.TreeMenu;
 import co.com.binariasystems.fmw.vweb.uicomponet.pager.PageChangeEvent;
@@ -25,6 +21,13 @@ import co.com.binariasystems.fmw.vweb.uicomponet.treemenu.MenuElement;
 import co.com.binariasystems.webtestapp.business.AuthenticationBusiness;
 import co.com.binariasystems.webtestapp.dto.MenuModuleDTO;
 import co.com.binariasystems.webtestapp.dto.MenuOptionDTO;
+
+import com.vaadin.data.Property.ValueChangeEvent;
+import com.vaadin.data.Property.ValueChangeListener;
+import com.vaadin.server.Page;
+import com.vaadin.ui.HorizontalSplitPanel;
+import com.vaadin.ui.Label;
+import com.vaadin.ui.Notification;
 
 
 @ViewController
@@ -35,13 +38,21 @@ public class DashboardViewController extends AbstractViewController {
 	@Dependency
 	private AuthenticationBusiness authBusiness;
 	@ViewField private Pager2<Object, Object> pager;
+	@ViewField private LinkLabel linkLabel;
 	private List<Object> items = new ArrayList<Object>();
 	
 	@Init
 	public void inicializar(){
 		System.out.println("Inicializando Dashboard Controller");
-		for(int i=1; i <= 100; i++)
-			items.add("Objeto "+i);
+		linkLabel.setClickHandler(new ClickHandler() {
+			@Override
+			public void handleClick() {
+				Notification.show("Haz clickado el link button", Notification.Type.HUMANIZED_MESSAGE);
+			}
+		});
+		
+//		for(int i=1; i <= 100; i++)
+//			items.add("Objeto "+i);
 		menuContainer.addValueChangeListener(new ValueChangeListener() {
 			@Override
 			public void valueChange(ValueChangeEvent event) {

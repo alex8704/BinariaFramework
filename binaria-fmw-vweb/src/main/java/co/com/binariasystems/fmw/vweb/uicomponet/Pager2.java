@@ -149,6 +149,7 @@ public class Pager2<FILTER_TYPE, RESULT_TYPE> extends HorizontalLayout implement
 	}
 	
 	private void currentPagePropertyValueChange(){
+		currentCacheGroup = currentPage() > 0 ? currentCacheGroup : 0;
 		if(currentPage() > 0)
 			firePageChangeEvent();
 	}
@@ -187,6 +188,7 @@ public class Pager2<FILTER_TYPE, RESULT_TYPE> extends HorizontalLayout implement
 	}
 	
 	private void fireFilterDtoChangeEvent(){
+		currentCacheGroup = 0;
 		if(currentPage() != 1)
 			currentPageProperty.setValue(1);
 		else
@@ -194,7 +196,7 @@ public class Pager2<FILTER_TYPE, RESULT_TYPE> extends HorizontalLayout implement
 	}
 	
 	private void firePageChangeEvent(){
-		if(isCachedPage(currentPage())){
+		if(currentCacheGroup > 0 && isCachedPage(currentPage())){
 			setPageData(extractCurrentPageData());
 			return;
 		}
