@@ -4,8 +4,6 @@ import java.text.MessageFormat;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.vaadin.ui.UI;
-
 import co.com.binariasystems.fmw.constants.FMWConstants;
 import co.com.binariasystems.fmw.ioc.IOCHelper;
 import co.com.binariasystems.fmw.util.messagebundle.MessageBundleManager;
@@ -14,7 +12,7 @@ import co.com.binariasystems.fmw.vweb.constants.UIConstants;
 public class LocaleMessagesUtil {
 	private static MessageFormat UI_CONVENTION_MF;
 	public static String getLocalizedMessage(MessageBundleManager messages, String key){
-		return messages.getString(key, UI.getCurrent().getPage().getWebBrowser().getLocale());
+		return messages.getString(key, VWebUtils.getCurrentUserLocale());
 	}
 	
 	public static String getLocalizedMessage(String messagesFile, String key){

@@ -49,7 +49,6 @@ public class DashboardViewController extends AbstractViewController {
 	@ViewField private LinkLabel linkLabel;
 	private List<Medidor> items = new ArrayList<Medidor>();
 	@ViewField private Grid grid;
-	@ViewField private BeanItemContainer<Medidor> container;
 	
 	@Init
 	public void inicializar(){
@@ -60,21 +59,7 @@ public class DashboardViewController extends AbstractViewController {
 				Notification.show("Haz clickado el link button", Notification.Type.HUMANIZED_MESSAGE);
 			}
 		});
-		/*
-		 * @Key(column="id_medidor")
-	private Long id;
-	private String serial;
-	@Relation(column="id_gateway")
-	private Gateway gateway;
-	//@Relation(column="id_suscriptor")
-	@Column(name="id_suscriptor")
-	@ForeignKey(entityClazz=Suscriptor.class)
-	private Long suscriptor;
-	@Column(name="fecha_instalacion")
-	private Timestamp fechaInstalacion;
-	@Column(name="lectura_inicial")
-	private Double lecturaInicial;
-		 */
+		
 		Random random = new Random();
 		for(int i = 1; i <= 100; i++){
 			Medidor medidor = new Medidor();

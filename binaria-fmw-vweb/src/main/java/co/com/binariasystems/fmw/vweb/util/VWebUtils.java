@@ -1,5 +1,7 @@
 package co.com.binariasystems.fmw.vweb.util;
 
+import java.util.Locale;
+
 import co.com.binariasystems.fmw.util.messagebundle.MessageBundleManager;
 import co.com.binariasystems.fmw.vweb.constants.VWebCommonConstants;
 import co.com.binariasystems.fmw.vweb.resources.messages.messages;
@@ -13,7 +15,9 @@ import com.vaadin.ui.Field;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Link;
+import com.vaadin.ui.UI;
 import com.vaadin.ui.Upload;
+
 
 public final class VWebUtils {
 	
@@ -33,6 +37,10 @@ public final class VWebUtils {
 	
 	public static String getCommonString(String key){
 		return LocaleMessagesUtil.getLocalizedMessage(commonStringsManager, key);
+	}
+	
+	public static Locale getCurrentUserLocale(){
+		return UI.getCurrent().getPage().getWebBrowser().getLocale();
 	}
 	
 	public static boolean isVField(Class<?> clazz){

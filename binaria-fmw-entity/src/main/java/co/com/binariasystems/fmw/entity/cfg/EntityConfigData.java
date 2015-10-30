@@ -42,6 +42,10 @@ public class EntityConfigData implements Serializable{
 	public Map<String, FieldConfigData> getFieldsData() {
 		return fieldsData;
 	}
+	
+	public FieldConfigData getFieldData(String fieldName){
+		return fieldsData.get(fieldName);
+	}
 
 	public void setFieldsData(Map<String, FieldConfigData> fieldsData) {
 		this.fieldsData = fieldsData;

@@ -1,6 +1,5 @@
 package co.com.binariasystems.fmw.reflec;
 
-import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.Time;
@@ -16,19 +15,37 @@ import co.com.binariasystems.fmw.constants.FMWConstants;
 import co.com.binariasystems.fmw.dto.Listable;
 
 public class TypeHelper {
+	
+	public static boolean isFloatingPointNumber(Class<?> clazz){
+		return (BigDecimal.class.isAssignableFrom(clazz) ||
+				Double.class.isAssignableFrom(clazz) || Double.TYPE.isAssignableFrom(clazz) || 
+				Float.class.isAssignableFrom(clazz) || Float.TYPE.isAssignableFrom(clazz));
+	}
+	
+	public static boolean isNotFloatingPointNumber(Class<?> clazz){
+		return (BigInteger.class.isAssignableFrom(clazz) || 
+				Byte.class.isAssignableFrom(clazz) || Byte.TYPE.isAssignableFrom(clazz) ||
+				Short.class.isAssignableFrom(clazz) || Short.TYPE.isAssignableFrom(clazz) || 
+				Integer.class.isAssignableFrom(clazz) || Integer.TYPE.isAssignableFrom(clazz) ||
+				Long.class.isAssignableFrom(clazz) || Long.TYPE.isAssignableFrom(clazz));
+	}
 
-	public static boolean isBasicType(Class clazz){
+	public static boolean isBasicType(Class<?> clazz){
 		return (clazz.isPrimitive() || Boolean.class.isAssignableFrom(clazz) || Character.class.isAssignableFrom(clazz) ||
 				Number.class.isAssignableFrom(clazz) || Date.class.isAssignableFrom(clazz) || CharSequence.class.isAssignableFrom(clazz))
 				|| clazz.getName().startsWith("java.") || clazz.getName().startsWith("com.sun") || clazz.getName().startsWith("com.oracle")
 				|| clazz.getName().startsWith("sun.") || clazz.getName().startsWith("oracle.");
 	}
 	
+	public static boolean isNotBasicType(Class clazz){
+		return !isBasicType(clazz);
+	}
+	
 	public static boolean isDateOrTimeType(Class clazz){
 		return Date.class.isAssignableFrom(clazz);
 	}
 	
-	public static boolean isNumericType(Class clazz){
+	public static boolean isNumericType(Class<?> clazz){
 		return (Number.class.isAssignableFrom(clazz) || Long.TYPE.isAssignableFrom(clazz)
 				 || Integer.TYPE.isAssignableFrom(clazz) || Double.TYPE.isAssignableFrom(clazz)
 				 || Float.TYPE.isAssignableFrom(clazz) || Short.TYPE.isAssignableFrom(clazz)
@@ -41,24 +58,11 @@ public class TypeHelper {
 	}
 	
 	
-	public static Object enumFromOrdinal(int ordinal, Class enumClass){
-		Object resp = null;
-		Method valuesMth;
-		try {
-			valuesMth = enumClass.getMethod("values", new Class[]{});
-			Enum[] vals = (Enum[])valuesMth.invoke(null, new Object[]{});
-			
-			for(int i = 0; i < vals.length; i++){
-				if(vals[i].ordinal() == ordinal){
-					resp = vals[i];
-					break;
-				}
-			}
-		} catch (Exception ex) {
-			System.err.println(ex.toString());
-		}
-		
-		return resp;
+	public static <E extends Enum<E>> E enumFromOrdinal(int ordinal, Class<E> enumClass){
+		E[] vals = enumClass.getEnumConstants();
+		for(E value : vals)
+			if(value.ordinal() == ordinal) return value;
+		return null;
 	}
 	
 	public static String objectToString(Object value){

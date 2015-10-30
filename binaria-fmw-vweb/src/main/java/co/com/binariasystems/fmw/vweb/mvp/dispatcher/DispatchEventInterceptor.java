@@ -1,3 +1,4 @@
+
 package co.com.binariasystems.fmw.vweb.mvp.dispatcher;
 
 import static co.com.binariasystems.fmw.vweb.constants.VWebCommonConstants.SECURITY_SUBJECT_ATTRIBUTE;
@@ -35,7 +36,7 @@ public class DispatchEventInterceptor {
 				authorized = securityManager.isAuthorized(authInfo);
 			}else 
 				authorized = securityManager.isPublicView(requestedUrl);
-			String targetUrl = ViewProvider.SPECIAL_VIEWS_URL+"?"+ViewProvider.AUTHENTICATION_VIEW_PARAM_IDENTIFIER;//Por defecto se tiene la url de autenticacion
+			String targetUrl = new StringBuilder(ViewProvider.SPECIAL_VIEWS_URL).append("?").append(ViewProvider.AUTHENTICATION_VIEW_PARAM_IDENTIFIER).toString();
 			targetUrl = authorized ? requestedUrl : (authenticated ? securityManager.getForbiddenViewUrl() : targetUrl);
 			
 			printDebugInformation(authorized, requestedUrl, targetUrl);

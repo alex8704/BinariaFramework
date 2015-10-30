@@ -4,11 +4,13 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import co.com.binariasystems.fmw.constants.FMWConstants;
@@ -145,7 +147,15 @@ public class SearcherResultWindow2<T> extends Window implements ClickListener {
 		List<String> visibleCols = new LinkedList<String>();
 		visibleCols.add(entityConfigData.getPkFieldName());
 		boolean hasDescriptionFields = entityConfigData.getSearchDescriptionFields() != null && entityConfigData.getSearchDescriptionFields().size() > 0;
+		Collection<String> descriptionFields = entityConfigData.getSearchDescriptionFields().isEmpty() ? entityConfigData.getFieldsData().keySet() : entityConfigData.getSearchDescriptionFields();
 		
+		for(String fieldName : descriptionFields){
+			if(fieldName.equals(entityConfigData.getPkFieldName())) continue;
+			FieldConfigData fieldCfg = entityConfigData.getFieldData(fieldName);
+			visibleCols.add(fieldName);
+			if(fieldCfg instanceof RelationFieldConfigData && !TypeHelper.isBasicType(fieldCfg.getFieldType()))
+				if(TypeHelper.isNotBasicType(fieldCfg.getFieldType()))return;
+		}
 //		SimpleFieldColumnGenerator simpleColumnGenerator = new SimpleFieldColumnGenerator();
 //		resultsTable.addGeneratedColumn(entityConfigData.getPkFieldName(), new PrimaryFieldColumnGenerator());
 		
