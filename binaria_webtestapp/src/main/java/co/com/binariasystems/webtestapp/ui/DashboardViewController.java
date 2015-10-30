@@ -1,7 +1,10 @@
 package co.com.binariasystems.webtestapp.ui;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Random;
 
 import co.com.binariasystems.fmw.annotation.Dependency;
 import co.com.binariasystems.fmw.exception.FMWUncheckedException;
@@ -20,11 +23,14 @@ import co.com.binariasystems.fmw.vweb.uicomponet.pager.PageChangeEvent;
 import co.com.binariasystems.fmw.vweb.uicomponet.pager.PageChangeHandler;
 import co.com.binariasystems.fmw.vweb.uicomponet.treemenu.MenuElement;
 import co.com.binariasystems.webtestapp.business.AuthenticationBusiness;
+import co.com.binariasystems.webtestapp.dto.Gateway;
+import co.com.binariasystems.webtestapp.dto.Medidor;
 import co.com.binariasystems.webtestapp.dto.MenuModuleDTO;
 import co.com.binariasystems.webtestapp.dto.MenuOptionDTO;
 
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
+import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.server.Page;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.HorizontalSplitPanel;
@@ -39,10 +45,11 @@ public class DashboardViewController extends AbstractViewController {
 	@ViewField private Label welcomeLabel;
 	@Dependency
 	private AuthenticationBusiness authBusiness;
-	@ViewField private Pager2<Object, Object> pager;
+	@ViewField private Pager2<Medidor, Medidor> pager;
 	@ViewField private LinkLabel linkLabel;
-	private List<Object> items = new ArrayList<Object>();
+	private List<Medidor> items = new ArrayList<Medidor>();
 	@ViewField private Grid grid;
+	@ViewField private BeanItemContainer<Medidor> container;
 	
 	@Init
 	public void inicializar(){
@@ -53,9 +60,37 @@ public class DashboardViewController extends AbstractViewController {
 				Notification.show("Haz clickado el link button", Notification.Type.HUMANIZED_MESSAGE);
 			}
 		});
-		
-		for(int i=1; i <= 100; i++)
-			items.add("Objeto "+i);
+		/*
+		 * @Key(column="id_medidor")
+	private Long id;
+	private String serial;
+	@Relation(column="id_gateway")
+	private Gateway gateway;
+	//@Relation(column="id_suscriptor")
+	@Column(name="id_suscriptor")
+	@ForeignKey(entityClazz=Suscriptor.class)
+	private Long suscriptor;
+	@Column(name="fecha_instalacion")
+	private Timestamp fechaInstalacion;
+	@Column(name="lectura_inicial")
+	private Double lecturaInicial;
+		 */
+		Random random = new Random();
+		for(int i = 1; i <= 100; i++){
+			Medidor medidor = new Medidor();
+			medidor.setId(Long.valueOf(i));
+			medidor.setSerial(String.valueOf(Math.abs(random.nextInt())));
+			medidor.setFechaInstalacion(new Timestamp(new Date().getTime()));
+			medidor.setGateway(new Gateway());
+			medidor.getGateway().setId(i);
+			medidor.getGateway().setDescripcion("Gateway "+i);
+			medidor.getGateway().setIp("127.0.0."+i);
+			medidor.getGateway().setFechaComunicacion(new Timestamp(new Date().getTime()));
+			medidor.setSuscriptor(Long.valueOf(100 - i));
+			medidor.setLecturaInicial(Double.valueOf(i+2));
+			items.add(medidor);
+			
+		}
 		menuContainer.addValueChangeListener(new ValueChangeListener() {
 			@Override
 			public void valueChange(ValueChangeEvent event) {
@@ -68,10 +103,10 @@ public class DashboardViewController extends AbstractViewController {
 		
 		pager.setPageDataTargetForGrid(grid);
 		
-		pager.setPageChangeHandler(new PageChangeHandler<Object, Object>() {
+		pager.setPageChangeHandler(new PageChangeHandler<Medidor, Medidor>() {
 			@Override
-			public ListPage<Object> loadPage(PageChangeEvent<Object> event) throws FMWUncheckedException {
-				return new ListPage<Object>(items.subList(event.getInitialRow(), event.getFinalRow() > items.size() ? items.size() : event.getFinalRow()), items.size());
+			public ListPage<Medidor> loadPage(PageChangeEvent<Medidor> event) throws FMWUncheckedException {
+				return new ListPage<Medidor>(items.subList(event.getInitialRow(), event.getFinalRow() > items.size() ? items.size() : event.getFinalRow()), items.size());
 			}
 		});
 	}

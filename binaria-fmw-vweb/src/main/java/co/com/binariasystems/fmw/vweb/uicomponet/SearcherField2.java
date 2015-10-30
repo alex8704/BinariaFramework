@@ -107,7 +107,7 @@ public class SearcherField2<T> extends CustomField<T>{
 	}
 
 	protected void textfieldValueChange() {
-		if()
+		
 	}
 
 	@Override
