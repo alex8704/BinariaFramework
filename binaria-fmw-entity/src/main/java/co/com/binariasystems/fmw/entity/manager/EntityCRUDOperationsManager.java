@@ -52,9 +52,10 @@ import co.com.binariasystems.fmw.util.pagination.ListPage;
  * manejado por Spring.
  */
 
+@SuppressWarnings("rawtypes")
 public class EntityCRUDOperationsManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger(EntityCRUDOperationsManager.class);
-	private static Map<Class, EntityCRUDOperationsManager> entityCRUDMgrContext = new HashMap<Class, EntityCRUDOperationsManager>();
+	private static Map<Class<?>, EntityCRUDOperationsManager> entityCRUDMgrContext = new HashMap<Class<?>, EntityCRUDOperationsManager>();
 	private static final String SQL_XML_FILE = "entitycruddao.xml";
 	private static final PropertiesManager mm = PropertiesManager.forPath(EntityCRUDDAO.class.getPackage().getName() + "." + SQL_XML_FILE, EntityCRUDDAO.class);
 
@@ -70,7 +71,7 @@ public class EntityCRUDOperationsManager {
 		INSERT, UPDATE, DELETE
 	}
 
-	public static EntityCRUDOperationsManager getInstance(Class entityClazz) {
+	public static EntityCRUDOperationsManager getInstance(Class<?> entityClazz) {
 		EntityCRUDOperationsManager resp = entityCRUDMgrContext.get(entityClazz);
 		if (resp == null) {
 			synchronized (EntityCRUDOperationsManager.class) {

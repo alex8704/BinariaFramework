@@ -166,4 +166,8 @@ public class StringUtils {
 		}
 		return collection.toArray(new String[collection.size()]);
 	}
+	
+	public static String quote(String str) {
+		return (str != null ? "'" + str + "'" : null);
+	}
 }

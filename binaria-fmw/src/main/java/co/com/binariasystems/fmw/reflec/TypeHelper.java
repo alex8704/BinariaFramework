@@ -66,10 +66,9 @@ public class TypeHelper {
 	}
 	
 	public static String objectToString(Object value){
-		String resp = null;
 		Object obj = null;
 		if(value == null)
-			resp = "";
+			obj = "";
 		if(Boolean.TYPE.isAssignableFrom(value.getClass()) || Boolean.class.isAssignableFrom(value.getClass()))
 			obj = value;
 		else if(Byte.TYPE.isAssignableFrom(value.getClass()) || Byte.class.isAssignableFrom(value.getClass()))

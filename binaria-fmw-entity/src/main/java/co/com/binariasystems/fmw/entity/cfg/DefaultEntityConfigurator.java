@@ -28,6 +28,7 @@ import co.com.binariasystems.fmw.entity.cfg.EntityConfigData.AuditFieldConfigDat
 import co.com.binariasystems.fmw.entity.cfg.EntityConfigData.AuditableEntityConfigData;
 import co.com.binariasystems.fmw.entity.cfg.EntityConfigData.FieldConfigData;
 import co.com.binariasystems.fmw.entity.cfg.EntityConfigData.RelationFieldConfigData;
+import co.com.binariasystems.fmw.entity.util.FMWEntityUtils;
 import co.com.binariasystems.fmw.entity.validator.EntityValidator;
 import co.com.binariasystems.fmw.exception.FMWException;
 import co.com.binariasystems.fmw.exception.FMWUncheckedException;
@@ -110,6 +111,12 @@ public class DefaultEntityConfigurator implements EntityConfigurator{
 		
 		if(StringUtils.isEmpty(entityConfigData.getSearchFieldName()))
 			entityConfigData.setSearchFieldName(entityConfigData.getPkFieldName());
+		
+		entityConfigData.setTitleKey(getTitleKey());
+		entityConfigData.setEnumKeyProperty(getEnumKeyProperty());
+		entityConfigData.setFieldLabelMappings(getFieldLabelMappings());
+		entityConfigData.setDeleteEnabled(isDeleteEnabled());
+		entityConfigData.setPkGenerationStrategy(getPKGenerationStrategy());
 		return entityConfigData;
 	}
 	
@@ -216,7 +223,7 @@ public class DefaultEntityConfigurator implements EntityConfigurator{
 		
 		EntityConfigUIControl fieldUIControl = getFieldUIControlMappings().get(fieldCfg.getFieldName());
 		if(fieldUIControl != null){
-			if(!isValidControlForField(fieldUIControl, fieldCfg))
+			if(FMWEntityUtils.isValidControlForField(fieldUIControl, fieldCfg))
 				throw new FMWException("Cannot create UIControl of type "+fieldUIControl.name()+" for "+fieldCfg.getFieldType()+" field "+fieldCfg.getFieldName());
 		}else{
 			if(fieldCfg instanceof RelationFieldConfigData){// Buscador Por defecto
@@ -238,34 +245,7 @@ public class DefaultEntityConfigurator implements EntityConfigurator{
 		}
 		fieldCfg.setFieldUIControl(fieldUIControl);
 	}
-	private boolean isValidControlForField(EntityConfigUIControl controlType, FieldConfigData fieldInfo){
-		boolean resp = false;
-		if(controlType == EntityConfigUIControl.TEXTFIELD || controlType == EntityConfigUIControl.PASSWORDFIELD){
-			resp = TypeHelper.isNumericType(fieldInfo.getFieldType()) || CharSequence.class.isAssignableFrom(fieldInfo.getFieldType()) ||
-					Character.class.isAssignableFrom(fieldInfo.getFieldType());
-		}
-		if(controlType == EntityConfigUIControl.TEXTAREA){
-			resp = CharSequence.class.isAssignableFrom(fieldInfo.getFieldType());
-		}
-		if(controlType == EntityConfigUIControl.DATEFIELD){
-			resp = Date.class.isAssignableFrom(fieldInfo.getFieldType());
-		}
-		if(controlType == EntityConfigUIControl.RADIO){
-			resp = fieldInfo.isEnumType() || (fieldInfo.getFixedValues() != null && fieldInfo.getFixedValues().length > 0);
-		}
-		if(controlType == EntityConfigUIControl.COMBOBOX){
-			resp = fieldInfo.isEnumType() || fieldInfo instanceof RelationFieldConfigData ||
-					(fieldInfo.getFixedValues() != null && fieldInfo.getFixedValues().length > 0);
-		}
-		if(controlType == EntityConfigUIControl.SEARCHBOX){
-			resp = fieldInfo instanceof RelationFieldConfigData;
-		}
-		if(controlType == EntityConfigUIControl.CHECKBOX){
-			resp = Boolean.class.isAssignableFrom(fieldInfo.getFieldType());
-		}
 	
-		return resp;
-	}
 
 	
 	public EnumKeyProperty getEnumKeyProperty() {

@@ -1,6 +1,7 @@
 package co.com.binariasystems.fmw.vweb.uicomponet;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
 
 import co.com.binariasystems.fmw.util.exception.FMWExceptionUtils;
 import co.com.binariasystems.fmw.vweb.constants.UIConstants;
@@ -10,7 +11,6 @@ import co.com.binariasystems.fmw.vweb.util.ValidationUtils;
 import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.server.ClassResource;
 import com.vaadin.server.Resource;
-import com.vaadin.server.VaadinService;
 import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Alignment;
@@ -171,10 +171,6 @@ public class MessageDialog extends Window implements ClickListener{
 		return this;
 	}
 	
-	private String basePath(){
-		return VaadinService.getCurrent().getBaseDirectory().getAbsolutePath();
-	}
-	
 	public void show(){
 		UI.getCurrent().addWindow(this);
 	}
@@ -190,6 +186,13 @@ public class MessageDialog extends Window implements ClickListener{
 	
     public static void showErrorMessage(String title, String message){
 		new MessageDialog(StringUtils.defaultIfEmpty(title, VWebUtils.getCommonString(ValidationUtils.VALIDATION_ERROR_WINDOW_TITLE)), message, Type.ERROR).show();
+	}
+    
+    public static void showExceptions(Throwable ex, Logger logger){
+		Throwable pretty = FMWExceptionUtils.prettyMessageException(ex);
+		if(logger != null)
+			logger.error(pretty.toString(), pretty);
+		new MessageDialog(VWebUtils.getCommonString(ValidationUtils.VALIDATION_ERROR_WINDOW_TITLE), pretty.getMessage(), Type.ERROR).show();
 	}
 	
     public static void showExceptions(Throwable ex){

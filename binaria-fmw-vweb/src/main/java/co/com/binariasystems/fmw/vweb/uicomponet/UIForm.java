@@ -413,7 +413,7 @@ public class UIForm extends HorizontalLayout{
 					
 					for(int i = targetIdx + 1; i < childComponents.size() && go; i++){
 						Component comp = childComponents.get(i);
-						if(comp instanceof Button && ((Button)comp).getData() != null && ((Button)comp).getData().equals(SearcherField.ACTIONBUTTON_DATA_PREFIX))
+						if(comp instanceof Button && SearcherField.ACTIONBUTTON_DATA_PREFIX.equals(((Button)comp).getData()))
 							continue;//No hacer nada cuando se llega a un boton de buscador
 						if(comp instanceof Focusable && ((Focusable)comp).isEnabled() && !((Focusable)comp).isReadOnly() ){
 							((Focusable)comp).focus();

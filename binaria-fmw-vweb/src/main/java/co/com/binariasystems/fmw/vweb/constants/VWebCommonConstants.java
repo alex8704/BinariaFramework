@@ -23,6 +23,7 @@ public interface VWebCommonConstants {
 	public static final String MASTER_CRUD_MSG_SUCCESSDELETE = "masterCRUD.msg.delete.success";
 	public static final String MASTER_CRUD_AREYOU_SURE_CONTINUE = "masterCrud.msg.areYouSureContinue";
 	public static final String SEARCH_WIN_CAPTION = "searchResultWin.caption";
+	public static final String SEARCH_WIN_TABLE_CAPTION = "searchResultWin.table.caption";
 	
 	public static final String CTX_PARAM_APP_SHORTNAME = "applicationShortName";
 	public static final String CTX_PARAM_APP_COMPLETENAME = "applicationCompleteName";
@@ -41,6 +42,10 @@ public interface VWebCommonConstants {
 	public static final String UIFORM_REQUIRED_ERROR = "uiform.requirederror";
 	public static final String LINK_LABEL_TEMPLATE_TEXT = "linkLabel.templateText";
 	public static final String LINK_LABEL_DISABLE_TEMPLATE_TEXT = "linkLabel.disable.templateText";
+	public static final String ACTION_LINK_TEMPLATE_TEXT = "actionLink.templateText";
+	public static final String ACTION_LINK_DISALE_TEMPLATE_TEXT = "actionLink.disable.templateText";
+	public static final String ACTION_ICON_TEMPLATE_TEXT = "actionIcon.templateText";
+	public static final String ACTION_ICON_DISALE_TEMPLATE_TEXT = "actionIcon.disable.templateText";
 	
 	public static final String DEFMSG_ERRORS_FOUND = "defaultmsg.errors.found";
 	public static final String DEFMSG_NUMBERRANGE_VIOLATED = "defaultmsg.numberrange.violated";
@@ -74,5 +79,8 @@ public interface VWebCommonConstants {
 	public static final String PAGER_NEXTP_CLASS = "pager-next-link";
 	public static final String PAGER_BACKP_CLASS = "pager-back-link";
 	public static final String LINKLABEL_NODEC_CLASS = "link-label-nodec";
+	public static final String SEPARATOR_NBSP = "&nbsp;";
+	
+	public static final String YES_NO_COLUMN_TEMPLATE = "yesNoImageColumn.templateText";
 	
 }

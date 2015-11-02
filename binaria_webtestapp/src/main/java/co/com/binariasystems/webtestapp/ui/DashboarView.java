@@ -9,7 +9,9 @@ import co.com.binariasystems.fmw.vweb.mvp.annotation.ViewBuild;
 import co.com.binariasystems.fmw.vweb.mvp.views.AbstractView;
 import co.com.binariasystems.fmw.vweb.uicomponet.LinkLabel;
 import co.com.binariasystems.fmw.vweb.uicomponet.Pager2;
+import co.com.binariasystems.fmw.vweb.uicomponet.SearcherField2;
 import co.com.binariasystems.fmw.vweb.uicomponet.TreeMenu;
+import co.com.binariasystems.webtestapp.dto.Gateway;
 import co.com.binariasystems.webtestapp.dto.Medidor;
 
 import com.vaadin.data.Item;
@@ -17,7 +19,6 @@ import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.data.util.GeneratedPropertyContainer;
 import com.vaadin.data.util.PropertyValueGenerator;
-import com.vaadin.server.Page;
 import com.vaadin.server.Sizeable.Unit;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.Grid;
@@ -47,6 +48,7 @@ public class DashboarView extends AbstractView{
 	private BeanItemContainer<Medidor> gridDs;
 	private GeneratedPropertyContainer container;
 	private MessageFormat doChooseFmt = new MessageFormat("javascript:doChoose({0})");
+	private SearcherField2<Long> gatewayTxt;
 	
 	@ViewBuild
 	public Component init(){
@@ -54,6 +56,8 @@ public class DashboarView extends AbstractView{
 		rightPanel = new VerticalLayout();
 		welcomeLabel = new Label("Welcome My People");
 		linkLabel = new LinkLabel("Este es mi LinkLabel");
+		gatewayTxt = new SearcherField2<Long>(Gateway.class, Long.TYPE);
+		gatewayTxt.setCaption("Gateway");
 
 		gridDs = new BeanItemContainer<Medidor>(Medidor.class);
 		container = new GeneratedPropertyContainer(gridDs);
@@ -99,6 +103,7 @@ public class DashboarView extends AbstractView{
 		rightPanel.addComponent(linkLabel);
 		rightPanel.addComponent(grid);
 		rightPanel.addComponent(pager);
+		rightPanel.addComponent(gatewayTxt);
 		
 		splitPanel.setFirstComponent(menuContainer);
 		splitPanel.setSecondComponent(rightPanel);

@@ -2,15 +2,22 @@ package co.com.binariasystems.fmw.entity.util;
 
 import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import co.com.binariasystems.fmw.constants.FMWConstants;
+import co.com.binariasystems.fmw.dto.Listable;
 import co.com.binariasystems.fmw.entity.Entity;
 import co.com.binariasystems.fmw.entity.cfg.EntityConfigData;
+import co.com.binariasystems.fmw.entity.cfg.EntityConfigData.AuditFieldConfigData;
 import co.com.binariasystems.fmw.entity.cfg.EntityConfigData.FieldConfigData;
 import co.com.binariasystems.fmw.entity.cfg.EntityConfigData.RelationFieldConfigData;
+import co.com.binariasystems.fmw.entity.cfg.EntityConfigUIControl;
 import co.com.binariasystems.fmw.entity.cfg.EntityConfigurationManager;
 import co.com.binariasystems.fmw.entity.cfg.EntityConfigurator;
 import co.com.binariasystems.fmw.exception.FMWException;
@@ -20,11 +27,9 @@ import co.com.binariasystems.fmw.reflec.TypeHelper;
 public class FMWEntityUtils {
 	
 	private static String showOpeationsSql;
-	private static final String ENTITY_FORM_TITLE_FMT = "entity.{0}.form.title";
-	private static final String ENTITY_LABELS_FMT = "entity.{0}.{1}.caption";
 	
 	
-	public static EntityConfigData getEntityConfig(Class entityClazz) throws FMWException{
+	public static EntityConfigData getEntityConfig(Class<?> entityClazz) throws FMWException{
 		EntityConfigurator configurator = EntityConfigurationManager.getInstance().getConfigurator(entityClazz);
 		EntityConfigData entityConfigData = configurator.configure();
 		return entityConfigData;
@@ -50,38 +55,88 @@ public class FMWEntityUtils {
 		StringBuilder resp = new StringBuilder();
 		
 		try{
-			if(TypeHelper.isBasicType(fieldValue.getClass()) || TypeHelper.isCollectionType(fieldValue.getClass()) 
-					|| Enum.class.isAssignableFrom(fieldValue.getClass()))
-				resp.append(TypeHelper.objectToString(fieldValue));
-			else if(!TypeHelper.isBasicType(fieldValue.getClass()) && fieldValue.getClass().isAnnotationPresent(Entity.class)){//No est tipo basico y es Entidad
+			if(fieldValue instanceof Listable)
+				resp.append(((Listable) fieldValue).getDescription());
+			else if(isEntityClass(fieldValue.getClass())){
 				EntityConfigData entityConfigData = getEntityConfig(fieldValue.getClass());
-				boolean hasDescriptionFields = entityConfigData.getSearchDescriptionFields() != null && entityConfigData.getSearchDescriptionFields().size() > 0;
 				String subFieldValue = null;
 				
-				if(hasDescriptionFields){
-					for(int i = 0; i < entityConfigData.getSearchDescriptionFields().size(); i++){
-						String fieldName = entityConfigData.getSearchDescriptionFields().get(i);
-						FieldConfigData subFieldCfg = entityConfigData.getFieldsData().get(fieldName);
-						if(subFieldCfg instanceof RelationFieldConfigData && !TypeHelper.isBasicType(subFieldCfg.getFieldType())){
-							subFieldValue = generateStringRepresentationForField(PropertyUtils.getProperty(fieldValue, subFieldCfg.getFieldName()), separator);
-						}else{
-							subFieldValue = TypeHelper.objectToString(PropertyUtils.getProperty(fieldValue, subFieldCfg.getFieldName()));
-						}
-						if(StringUtils.isNotBlank(subFieldValue)){
-							if(resp.length() > 0)
-								resp.append(StringUtils.defaultIfBlank(separator, FMWConstants.WHITE_SPACE));
-							resp.append(subFieldValue);
-						}
+				for(String fieldName : entityConfigData.getSearchDescriptionFields()){
+					FieldConfigData subFieldCfg = entityConfigData.getFieldData(fieldName);
+					subFieldValue = generateStringRepresentationForField(PropertyUtils.getProperty(fieldValue, subFieldCfg.getFieldName()), separator);
+					if(StringUtils.isNotBlank(subFieldValue)){
+						resp.append((resp.length() > 0) ? StringUtils.defaultIfBlank(separator, FMWConstants.WHITE_SPACE) : "");
+						resp.append(subFieldValue);
 					}
-				}else
-					resp.append(TypeHelper.objectToString(fieldValue));
-			}else
+				}
+				resp.append(entityConfigData.getSearchDescriptionFields().size() > 0 ? "" : TypeHelper.objectToString(fieldValue));
+			}else	//BasicTypes, Enums, Collections
 				resp.append(TypeHelper.objectToString(fieldValue));
 		}catch(FMWException | IllegalAccessException | InvocationTargetException | NoSuchMethodException ex){
 			throw new FMWException(ex);
 		}
 		
 		return resp.toString();
+	}
+	
+	public static boolean isEntityClass(Class<?> clazz){
+		return TypeHelper.isNotBasicType(clazz) && clazz.getAnnotation(Entity.class) != null;
+	}
+	
+	public static boolean isValidControlForField(EntityConfigUIControl controlType, FieldConfigData fieldInfo){
+		boolean resp = false;
+		if(controlType == EntityConfigUIControl.TEXTFIELD || controlType == EntityConfigUIControl.PASSWORDFIELD){
+			resp = TypeHelper.isNumericType(fieldInfo.getFieldType()) || CharSequence.class.isAssignableFrom(fieldInfo.getFieldType()) ||
+					Character.class.isAssignableFrom(fieldInfo.getFieldType());
+		}
+		if(controlType == EntityConfigUIControl.TEXTAREA){
+			resp = CharSequence.class.isAssignableFrom(fieldInfo.getFieldType());
+		}
+		if(controlType == EntityConfigUIControl.DATEFIELD){
+			resp = Date.class.isAssignableFrom(fieldInfo.getFieldType());
+		}
+		if(controlType == EntityConfigUIControl.RADIO){
+			resp = fieldInfo.isEnumType() || (fieldInfo.getFixedValues() != null && fieldInfo.getFixedValues().length > 0);
+		}
+		if(controlType == EntityConfigUIControl.COMBOBOX){
+			resp = fieldInfo.isEnumType() || fieldInfo instanceof RelationFieldConfigData ||
+					(fieldInfo.getFixedValues() != null && fieldInfo.getFixedValues().length > 0);
+		}
+		if(controlType == EntityConfigUIControl.SEARCHBOX){
+			resp = fieldInfo instanceof RelationFieldConfigData;
+		}
+		if(controlType == EntityConfigUIControl.CHECKBOX){
+			resp = Boolean.class.isAssignableFrom(fieldInfo.getFieldType());
+		}
+	
+		return resp;
+	}
+	
+	/**
+	 * Metodo usado internamente anter de crear los componentes graficos, para definir
+	 * el orden de generacion de cada campo teniendo en cuenta un mecanismo de prioridades
+	 * que permite ubicar de la mejor manera los elementos segun el tipo de campo a generar
+	 * 
+	 * @param fieldsDataMap
+	 * @param PKFieldName
+	 * @return
+	 */
+	public static List<FieldConfigData> sortByUIControlTypePriority(Map<String, FieldConfigData> fieldsDataMap, String PKFieldName){
+		List<FieldConfigData> resp = new ArrayList<EntityConfigData.FieldConfigData>();
+		int index = 0;
+		for(String fieldName : fieldsDataMap.keySet()){
+			FieldConfigData fieldCfgdData = fieldsDataMap.get(fieldName);
+			if(fieldCfgdData instanceof AuditFieldConfigData) continue;
+			if(fieldName.equals(PKFieldName))
+				resp.add(0, fieldCfgdData);
+			else{
+				for(index = 0; index < resp.size(); index++)
+					if(fieldCfgdData.getFieldUIControl().ordinal() < resp.get(index).getFieldUIControl().ordinal()) break;
+				resp.add(index, fieldCfgdData);
+			}
+		}
+		
+		return resp;
 	}
 	
 	public static boolean showOpeationsSql(){
@@ -92,11 +147,11 @@ public class FMWEntityUtils {
 	}
 	
 	public static String getEntityLabelsFormat(){
-		return ENTITY_LABELS_FMT;
+		return FMWEntityConstants.ENTITY_CONVENTION_LABELS_FMT;
 	}
 	
 	public static String getEntityFormTitleFormat(){
-		return ENTITY_FORM_TITLE_FMT;
+		return FMWEntityConstants.ENTITY_CONVENTION_FORM_TITLE_FMT;
 	}
 	
 	public static MessageFormat createEntityLabelsMessageFormat(){

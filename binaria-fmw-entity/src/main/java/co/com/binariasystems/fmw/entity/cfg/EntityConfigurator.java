@@ -15,7 +15,7 @@ import co.com.binariasystems.fmw.exception.FMWException;
 
 public interface EntityConfigurator {
 	public String getTitleKey();
-	public Class getEntityClass();
+	public Class<?> getEntityClass();
 	public EntityConfigData configure() throws FMWException;
 	public EnumKeyProperty getEnumKeyProperty();
 	public Map<String, String> getFieldLabelMappings();

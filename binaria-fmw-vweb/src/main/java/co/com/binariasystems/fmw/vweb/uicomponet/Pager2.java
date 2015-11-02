@@ -319,4 +319,8 @@ public class Pager2<FILTER_TYPE, RESULT_TYPE> extends HorizontalLayout implement
 		if(pageDataTarget != null)
 			pageDataTarget.refreshPageData(data);
 	}
+	
+	public int getRowsByPage(){
+		return rowsByPage();
+	}
 }
