@@ -7,10 +7,10 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 
 import co.com.binariasystems.fmw.util.pagination.ListPage;
 
-public interface EntityCRUDDAO {
+public interface EntityCRUDDAO<T> {
 	public void save(String sqlStatement, MapSqlParameterSource paramSource) throws Exception;
 	public void edit(String sqlStatement, MapSqlParameterSource paramSource) throws Exception;
 	public void delete(String sqlStatement, MapSqlParameterSource paramSource) throws Exception;
-	public ListPage<Object> search(String sqlStatement, MapSqlParameterSource paramSource, int offset, int rowsByPage, RowMapper<Object> rowMapper) throws Exception;
-	public List<Object> searchWithoutPaging(String sqlStatement, MapSqlParameterSource paramSource, RowMapper<Object> rowMapper);
+	public ListPage<T> search(String sqlStatement, MapSqlParameterSource paramSource, int offset, int rowsByPage, RowMapper<T> rowMapper) throws Exception;
+	public List<T> searchWithoutPaging(String sqlStatement, MapSqlParameterSource paramSource, RowMapper<T> rowMapper);
 }

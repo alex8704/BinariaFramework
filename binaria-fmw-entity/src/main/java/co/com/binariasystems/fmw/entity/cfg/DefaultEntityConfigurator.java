@@ -1,6 +1,5 @@
 package co.com.binariasystems.fmw.entity.cfg;
 
-import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -41,8 +40,8 @@ import co.com.binariasystems.fmw.reflec.TypeHelper;
  * @author Alexander Castro O.
  */
 
-public class DefaultEntityConfigurator implements EntityConfigurator{
-	private Class<? extends Serializable> entityClazz;
+public class DefaultEntityConfigurator<T> implements EntityConfigurator<T>{
+	private Class<T> entityClazz;
 	private int keyCount = 0;
 	private int searchKeyCount = 0;
 	private EnumKeyProperty enumKeyProperty = EnumKeyProperty.NAME;
@@ -51,7 +50,7 @@ public class DefaultEntityConfigurator implements EntityConfigurator{
 	private boolean deleteEnabled = true;
 	private PKGenerationStrategy pKGenerationStrategy = PKGenerationStrategy.MAX_QUERY;
 	private String titleKey;
-	private EntityConfigData entityConfigData;
+	private EntityConfigData<T> entityConfigData;
 	
 	
 	protected DefaultEntityConfigurator(){
@@ -59,25 +58,25 @@ public class DefaultEntityConfigurator implements EntityConfigurator{
 	
 	public DefaultEntityConfigurator(String entityClazzName){
 		try{
-			this.entityClazz = (Class<? extends Serializable>) Class.forName(entityClazzName);
+			this.entityClazz = (Class<T>) Class.forName(entityClazzName);
 		}catch(ClassNotFoundException ex){
 			throw new FMWUncheckedException(ex);
 		}
 		
 	}
 	
-	public DefaultEntityConfigurator(Class<? extends Serializable> entityClazz){
+	public DefaultEntityConfigurator(Class<T> entityClazz){
 		this.entityClazz = entityClazz;
 	}
 
 	
-	public EntityConfigData configure() throws FMWException {
+	public EntityConfigData<T> configure() throws FMWException {
 		keyCount = 0;
 		searchKeyCount = 0;
 		if(entityConfigData != null) 
 			return entityConfigData;
 		
-		entityConfigData = entityClazz.isAnnotationPresent(Auditable.class) ? new AuditableEntityConfigData() : new EntityConfigData();
+		entityConfigData = entityClazz.isAnnotationPresent(Auditable.class) ? new AuditableEntityConfigData<T>() : new EntityConfigData<T>();
 		entityConfigData.setEntityClass(entityClazz);
 		entityConfigData.setTable(entityClazz.getSimpleName().toLowerCase());
 		for(Annotation annot : entityClazz.getAnnotations()){
@@ -272,7 +271,7 @@ public class DefaultEntityConfigurator implements EntityConfigurator{
 		return deleteEnabled;
 	}
 	
-	public Class<? extends Serializable> getEntityClazz() {
+	public Class<T> getEntityClazz() {
 		return entityClazz;
 	}
 
@@ -306,13 +305,13 @@ public class DefaultEntityConfigurator implements EntityConfigurator{
 		this.titleKey = titleKey;
 	}
 	
-	public void setEntityClass(Class<? extends Serializable> entityClazz){
+	public void setEntityClass(Class<T> entityClazz){
 		this.entityClazz = entityClazz;
 		entityConfigData = null;
 	}
 
 	
-	public Class<? extends Serializable> getEntityClass() {
+	public Class<T> getEntityClass() {
 		return entityClazz;
 	}
 	

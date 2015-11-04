@@ -19,7 +19,6 @@ import co.com.binariasystems.fmw.entity.cfg.EntityConfigData.FieldConfigData;
 import co.com.binariasystems.fmw.entity.cfg.EntityConfigData.RelationFieldConfigData;
 import co.com.binariasystems.fmw.entity.cfg.EntityConfigUIControl;
 import co.com.binariasystems.fmw.entity.cfg.EntityConfigurationManager;
-import co.com.binariasystems.fmw.entity.cfg.EntityConfigurator;
 import co.com.binariasystems.fmw.exception.FMWException;
 import co.com.binariasystems.fmw.ioc.IOCHelper;
 import co.com.binariasystems.fmw.reflec.TypeHelper;
@@ -29,9 +28,8 @@ public class FMWEntityUtils {
 	private static String showOpeationsSql;
 	
 	
-	public static EntityConfigData getEntityConfig(Class<?> entityClazz) throws FMWException{
-		EntityConfigurator configurator = EntityConfigurationManager.getInstance().getConfigurator(entityClazz);
-		EntityConfigData entityConfigData = configurator.configure();
+	public static EntityConfigData<?> getEntityConfig(Class<?> entityClazz) throws FMWException{
+		EntityConfigData<?> entityConfigData = EntityConfigurationManager.getInstance().getConfigurator(entityClazz).configure();
 		return entityConfigData;
 	}
 	
@@ -58,7 +56,7 @@ public class FMWEntityUtils {
 			if(fieldValue instanceof Listable)
 				resp.append(((Listable) fieldValue).getDescription());
 			else if(isEntityClass(fieldValue.getClass())){
-				EntityConfigData entityConfigData = getEntityConfig(fieldValue.getClass());
+				EntityConfigData<?> entityConfigData = getEntityConfig(fieldValue.getClass());
 				String subFieldValue = null;
 				
 				for(String fieldName : entityConfigData.getSearchDescriptionFields()){

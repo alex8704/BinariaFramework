@@ -16,7 +16,6 @@ import co.com.binariasystems.fmw.entity.cfg.EntityConfigData;
 import co.com.binariasystems.fmw.entity.cfg.EntityConfigData.FieldConfigData;
 import co.com.binariasystems.fmw.entity.cfg.EntityConfigUIControl;
 import co.com.binariasystems.fmw.entity.cfg.EntityConfigurationManager;
-import co.com.binariasystems.fmw.entity.cfg.EntityConfigurator;
 import co.com.binariasystems.fmw.entity.criteria.Criteria;
 import co.com.binariasystems.fmw.entity.manager.EntityCRUDOperationsManager;
 import co.com.binariasystems.fmw.entity.util.FMWEntityUtils;
@@ -66,13 +65,12 @@ public class SearcherResultWindow2<T> extends Window implements CloseListener, C
 	private Button searchBtn;
 	private Button searchAllBtn;
 	
-	private EntityConfigData entityConfigData;
-	private EntityConfigurator configurator;
-	private EntityCRUDOperationsManager manager;
+	private EntityConfigData<T> entityConfigData;
+	private EntityCRUDOperationsManager<T> manager;
 	private Map<String, Component> componentMap = new HashMap<String, Component>();
-	private BeanItem beanItem;
-	private Pager2<Object, Object> pager;
-	private PageChangeHandler<Object, Object> pageChangeHanlder;
+	private BeanItem<T> beanItem;
+	private Pager2<T, T> pager;
+	private PageChangeHandler<T, T> pageChangeHanlder;
 	private Grid resultsGrid;
 	private GeneratedPropertyContainer gridContainer;
 	
@@ -96,6 +94,12 @@ public class SearcherResultWindow2<T> extends Window implements CloseListener, C
 	public SearcherResultWindow2(Class<T> entityClazz) {
 		this.entityClazz = entityClazz;
 		labelsFmt = FMWEntityUtils.createEntityLabelsMessageFormat();
+		try {
+			initContent();
+			this.addCloseListener(this);
+		} catch (FMWException ex) {
+			MessageDialog.showExceptions(ex);
+		}
 	}
 	
 	public void setSelectionChangeListener(SearchSelectionChangeListener<T> selectionChangeListener) {
@@ -108,24 +112,10 @@ public class SearcherResultWindow2<T> extends Window implements CloseListener, C
 		this.conditions = conditions;
 	}
 	
-	@Override
-	public void attach() {
-		super.attach();
-		if(!attached){
-			try {
-				initContent();
-				this.addCloseListener(this);
-			} catch (FMWException ex) {
-				MessageDialog.showExceptions(ex);
-			}
-			attached = !attached;
-		}
-	}
-	
+	@SuppressWarnings("unchecked")
 	public void initContent() throws FMWException{
-		configurator = EntityConfigurationManager.getInstance().getConfigurator(entityClazz);
-		entityConfigData = configurator.configure();
-		manager = EntityCRUDOperationsManager.getInstance(entityClazz);
+		entityConfigData = (EntityConfigData<T>)EntityConfigurationManager.getInstance().getConfigurator(entityClazz).configure();
+		manager = (EntityCRUDOperationsManager<T>)EntityCRUDOperationsManager.getInstance(entityClazz);
 		selectionEventFunction = SearcherResultWindow2.class.getSimpleName()+"_fn"+Math.abs(hashCode());
 		
 		setCaption(VWebUtils.getCommonString(VWebCommonConstants.SEARCH_WIN_CAPTION));
@@ -156,24 +146,25 @@ public class SearcherResultWindow2<T> extends Window implements CloseListener, C
 			widthPercent = 0;
 		}
 		
-		pager = new Pager2<Object, Object>(PagerMode.PAGE);
+		pager = new Pager2<T, T>(PagerMode.PAGE);
 		searchBtn = new Button(VWebUtils.getCommonString(VWebCommonConstants.MASTER_CRUD_MSG_SEARCHCAPTION));
 		searchAllBtn = new Button(VWebUtils.getCommonString(VWebCommonConstants.MASTER_CRUD_MSG_SEARCHALLCAPTION));
 		cleanBtn = new Button(VWebUtils.getCommonString(VWebCommonConstants.MASTER_CRUD_MSG_CLEANCAPTION));
 		gridContainer = new GeneratedPropertyContainer(new BeanItemContainer<Object>((Class<? super Object>) entityConfigData.getEntityClass()));
+		gridContainer.addGeneratedProperty("actions", new GridUtils.ActionLinkValueGenerator(entityConfigData.getPkFieldName(), null, this, selectionEventFunction, new ActionLinkInfo("select","Seleccionar")));
+		
 		resultsGrid = new Grid(VWebUtils.getCommonString(VWebCommonConstants.SEARCH_WIN_TABLE_CAPTION), new GeneratedPropertyContainer(gridContainer));
 		resultsGrid.setSelectionMode(SelectionMode.NONE);
 		resultsGrid.removeAllColumns();
+		
 		resultsGrid.addColumn("actions")
 		.setHeaderCaption("Seleccionar")
 		.setRenderer(new HtmlRenderer());
 		
-		gridContainer.addGeneratedProperty("actions", new GridUtils.ActionLinkValueGenerator(entityConfigData.getPkFieldName(), null, this, selectionEventFunction, new ActionLinkInfo("select","Seleccionar")));
-		
 		Collection<String> descriptionFields = entityConfigData.getSearchDescriptionFields().isEmpty() ? entityConfigData.getFieldsData().keySet() : entityConfigData.getSearchDescriptionFields();
 		GenericStringPropertyGenerator genericPropertyGenerator = new GenericStringPropertyGenerator();
 		for(String fieldName : descriptionFields){
-			if(fieldName.equals(entityConfigData.getPkFieldName())) continue;
+			//if(fieldName.equals(entityConfigData.getPkFieldName())) continue;
 			FieldConfigData fieldCfg = entityConfigData.getFieldData(fieldName);
 			Renderer<?> renderer = GridUtils.obtainRendererForType(fieldCfg.getFieldType());
 			Column column = resultsGrid.addColumn(fieldName);
@@ -202,20 +193,18 @@ public class SearcherResultWindow2<T> extends Window implements CloseListener, C
 		form.setResetButton(cleanBtn);
 		
 		setContent(form);
-		//handleClean();
+		cleanBtn.click();
 	}
 	
 	private void bindComponentsToModel() throws FMWException{
 		Object bean = null;
 		try{
 			bean = entityConfigData.getEntityClass().getConstructor().newInstance();
-			beanItem = new BeanItem(bean, componentMap.keySet());
+			beanItem = new BeanItem<T>((T)bean, componentMap.keySet());
 			for(String fieldName :componentMap.keySet()){
 				Component comp = componentMap.get(fieldName);
 				if(comp instanceof Field)
-					((Field)comp).setPropertyDataSource(beanItem.getItemProperty(fieldName));
-				else if(comp instanceof SearcherField)
-					((SearcherField)comp).setPropertyDataSource(beanItem.getItemProperty(fieldName));
+					((Field<?>)comp).setPropertyDataSource(beanItem.getItemProperty(fieldName));
 			}
 		}catch(InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException ex){
 			throw new FMWException(ex);
@@ -226,8 +215,9 @@ public class SearcherResultWindow2<T> extends Window implements CloseListener, C
 		searchBtn.addClickListener(this);
 		searchAllBtn.addClickListener(this);
 		cleanBtn.addClickListener(this);
-		pageChangeHanlder = new PageChangeHandler<Object, Object>() {
-			public ListPage<Object> loadPage(PageChangeEvent<Object> event) throws FMWUncheckedException {
+		pageChangeHanlder = new PageChangeHandler<T, T>() {
+			public ListPage<T> loadPage(PageChangeEvent<T> event) throws FMWUncheckedException {
+				if(event.getFilterDTO() == null) return new ListPage<T>();
 				try {
 					return manager.searchForFmwComponent(event.getFilterDTO(), event.getInitialRow(), event.getRowsByPage() * event.getPagesPerGroup(), conditions);
 				} catch (Exception e) {
@@ -264,7 +254,7 @@ public class SearcherResultWindow2<T> extends Window implements CloseListener, C
 	private void handleSearch(Button button) throws Exception{
 		if(button == searchAllBtn)
 			handleClean();
-		pager.setFilterDto(BeanUtils.cloneBean(beanItem.getBean()));
+		pager.setFilterDto((T)BeanUtils.cloneBean(beanItem.getBean()));
 	}
 
 	private void handleClean() throws Exception{

@@ -17,7 +17,7 @@ import java.util.Map;
 
 public class EntityConfigurationManager {
 	private	static EntityConfigurationManager instance;
-	private Map<String, EntityConfigurator> configuratorsContext = new HashMap<String, EntityConfigurator>();
+	private Map<String, EntityConfigurator<?>> configuratorsContext = new HashMap<String, EntityConfigurator<?>>();
 	
 	private EntityConfigurationManager(){}
 	
@@ -30,12 +30,12 @@ public class EntityConfigurationManager {
 		return instance;
 	}
 	
-	public void setConfiguratorsContext(Map<String, EntityConfigurator> configuratorsContext){
+	public void setConfiguratorsContext(Map<String, EntityConfigurator<?>> configuratorsContext){
 		this.configuratorsContext = configuratorsContext;
 	}
 	
-	public EntityConfigurator getConfigurator(String entityClass){
-		Class clazz;
+	public EntityConfigurator<?> getConfigurator(String entityClass){
+		Class<?> clazz;
 		try {
 			clazz = Class.forName(entityClass);
 		} catch (ClassNotFoundException e) {
@@ -45,8 +45,9 @@ public class EntityConfigurationManager {
 		return getConfigurator(clazz);
 	}
 	
-	public EntityConfigurator getConfigurator(Class entityClass){
-		EntityConfigurator resp = configuratorsContext.get(entityClass.getName());
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public EntityConfigurator<?> getConfigurator(Class<?> entityClass){
+		EntityConfigurator<?> resp = configuratorsContext.get(entityClass.getName());
 		if(resp == null){
 			synchronized (EntityConfigurationManager.class) {
 				resp = new DefaultEntityConfigurator(entityClass);

@@ -9,14 +9,13 @@ import java.util.Map;
 import co.com.binariasystems.fmw.dto.Listable;
 import co.com.binariasystems.fmw.entity.Auditable;
 import co.com.binariasystems.fmw.entity.validator.EntityValidator;
-import co.com.binariasystems.fmw.exception.FMWException;
 
 /**
  * @author Alexander Castro O.
  */
 
-public class EntityConfigData implements Serializable {
-	private Class<?> entityClass;
+public class EntityConfigData<T> implements Serializable {
+	private Class<T> entityClass;
 	private Class<? extends EntityValidator> validationClass;
 	private String table;
 	private Map<String, FieldConfigData> fieldsData = new HashMap<String, FieldConfigData>();
@@ -29,11 +28,11 @@ public class EntityConfigData implements Serializable {
 	private boolean deleteEnabled;
 	private PKGenerationStrategy pkGenerationStrategy;
 
-	public Class<?> getEntityClass() {
+	public Class<T> getEntityClass() {
 		return entityClass;
 	}
 
-	public void setEntityClass(Class<?> entityClass) {
+	public void setEntityClass(Class<T> entityClass) {
 		this.entityClass = entityClass;
 	}
 
@@ -142,11 +141,11 @@ public class EntityConfigData implements Serializable {
 
 
 
-	public static class AuditableEntityConfigData extends EntityConfigData {
-		private FieldConfigData creationUserFieldCfg;
-		private FieldConfigData modificationUserFieldCfg;
-		private FieldConfigData creationDateFieldCfg;
-		private FieldConfigData modificationDateFieldCfg;
+	public static class AuditableEntityConfigData<T> extends EntityConfigData<T> {
+		private AuditFieldConfigData creationUserFieldCfg;
+		private AuditFieldConfigData modificationUserFieldCfg;
+		private AuditFieldConfigData creationDateFieldCfg;
+		private AuditFieldConfigData modificationDateFieldCfg;
 
 		public static boolean isAuditField(String fieldName,
 				Auditable auditableInfo) {
@@ -167,37 +166,37 @@ public class EntityConfigData implements Serializable {
 			return false;
 		}
 
-		public FieldConfigData getCreationUserFieldCfg() {
+		public AuditFieldConfigData getCreationUserFieldCfg() {
 			return creationUserFieldCfg;
 		}
 
-		public void setCreationUserFieldCfg(FieldConfigData creationUserFieldCfg) {
+		public void setCreationUserFieldCfg(AuditFieldConfigData creationUserFieldCfg) {
 			this.creationUserFieldCfg = creationUserFieldCfg;
 		}
 
-		public FieldConfigData getModificationUserFieldCfg() {
+		public AuditFieldConfigData getModificationUserFieldCfg() {
 			return modificationUserFieldCfg;
 		}
 
 		public void setModificationUserFieldCfg(
-				FieldConfigData modificationUserFieldCfg) {
+				AuditFieldConfigData modificationUserFieldCfg) {
 			this.modificationUserFieldCfg = modificationUserFieldCfg;
 		}
 
-		public FieldConfigData getCreationDateFieldCfg() {
+		public AuditFieldConfigData getCreationDateFieldCfg() {
 			return creationDateFieldCfg;
 		}
 
-		public void setCreationDateFieldCfg(FieldConfigData creationDateFieldCfg) {
+		public void setCreationDateFieldCfg(AuditFieldConfigData creationDateFieldCfg) {
 			this.creationDateFieldCfg = creationDateFieldCfg;
 		}
 
-		public FieldConfigData getModificationDateFieldCfg() {
+		public AuditFieldConfigData getModificationDateFieldCfg() {
 			return modificationDateFieldCfg;
 		}
 
 		public void setModificationDateFieldCfg(
-				FieldConfigData modificationDateFieldCfg) {
+				AuditFieldConfigData modificationDateFieldCfg) {
 			this.modificationDateFieldCfg = modificationDateFieldCfg;
 		}
 

@@ -9,6 +9,10 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
+import co.com.binariasystems.fmw.constants.FMWConstants;
+import co.com.binariasystems.fmw.vweb.constants.VWebCommonConstants;
+import co.com.binariasystems.fmw.vweb.util.VWebUtils;
+
 import com.vaadin.data.Validator;
 import com.vaadin.data.Validator.InvalidValueException;
 import com.vaadin.event.ShortcutAction.KeyCode;
@@ -37,10 +41,6 @@ import com.vaadin.ui.Slider;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.Upload;
 import com.vaadin.ui.VerticalLayout;
-
-import co.com.binariasystems.fmw.constants.FMWConstants;
-import co.com.binariasystems.fmw.vweb.constants.VWebCommonConstants;
-import co.com.binariasystems.fmw.vweb.util.VWebUtils;
 
 /*
  * Clase que representa un formulario para capturar/mostrar informacion
@@ -356,8 +356,8 @@ public class UIForm extends HorizontalLayout{
 					
 					for(int i = targetIdx + 1; i < childComponents.size() && go; i++){
 						Component comp = childComponents.get(i);
-						if(comp instanceof Button && ((Button)comp).getData() != null && ((Button)comp).getData().equals(SearcherField.ACTIONBUTTON_DATA_PREFIX))
-							continue;//No hacer nada cuando se llega a un boton de buscador
+//						if(comp instanceof Button && ((Button)comp).getData() != null && ((Button)comp).getData().equals(SearcherField.ACTIONBUTTON_DATA_PREFIX))
+//							continue;//No hacer nada cuando se llega a un boton de buscador
 //						if(comp instanceof TextField && ((TextField)comp).getData() instanceof SearchTextField)
 //							((SearchTextField)((TextField)comp).getData()).handleEnterPress((TextField)comp);//Lanzar evento en los Buscadores
 						if(comp instanceof Focusable && ((Focusable)comp).isEnabled() && !((Focusable)comp).isReadOnly() ){
@@ -383,8 +383,8 @@ public class UIForm extends HorizontalLayout{
 					
 					for(int i= targetIdx - 1; i >= 0 && go; i--){
 						Component comp = childComponents.get(i);
-						if(comp instanceof Button && ((Button)comp).getData() != null && ((Button)comp).getData().equals(SearcherField.ACTIONBUTTON_DATA_PREFIX))
-							continue;//No hacer nada cuando se llega a un boton de buscador
+//						if(comp instanceof Button && ((Button)comp).getData() != null && ((Button)comp).getData().equals(SearcherField.ACTIONBUTTON_DATA_PREFIX))
+//							continue;//No hacer nada cuando se llega a un boton de buscador
 //						if(comp instanceof TextField && ((TextField)comp).getData() instanceof SearchTextField)
 //							((SearchTextField)((TextField)comp).getData()).handleEnterPress((TextField)comp);//Lanzar evento en los Buscadores
 						if(comp instanceof Focusable && ((Focusable)comp).isEnabled() && !((Focusable)comp).isReadOnly() ){
@@ -400,9 +400,9 @@ public class UIForm extends HorizontalLayout{
 		mainPanel.addAction(new ShortcutListener("EnterPress@"+mainPanel.hashCode(), KeyCode.ENTER, null) {
 			@Override
 			public void handleAction(Object sender, Object target) {
-				if(target instanceof TextField && ((TextField)target).getData() instanceof SearcherField)
-					((SearcherField)((TextField)target).getData()).handleEnterPress((TextField)target);//Lanzar evento en los Buscadores
-				else if(target == lastComponent && lastComponent.isEnabled() && !lastComponent.isReadOnly() && submitButton != null &&
+//				if(target instanceof TextField && ((TextField)target).getData() instanceof SearcherField)
+//					((SearcherField)((TextField)target).getData()).handleEnterPress((TextField)target);//Lanzar evento en los Buscadores
+				if(target == lastComponent && lastComponent.isEnabled() && !lastComponent.isReadOnly() && submitButton != null &&
 						(target instanceof TextField || target instanceof PasswordField || target instanceof DateField))
 					submitButton.click();
 				
@@ -413,8 +413,8 @@ public class UIForm extends HorizontalLayout{
 					
 					for(int i = targetIdx + 1; i < childComponents.size() && go; i++){
 						Component comp = childComponents.get(i);
-						if(comp instanceof Button && SearcherField.ACTIONBUTTON_DATA_PREFIX.equals(((Button)comp).getData()))
-							continue;//No hacer nada cuando se llega a un boton de buscador
+//						if(comp instanceof Button && SearcherField.ACTIONBUTTON_DATA_PREFIX.equals(((Button)comp).getData()))
+//							continue;//No hacer nada cuando se llega a un boton de buscador
 						if(comp instanceof Focusable && ((Focusable)comp).isEnabled() && !((Focusable)comp).isReadOnly() ){
 							((Focusable)comp).focus();
 							go = !go;

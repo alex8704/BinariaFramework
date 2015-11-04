@@ -253,7 +253,7 @@ public class CriteriaUtils {
 		else if(criteria instanceof SingleValueOnSetCriteria)
 			return buildSingleValueSQLCondition((SingleValueOnSetCriteria)criteria, columnName);
 		else if(criteria instanceof ValueRangeCriteria)
-			return buildSingleValueSQLCondition((ValueRangeCriteria)criteria, columnName);
+			return buildSingleValueSQLCondition((ValueRangeCriteria<?>)criteria, columnName);
 		else
 			throw new FMWUncheckedException("Cannot invoke "+CriteriaUtils.class.getSimpleName()+".buildSingleValueSQLCondition for "+MultipleGroupedCriteria.class.getName()+" type");
 	}
@@ -287,7 +287,7 @@ public class CriteriaUtils {
 		return resp.toString();
 	}
 	
-	public static String buildSingleValueSQLCondition(ValueRangeCriteria criteria, String columnName){
+	public static String buildSingleValueSQLCondition(ValueRangeCriteria<?> criteria, String columnName){
 		StringBuilder resp = new StringBuilder();
 		
 		resp.append(columnName).append(FMWConstants.WHITE_SPACE).append(getCriteriaOperator(criteria))

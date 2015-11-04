@@ -10,7 +10,7 @@ import co.com.binariasystems.fmw.util.db.DBUtil;
 import co.com.binariasystems.fmw.util.db.DBUtil.DBMS;
 import co.com.binariasystems.fmw.util.pagination.ListPage;
 
-public class EntityCRUDDAOImpl extends FMWAbstractDAO implements EntityCRUDDAO {
+public class EntityCRUDDAOImpl<T> extends FMWAbstractDAO implements EntityCRUDDAO<T> {
 
 
 	public void save(String sqlStatement, MapSqlParameterSource paramSource) throws Exception {
@@ -22,10 +22,10 @@ public class EntityCRUDDAOImpl extends FMWAbstractDAO implements EntityCRUDDAO {
 		getNamedParameterJdbcTemplate().update(sqlStatement, paramSource);
 	}
 
-	public ListPage<Object> search(String sqlStatement, MapSqlParameterSource paramSource, int offset, int rowsByPage, RowMapper<Object> rowMapper) throws Exception {
-		ListPage<Object> resp = new ListPage<Object>();
+	public ListPage<T> search(String sqlStatement, MapSqlParameterSource paramSource, int offset, int rowsByPage, RowMapper<T> rowMapper) throws Exception {
+		ListPage<T> resp = new ListPage<T>();
 		int count = getNamedParameterJdbcTemplate().queryForObject(toCurrentDBMSCountQuery(sqlStatement, offset, rowsByPage), paramSource, Integer.class);
-		List<Object> data = null;
+		List<T> data = null;
 		if(count > 0)
 			data = getNamedParameterJdbcTemplate().query(toCurrentDBMSPaginatedQuery(sqlStatement, (offset < 0 ? count -1 : offset), rowsByPage), paramSource, rowMapper);
 		
@@ -60,12 +60,11 @@ public class EntityCRUDDAOImpl extends FMWAbstractDAO implements EntityCRUDDAO {
 		StringBuilder respBuilder = new StringBuilder();
 		int fromIdx = queryStatemet.indexOf(" from ");
 		respBuilder.append("select count(*)").append(queryStatemet.substring(fromIdx, queryStatemet.indexOf(" order by ")));
-		//respBuilder.append("select count(*) from (").append(queryStatemet).append(")");
 		return respBuilder.toString();
 	}
 
-	public List<Object> searchWithoutPaging(String sqlStatement, MapSqlParameterSource paramSource, RowMapper<Object> rowMapper) {
-		List<Object> data = getNamedParameterJdbcTemplate().query(sqlStatement, paramSource, rowMapper);
+	public List<T> searchWithoutPaging(String sqlStatement, MapSqlParameterSource paramSource, RowMapper<T> rowMapper) {
+		List<T> data = getNamedParameterJdbcTemplate().query(sqlStatement, paramSource, rowMapper);
 		return data;
 	}
 

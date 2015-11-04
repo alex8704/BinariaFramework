@@ -8,10 +8,12 @@ import co.com.binariasystems.fmw.util.pagination.ListPage;
 import co.com.binariasystems.fmw.vweb.constants.VWebCommonConstants;
 import co.com.binariasystems.fmw.vweb.uicomponet.LinkLabel.ClickHandler;
 import co.com.binariasystems.fmw.vweb.uicomponet.LinkLabel.LinkClickEvent;
+import co.com.binariasystems.fmw.vweb.uicomponet.Pager.PagerMode;
 import co.com.binariasystems.fmw.vweb.uicomponet.pager.PageChangeEvent;
 import co.com.binariasystems.fmw.vweb.uicomponet.pager.PageChangeHandler;
 import co.com.binariasystems.fmw.vweb.util.VWebUtils;
 
+import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.util.ObjectProperty;
 import com.vaadin.data.validator.IntegerRangeValidator;
@@ -65,8 +67,8 @@ public class Pager2<FILTER_TYPE, RESULT_TYPE> extends HorizontalLayout implement
 	}
 	
 	public Pager2(PagerMode pMode, int rowsByPage){
-		rowsByPageProperty.setValue(rowsByPage);
-		this.pagerMode = (pagerMode != null) ? pagerMode : PagerMode.PAGE;
+		this.pagerMode = (pMode != null) ? pMode : PagerMode.PAGE;
+		rowsByPageProperty.setValue(pagerMode.equals(PagerMode.ITEM) ? 1 : ROWS_BY_PAGE_ITEMS[0]);
 	}
 	
 	
@@ -101,7 +103,7 @@ public class Pager2<FILTER_TYPE, RESULT_TYPE> extends HorizontalLayout implement
 		
 		foundItemsLbl.setWidth(100, Unit.PERCENTAGE);
 		rowsByPageConfCmb.setWidth(55, Unit.PIXELS);
-		rowsByPageConfCmb.addItems(Arrays.asList(ROWS_BY_PAGE_ITEMS));
+		rowsByPageConfCmb.addItems(pagerMode.equals(PagerMode.ITEM) ? Arrays.asList(1) : Arrays.asList(ROWS_BY_PAGE_ITEMS));
 		rowsByPageConfCmb.setNullSelectionAllowed(false);
 		rowsByPageConfCmb.setPropertyDataSource(rowsByPageProperty);
 		currentPageTxt.setWidth(50, Unit.PIXELS);
@@ -155,6 +157,9 @@ public class Pager2<FILTER_TYPE, RESULT_TYPE> extends HorizontalLayout implement
 		currentPagePanel.setComponentAlignment(nextPLink, Alignment.MIDDLE_LEFT);
 		currentPagePanel.setComponentAlignment(lastPLink, Alignment.MIDDLE_LEFT);
 		
+		rowsByPageConfLbl.setVisible(pagerMode == PagerMode.PAGE);
+		rowsByPageConfCmb.setVisible(pagerMode == PagerMode.PAGE);
+		
 		currentPageTxt.setImmediate(true);
 		rowsByPageConfCmb.setImmediate(true);
 		
@@ -164,6 +169,7 @@ public class Pager2<FILTER_TYPE, RESULT_TYPE> extends HorizontalLayout implement
 	}
 	
 	private void bindEvents(){
+		
 		currentPageProperty.addValueChangeListener(this);
 		pageCountProperty.addValueChangeListener(this);
 		rowsByPageProperty.addValueChangeListener(this);

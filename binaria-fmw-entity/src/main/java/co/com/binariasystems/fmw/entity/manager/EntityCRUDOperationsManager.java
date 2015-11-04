@@ -52,27 +52,26 @@ import co.com.binariasystems.fmw.util.pagination.ListPage;
  * manejado por Spring.
  */
 
-@SuppressWarnings("rawtypes")
-public class EntityCRUDOperationsManager {
+public class EntityCRUDOperationsManager<T> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(EntityCRUDOperationsManager.class);
-	private static Map<Class<?>, EntityCRUDOperationsManager> entityCRUDMgrContext = new HashMap<Class<?>, EntityCRUDOperationsManager>();
+	private static Map<Class<?>, EntityCRUDOperationsManager<?>> entityCRUDMgrContext = new HashMap<Class<?>, EntityCRUDOperationsManager<?>>();
 	private static final String SQL_XML_FILE = "entitycruddao.xml";
 	private static final PropertiesManager mm = PropertiesManager.forPath(EntityCRUDDAO.class.getPackage().getName() + "." + SQL_XML_FILE, EntityCRUDDAO.class);
 
 	private EntityCRUDOperationsManager() {
 	}
 
-	private EntityValidator entityValidator;
-	private EntityConfigData entityConfigData;
-	private EntityConfigurator configurator;
-	private EntityCRUDDAO dao;
+	private EntityValidator<T> entityValidator;
+	private EntityConfigData<T> entityConfigData;
+	//private EntityConfigurator configurator;
+	private EntityCRUDDAO<T> dao;
 
 	public static enum CRUDOperation {
 		INSERT, UPDATE, DELETE
 	}
 
-	public static EntityCRUDOperationsManager getInstance(Class<?> entityClazz) {
-		EntityCRUDOperationsManager resp = entityCRUDMgrContext.get(entityClazz);
+	public static EntityCRUDOperationsManager<?> getInstance(Class<?> entityClazz) {
+		EntityCRUDOperationsManager<?> resp = entityCRUDMgrContext.get(entityClazz);
 		if (resp == null) {
 			synchronized (EntityCRUDOperationsManager.class) {
 				try {
@@ -86,10 +85,10 @@ public class EntityCRUDOperationsManager {
 		return resp;
 	}
 
-	private static EntityCRUDOperationsManager createInstance(Class entityClazz) throws Exception {
-		EntityCRUDOperationsManager resp = new EntityCRUDOperationsManager();
-		resp.configurator = EntityConfigurationManager.getInstance().getConfigurator(entityClazz);
-		resp.entityConfigData = resp.configurator.configure();
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private static EntityCRUDOperationsManager<?> createInstance(Class<?> entityClazz) throws Exception {
+		EntityCRUDOperationsManager<?> resp = new EntityCRUDOperationsManager<Object>();
+		resp.entityConfigData = (EntityConfigData) EntityConfigurationManager.getInstance().getConfigurator(entityClazz).configure();
 		resp.dao = IOCHelper.getBean(EntityCRUDDAO.class);
 
 		if (resp.entityConfigData.getValidationClass() != null) {
@@ -99,7 +98,7 @@ public class EntityCRUDOperationsManager {
 		return resp;
 	}
 
-	public Object save(Object entityBean) throws Exception {
+	public Object save(T entityBean) throws Exception {
 		applyValidations(entityBean, CRUDOperation.INSERT);
 		StringBuilder sqlBuilder = new StringBuilder();
 		StringBuilder colNamesBuilder = new StringBuilder();
@@ -111,33 +110,33 @@ public class EntityCRUDOperationsManager {
 		for (String fieldName : entityConfigData.getFieldsData().keySet()) {
 			FieldConfigData fieldCfg = entityConfigData.getFieldsData().get(fieldName);
 
-			if (fieldName.equals(entityConfigData.getPkFieldName()) && configurator.getPKGenerationStrategy() == PKGenerationStrategy.IDENTITY)
+			if (fieldName.equals(entityConfigData.getPkFieldName()) && entityConfigData.getPkGenerationStrategy() == PKGenerationStrategy.IDENTITY)
 				continue;
 
 			if (fieldName.equals(entityConfigData.getPkFieldName())) {
 
 				colNamesBuilder.append(first ? "" : ", ").append(fieldCfg.getColumnName());
-				if (configurator.getPKGenerationStrategy() == PKGenerationStrategy.SEQUENCE) {
+				if (entityConfigData.getPkGenerationStrategy() == PKGenerationStrategy.SEQUENCE) {
 					String seqTemplate = mm.getString(DBUtil.getCurrentDBMS().name().toLowerCase() + ".sequence.next.sentence.template");
 					String seqName = "seq_" + entityConfigData.getTable();
 					namedParamsBuilder.append(first ? "" : ", ").append("(").append(MessageFormat.format(seqTemplate, seqName)).append(")");
 				}
-				if (configurator.getPKGenerationStrategy() == PKGenerationStrategy.MAX_QUERY) {
+				if (entityConfigData.getPkGenerationStrategy() == PKGenerationStrategy.MAX_QUERY) {
 					String maxQueryTemplate = mm.getString("entitycrud.max_query");
 					namedParamsBuilder.append(first ? "" : ", ").append("(").append(MessageFormat.format(maxQueryTemplate, fieldCfg.getColumnName(), entityConfigData.getTable())).append(")");
 				}
 				first = false;
 			} else {
-				if (fieldCfg instanceof RelationFieldConfigData && !TypeHelper.isBasicType(fieldCfg.getFieldType())) {
-					EntityConfigurator mtd_configurator = EntityConfigurationManager.getInstance().getConfigurator(((RelationFieldConfigData) fieldCfg).getRelationEntityClass());
-					EntityConfigData mtd_cfgData = mtd_configurator.configure();
+				if (fieldCfg instanceof RelationFieldConfigData && FMWEntityUtils.isEntityClass(fieldCfg.getFieldType())) {
+					EntityConfigurator<?> mtd_configurator = EntityConfigurationManager.getInstance().getConfigurator(((RelationFieldConfigData) fieldCfg).getRelationEntityClass());
+					EntityConfigData<?> mtd_cfgData = mtd_configurator.configure();
 					propertyName = fieldCfg.getFieldName() + "." + mtd_cfgData.getPkFieldName();
 				}
 
 				Object fieldValue = PropertyUtils.getNestedProperty(entityBean, fieldName);
 
 				if(fieldCfg.isEnumType() && fieldValue != null)
-					fieldValue = configurator.getEnumKeyProperty().equals(EnumKeyProperty.ORDINAL) ? ((Enum)fieldValue).ordinal() : ((Enum)fieldValue).name();
+					fieldValue = entityConfigData.getEnumKeyProperty().equals(EnumKeyProperty.ORDINAL) ? ((Enum<?>)fieldValue).ordinal() : ((Enum<?>)fieldValue).name();
 				else if (fieldCfg instanceof RelationFieldConfigData && !TypeHelper.isBasicType(fieldCfg.getFieldType()) && fieldValue != null) {
 					fieldValue = PropertyUtils.getNestedProperty(entityBean, propertyName);
 				}else if(Listable.class.isAssignableFrom(fieldCfg.getFieldType()) && fieldValue != null)
@@ -156,11 +155,11 @@ public class EntityCRUDOperationsManager {
 		if(FMWEntityUtils.showOpeationsSql())
 			LOGGER.info("INSERT_SQL: {" + sqlBuilder.toString() + "}");
 		dao.save(sqlBuilder.toString(), paramSource);
-		ListPage<Object> postSearch = search(entityBean, -1, 1, null);
+		ListPage<T> postSearch = search(entityBean, -1, 1, null);
 		return postSearch.getRowCount() > 0 ? postSearch.getData().get(postSearch.getData().size() - 1) : entityBean;
 	}
 
-	public void edit(Object entityBean) throws Exception {
+	public void edit(T entityBean) throws Exception {
 		applyValidations(entityBean, CRUDOperation.UPDATE);
 		StringBuilder sqlBuilder = new StringBuilder();
 		MapSqlParameterSource paramSource = new MapSqlParameterSource();
@@ -178,15 +177,15 @@ public class EntityCRUDOperationsManager {
 			sqlBuilder.append(first ? "" : ", ").append(fieldCfg.getColumnName()).append(" = :").append(fieldCfg.getFieldName());
 
 			if (fieldCfg instanceof RelationFieldConfigData && !TypeHelper.isBasicType(fieldCfg.getFieldType())) {
-				EntityConfigurator mtd_configurator = EntityConfigurationManager.getInstance().getConfigurator(((RelationFieldConfigData) fieldCfg).getRelationEntityClass());
-				EntityConfigData mtd_cfgData = mtd_configurator.configure();
+				EntityConfigurator<?> mtd_configurator = EntityConfigurationManager.getInstance().getConfigurator(((RelationFieldConfigData) fieldCfg).getRelationEntityClass());
+				EntityConfigData<?> mtd_cfgData = mtd_configurator.configure();
 				propertyName = fieldCfg.getFieldName() + "." + mtd_cfgData.getPkFieldName();
 			}
 
 			Object fieldValue = PropertyUtils.getNestedProperty(entityBean, fieldName);
 			
 			if(fieldCfg.isEnumType() && fieldValue != null)
-				fieldValue = configurator.getEnumKeyProperty().equals(EnumKeyProperty.ORDINAL) ? ((Enum)fieldValue).ordinal() : ((Enum)fieldValue).name();
+				fieldValue = entityConfigData.getEnumKeyProperty().equals(EnumKeyProperty.ORDINAL) ? ((Enum<?>)fieldValue).ordinal() : ((Enum<?>)fieldValue).name();
 			else if (fieldCfg instanceof RelationFieldConfigData && !TypeHelper.isBasicType(fieldCfg.getFieldType()) && fieldValue != null) {
 				fieldValue = PropertyUtils.getNestedProperty(entityBean, propertyName);
 			}else if(Listable.class.isAssignableFrom(fieldCfg.getFieldType()) && fieldValue != null)
@@ -203,10 +202,10 @@ public class EntityCRUDOperationsManager {
 		dao.edit(sqlBuilder.toString(), paramSource);
 	}
 
-	private List<String> getColumnsForSQLSearchStatementFromEntity(Class entityClazz, String prefix, boolean includeRelations, String aliasPrefix) throws FMWException {
+	private List<String> getColumnsForSQLSearchStatementFromEntity(Class<?> entityClazz, String prefix, boolean includeRelations, String aliasPrefix) throws FMWException {
 		List<String> resp = new LinkedList<String>();
-		EntityConfigurator mtd_configurator = EntityConfigurationManager.getInstance().getConfigurator(entityClazz);
-		EntityConfigData mtd_cfgData = mtd_configurator.configure();
+		EntityConfigurator<?> mtd_configurator = EntityConfigurationManager.getInstance().getConfigurator(entityClazz);
+		EntityConfigData<?> mtd_cfgData = mtd_configurator.configure();
 
 		for (String fieldName : mtd_cfgData.getFieldsData().keySet()) {
 			FieldConfigData fieldCfg = mtd_cfgData.getFieldsData().get(fieldName);
@@ -225,7 +224,7 @@ public class EntityCRUDOperationsManager {
 		return resp;
 	}
 
-	public ListPage<Object> search(Object entityBean, int offset, int rowsByPage, Criteria conditions) throws Exception {
+	public ListPage<T> search(T entityBean, int offset, int rowsByPage, Criteria conditions) throws Exception {
 		StringBuilder sqlBuilder = new StringBuilder();
 		StringBuilder whereBuilder = new StringBuilder();
 		MapSqlParameterSource paramSource = new MapSqlParameterSource();
@@ -243,8 +242,8 @@ public class EntityCRUDOperationsManager {
 		for (String fieldName : entityConfigData.getFieldsData().keySet()) {
 			FieldConfigData fieldCfg = entityConfigData.getFieldsData().get(fieldName);
 			if (fieldCfg instanceof RelationFieldConfigData && !TypeHelper.isBasicType(fieldCfg.getFieldType())) {
-				EntityConfigurator mtd_configurator = EntityConfigurationManager.getInstance().getConfigurator(((RelationFieldConfigData) fieldCfg).getRelationEntityClass());
-				EntityConfigData mtd_cfgData = mtd_configurator.configure();
+				EntityConfigurator<?> mtd_configurator = EntityConfigurationManager.getInstance().getConfigurator(((RelationFieldConfigData) fieldCfg).getRelationEntityClass());
+				EntityConfigData<?> mtd_cfgData = mtd_configurator.configure();
 				sqlBuilder.append(" left join ").append(mtd_cfgData.getTable()).append(" ").append(((RelationFieldConfigData) fieldCfg).getQueryAlias());
 				sqlBuilder.append(" on(").append(FMWEntityConstants.ENTITY_DYNASQL_MAIN_ALIAS).append(".").append(fieldCfg.getColumnName()).append(" = ");
 				sqlBuilder.append(((RelationFieldConfigData) fieldCfg).getQueryAlias()).append(".").append(mtd_cfgData.getFieldsData().get(mtd_cfgData.getPkFieldName()).getColumnName()).append(")");
@@ -263,8 +262,8 @@ public class EntityCRUDOperationsManager {
 				continue;
 
 			if (fieldCfg instanceof RelationFieldConfigData && !TypeHelper.isBasicType(fieldCfg.getFieldType())) {
-				EntityConfigurator mtd_configurator = EntityConfigurationManager.getInstance().getConfigurator(((RelationFieldConfigData) fieldCfg).getRelationEntityClass());
-				EntityConfigData mtd_cfgData = mtd_configurator.configure();
+				EntityConfigurator<?> mtd_configurator = EntityConfigurationManager.getInstance().getConfigurator(((RelationFieldConfigData) fieldCfg).getRelationEntityClass());
+				EntityConfigData<?> mtd_cfgData = mtd_configurator.configure();
 				propertyName = fieldCfg.getFieldName() + "." + mtd_cfgData.getPkFieldName();
 			}
 
@@ -278,7 +277,7 @@ public class EntityCRUDOperationsManager {
 			}
 
 			if(fieldCfg.isEnumType() && fieldValue != null)
-				fieldValue = configurator.getEnumKeyProperty().equals(EnumKeyProperty.ORDINAL) ? ((Enum)fieldValue).ordinal() : ((Enum)fieldValue).name();
+				fieldValue = entityConfigData.getEnumKeyProperty().equals(EnumKeyProperty.ORDINAL) ? ((Enum<?>)fieldValue).ordinal() : ((Enum<?>)fieldValue).name();
 			else if (fieldCfg instanceof RelationFieldConfigData && !TypeHelper.isBasicType(fieldCfg.getFieldType()) && fieldValue != null) {
 				fieldValue = PropertyUtils.getNestedProperty(entityBean, propertyName);
 			}else if(Listable.class.isAssignableFrom(fieldCfg.getFieldType()) && fieldValue != null)
@@ -313,10 +312,10 @@ public class EntityCRUDOperationsManager {
 		
 		if(FMWEntityUtils.showOpeationsSql())
 			LOGGER.info("SEARCH_SQL: {" + sqlBuilder.toString() + "}");
-		return dao.search(sqlBuilder.toString(), paramSource, offset, rowsByPage, new EntityRowMapper(entityConfigData, configurator));
+		return dao.search(sqlBuilder.toString(), paramSource, offset, rowsByPage, new EntityRowMapper<T>(entityConfigData));
 	}
 
-	public void delete(Object entityBean) throws Exception {
+	public void delete(T entityBean) throws Exception {
 		applyValidations(entityBean, CRUDOperation.DELETE);
 		StringBuilder sqlBuilder = new StringBuilder();
 		MapSqlParameterSource paramSource = new MapSqlParameterSource();
@@ -342,7 +341,7 @@ public class EntityCRUDOperationsManager {
 	 * @return
 	 * @throws Exception
 	 */
-	public ListPage<Object> searchForFmwComponent(Object entityBean, int offset, int rowsByPage, Criteria conditions) throws Exception {
+	public ListPage<T> searchForFmwComponent(T entityBean, int offset, int rowsByPage, Criteria conditions) throws Exception {
 		StringBuilder sqlBuilder = new StringBuilder();
 		StringBuilder whereBuilder = new StringBuilder();
 		MapSqlParameterSource paramSource = new MapSqlParameterSource();
@@ -359,8 +358,8 @@ public class EntityCRUDOperationsManager {
 		for (String fieldName : entityConfigData.getFieldsData().keySet()) {
 			FieldConfigData fieldCfg = entityConfigData.getFieldsData().get(fieldName);
 			if (fieldCfg instanceof RelationFieldConfigData && !TypeHelper.isBasicType(fieldCfg.getFieldType())) {
-				EntityConfigurator mtd_configurator = EntityConfigurationManager.getInstance().getConfigurator(((RelationFieldConfigData) fieldCfg).getRelationEntityClass());
-				EntityConfigData mtd_cfgData = mtd_configurator.configure();
+				EntityConfigurator<?> mtd_configurator = EntityConfigurationManager.getInstance().getConfigurator(((RelationFieldConfigData) fieldCfg).getRelationEntityClass());
+				EntityConfigData<?> mtd_cfgData = mtd_configurator.configure();
 				sqlBuilder.append(" left join ").append(mtd_cfgData.getTable()).append(" ").append(((RelationFieldConfigData) fieldCfg).getQueryAlias());
 				sqlBuilder.append(" on(").append(FMWEntityConstants.ENTITY_DYNASQL_MAIN_ALIAS).append(".").append(fieldCfg.getColumnName()).append(" = ");
 				sqlBuilder.append(((RelationFieldConfigData) fieldCfg).getQueryAlias()).append(".").append(mtd_cfgData.getFieldsData().get(mtd_cfgData.getPkFieldName()).getColumnName()).append(")");
@@ -374,8 +373,8 @@ public class EntityCRUDOperationsManager {
 		for (String fieldName : entityConfigData.getFieldsData().keySet()) {
 			FieldConfigData fieldCfg = entityConfigData.getFieldsData().get(fieldName);
 			if (fieldCfg instanceof RelationFieldConfigData && !TypeHelper.isBasicType(fieldCfg.getFieldType())) {
-				EntityConfigurator mtd_configurator = EntityConfigurationManager.getInstance().getConfigurator(((RelationFieldConfigData) fieldCfg).getRelationEntityClass());
-				EntityConfigData mtd_cfgData = mtd_configurator.configure();
+				EntityConfigurator<?> mtd_configurator = EntityConfigurationManager.getInstance().getConfigurator(((RelationFieldConfigData) fieldCfg).getRelationEntityClass());
+				EntityConfigData<?> mtd_cfgData = mtd_configurator.configure();
 				propertyName = fieldCfg.getFieldName() + "." + mtd_cfgData.getPkFieldName();
 			}
 
@@ -389,7 +388,7 @@ public class EntityCRUDOperationsManager {
 			}
 			
 			if(fieldCfg.isEnumType() && fieldValue != null)
-				fieldValue = configurator.getEnumKeyProperty().equals(EnumKeyProperty.ORDINAL) ? ((Enum)fieldValue).ordinal() : ((Enum)fieldValue).name();
+				fieldValue = entityConfigData.getEnumKeyProperty().equals(EnumKeyProperty.ORDINAL) ? ((Enum<?>)fieldValue).ordinal() : ((Enum<?>)fieldValue).name();
 			else if (fieldCfg instanceof RelationFieldConfigData && !TypeHelper.isBasicType(fieldCfg.getFieldType()) && fieldValue != null) {
 				fieldValue = PropertyUtils.getNestedProperty(entityBean, propertyName);
 			}else if(Listable.class.isAssignableFrom(fieldCfg.getFieldType()) && fieldValue != null)
@@ -424,7 +423,7 @@ public class EntityCRUDOperationsManager {
 		if(FMWEntityUtils.showOpeationsSql())
 			LOGGER.info("SEARCH_SQL: {" + sqlBuilder.toString() + "}");
 		
-		return dao.search(sqlBuilder.toString(), paramSource, offset, rowsByPage, new EntityRowMapper(entityConfigData, configurator));
+		return dao.search(sqlBuilder.toString(), paramSource, offset, rowsByPage, new EntityRowMapper<T>(entityConfigData));
 	}
 
 	/**
@@ -441,7 +440,7 @@ public class EntityCRUDOperationsManager {
 	 * @throws FMWException 
 	 * @throws Exception
 	 */
-	public List<Object> searchWithoutPaging(Object searchDTO) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException, FMWException{
+	public List<T> searchWithoutPaging(T searchDTO) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException, FMWException{
 		Object entityBean = searchDTO != null ? searchDTO : ConstructorUtils.invokeConstructor(entityConfigData.getEntityClass());
 		StringBuilder sqlBuilder = new StringBuilder();
 		StringBuilder whereBuilder = new StringBuilder();
@@ -459,8 +458,8 @@ public class EntityCRUDOperationsManager {
 		for (String fieldName : entityConfigData.getFieldsData().keySet()) {
 			FieldConfigData fieldCfg = entityConfigData.getFieldsData().get(fieldName);
 			if (fieldCfg instanceof RelationFieldConfigData && !TypeHelper.isBasicType(fieldCfg.getFieldType())) {
-				EntityConfigurator mtd_configurator = EntityConfigurationManager.getInstance().getConfigurator(((RelationFieldConfigData) fieldCfg).getRelationEntityClass());
-				EntityConfigData mtd_cfgData = mtd_configurator.configure();
+				EntityConfigurator<?> mtd_configurator = EntityConfigurationManager.getInstance().getConfigurator(((RelationFieldConfigData) fieldCfg).getRelationEntityClass());
+				EntityConfigData<?> mtd_cfgData = mtd_configurator.configure();
 				sqlBuilder.append(" left join ").append(mtd_cfgData.getTable()).append(" ").append(((RelationFieldConfigData) fieldCfg).getQueryAlias());
 				sqlBuilder.append(" on(").append(FMWEntityConstants.ENTITY_DYNASQL_MAIN_ALIAS).append(".").append(fieldCfg.getColumnName()).append(" = ");
 				sqlBuilder.append(((RelationFieldConfigData) fieldCfg).getQueryAlias()).append(".").append(mtd_cfgData.getFieldsData().get(mtd_cfgData.getPkFieldName()).getColumnName()).append(")");
@@ -479,8 +478,8 @@ public class EntityCRUDOperationsManager {
 				continue;
 
 			if (fieldCfg instanceof RelationFieldConfigData && !TypeHelper.isBasicType(fieldCfg.getFieldType())) {
-				EntityConfigurator mtd_configurator = EntityConfigurationManager.getInstance().getConfigurator(((RelationFieldConfigData) fieldCfg).getRelationEntityClass());
-				EntityConfigData mtd_cfgData = mtd_configurator.configure();
+				EntityConfigurator<?> mtd_configurator = EntityConfigurationManager.getInstance().getConfigurator(((RelationFieldConfigData) fieldCfg).getRelationEntityClass());
+				EntityConfigData<?> mtd_cfgData = mtd_configurator.configure();
 				propertyName = fieldCfg.getFieldName() + "." + mtd_cfgData.getPkFieldName();
 			}
 
@@ -494,7 +493,7 @@ public class EntityCRUDOperationsManager {
 			}
 			
 			if(fieldCfg.isEnumType() && fieldValue != null)
-				fieldValue = configurator.getEnumKeyProperty().equals(EnumKeyProperty.ORDINAL) ? ((Enum)fieldValue).ordinal() : ((Enum)fieldValue).name();
+				fieldValue = entityConfigData.getEnumKeyProperty().equals(EnumKeyProperty.ORDINAL) ? ((Enum<?>)fieldValue).ordinal() : ((Enum<?>)fieldValue).name();
 			else if (fieldCfg instanceof RelationFieldConfigData && !TypeHelper.isBasicType(fieldCfg.getFieldType()) && fieldValue != null) {
 				fieldValue = PropertyUtils.getNestedProperty(entityBean, propertyName);
 			}else if(Listable.class.isAssignableFrom(fieldCfg.getFieldType()) && fieldValue != null)
@@ -524,10 +523,10 @@ public class EntityCRUDOperationsManager {
 		if(FMWEntityUtils.showOpeationsSql())
 			LOGGER.info("SEARCH_WITHOUT_PAGING_SQL: {" + sqlBuilder.toString() + "}");
 		
-		return dao.searchWithoutPaging(sqlBuilder.toString(), paramSource, new EntityRowMapper(entityConfigData, configurator));
+		return dao.searchWithoutPaging(sqlBuilder.toString(), paramSource, new EntityRowMapper<T>(entityConfigData));
 	}
 
-	private String buildCriteriaStatements(EntityConfigData configData, Criteria criteria) {
+	private String buildCriteriaStatements(EntityConfigData<?> configData, Criteria criteria) {
 		if (criteria == null)
 			return "";
 
@@ -557,7 +556,7 @@ public class EntityCRUDOperationsManager {
 			else if (criteria instanceof SingleValueOnSetCriteria)
 				entityField = ((SingleValueOnSetCriteria) criteria).getEntityField();
 			else if (criteria instanceof ValueRangeCriteria)
-				entityField = ((ValueRangeCriteria) criteria).getEntityField();
+				entityField = ((ValueRangeCriteria<?>) criteria).getEntityField();
 
 			fieldCfg = configData.getFieldsData().get(entityField);
 
@@ -574,8 +573,7 @@ public class EntityCRUDOperationsManager {
 		return resp.toString();
 	}
 
-	@SuppressWarnings("unchecked")
-	private void applyValidations(Object entityBean, CRUDOperation operation) throws EntityCRUDValidationException {
+	private void applyValidations(T entityBean, CRUDOperation operation) throws EntityCRUDValidationException {
 		if (entityValidator == null)
 			return;
 		if (operation == CRUDOperation.INSERT)

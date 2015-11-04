@@ -72,9 +72,9 @@ public class SearcherResultWindow extends Window implements ClickListener{
 	private Button searchBtn;
 	private Button searchAllBtn;
 	
-	private EntityConfigData entityConfigData;
-	private EntityConfigurator configurator;
-	private EntityCRUDOperationsManager manager;
+	private EntityConfigData<?> entityConfigData;
+	private EntityConfigurator<?> configurator;
+	private EntityCRUDOperationsManager<?> manager;
 	private Map<String, Component> componentMap = new HashMap<String, Component>();
 	private BeanItem beanItem;
 	private Pager<Object> pager;
@@ -356,7 +356,7 @@ public class SearcherResultWindow extends Window implements ClickListener{
 		pageChangeHanlder = new PageChangeHandler<Object, Object>() {
 			public ListPage<Object> loadPage(PageChangeEvent<Object> event) throws FMWUncheckedException {
 				try {
-					return manager.searchForFmwComponent(event.getFilterDTO(), event.getInitialRow(), event.getRowsByPage(), conditions);
+					return new ListPage<Object>();//manager.searchForFmwComponent(event.getFilterDTO(), event.getInitialRow(), event.getRowsByPage(), conditions);
 				} catch (Exception e) {
 					Throwable cause = FMWExceptionUtils.prettyMessageException(e);
 					throw new FMWUncheckedException(cause.getMessage(), cause);

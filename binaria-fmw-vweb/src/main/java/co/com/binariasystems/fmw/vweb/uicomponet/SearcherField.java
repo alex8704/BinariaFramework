@@ -46,18 +46,16 @@ public class SearcherField extends VerticalLayout implements ValueChangeListener
 	private TextField textfield;
 	private TextField descriptionTxt;
 	private Button button;
-	private Class<? extends Object> entityClass;
+	private Class<?> entityClass;
 	private Property<Object> propertyDs;
 	private Object lastTextFieldValue;
 	private SearcherResultWindow resultWindow;
 	private Object currentValue;
 	private Criteria conditions;
 	
-	private EntityConfigData masterConfigData;
-	private EntityConfigurator configurator;
+	private EntityConfigData<?> masterConfigData;
 	private FieldConfigData pkFieldCfg;
 	private FieldConfigData searchFieldCfg;
-	private EntityCRUDOperationsManager manager;
 	private String captiontxt;
 	private boolean pkSearch = true;
 	private boolean basicJavaType;
@@ -66,7 +64,7 @@ public class SearcherField extends VerticalLayout implements ValueChangeListener
 	
 	private SearcherField(){}
 	
-	public SearcherField(Class<? extends Object> entityClass, String caption){
+	public SearcherField(Class<?> entityClass, String caption){
 		super();
 		this.entityClass = entityClass;
 		this.captiontxt = caption; 
@@ -83,9 +81,7 @@ public class SearcherField extends VerticalLayout implements ValueChangeListener
 	}
 	
 	private void initComponents() throws Exception{
-		configurator = EntityConfigurationManager.getInstance().getConfigurator(entityClass);
-		masterConfigData = configurator.configure();
-		manager = EntityCRUDOperationsManager.getInstance(entityClass);
+		masterConfigData = EntityConfigurationManager.getInstance().getConfigurator(entityClass).configure();
 		pkFieldCfg = masterConfigData.getFieldsData().get(masterConfigData.getPkFieldName());
 		searchFieldCfg = masterConfigData.getFieldsData().get(masterConfigData.getSearchFieldName());
 		

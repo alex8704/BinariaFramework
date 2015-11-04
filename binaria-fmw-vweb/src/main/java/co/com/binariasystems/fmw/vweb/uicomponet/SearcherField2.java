@@ -9,8 +9,6 @@ import org.slf4j.LoggerFactory;
 import co.com.binariasystems.fmw.constants.FMWConstants;
 import co.com.binariasystems.fmw.entity.cfg.EntityConfigData;
 import co.com.binariasystems.fmw.entity.cfg.EntityConfigurationManager;
-import co.com.binariasystems.fmw.entity.cfg.EntityConfigurator;
-import co.com.binariasystems.fmw.entity.manager.EntityCRUDOperationsManager;
 import co.com.binariasystems.fmw.entity.util.FMWEntityUtils;
 import co.com.binariasystems.fmw.exception.FMWException;
 import co.com.binariasystems.fmw.vweb.uicomponet.SearcherResultWindow2.SearchSelectionChangeEvent;
@@ -37,31 +35,26 @@ public class SearcherField2<T> extends CustomField<T> implements SearchSelection
 	private static final Logger LOGGER = LoggerFactory.getLogger(SearcherField2.class);
 	private Class<?> entityClazz;
 	private Class<T> returnType;
-	private Label captionLabel;
 	private TextField textfield;
 	private TextField descriptionTxt;
 	private Button button;
-	private VerticalLayout content;
-	private HorizontalLayout subcontent;
+	private HorizontalLayout content;
 	private SearcherResultWindow2<Object> searchWindow;
 	
-	private String caption;
 	private ObjectProperty<Object> textfieldProperty;
 	
-	private EntityConfigData masterConfigData;
-	private EntityConfigurator configurator;
-	private EntityCRUDOperationsManager manager;
+	private EntityConfigData<?> masterConfigData;
 	
 	private boolean omitSearchCall;
 	
-	public SearcherField2(Class<?> entityClazz) {
-		this.entityClazz = entityClazz;
-		this.returnType = (Class<T>) entityClazz;
+	public SearcherField2(Class<?> entityClazz, String caption) {
+		this(entityClazz, (Class<T>) entityClazz, caption);
 	}
 	
-	public SearcherField2(Class<?> entityClazz, Class<T> returnType) {
+	public SearcherField2(Class<?> entityClazz, Class<T> returnType, String caption) {
 		this.entityClazz = entityClazz;
 		this.returnType = returnType;
+		setCaption(caption);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -70,7 +63,6 @@ public class SearcherField2<T> extends CustomField<T> implements SearchSelection
 		try{
 			initEntityConfig();
 			textfieldProperty = new ObjectProperty<Object>(null, (Class<Object>)masterConfigData.getSearchFieldData().getFieldType());
-			captionLabel = new Label(caption, ContentMode.HTML);
 			textfield = new TextField(textfieldProperty);
 			descriptionTxt = new TextField(new ObjectProperty<String>(null, String.class));
 			button = new Button();
@@ -80,23 +72,19 @@ public class SearcherField2<T> extends CustomField<T> implements SearchSelection
 			descriptionTxt.setNullRepresentation("");
 			descriptionTxt.setValidationVisible(false);
 			
-			subcontent = new HorizontalLayout();
-			subcontent.setWidth(100, Unit.PERCENTAGE);
+			content = new HorizontalLayout();
+			content.setWidth(100, Unit.PERCENTAGE);
 			textfield.setWidth(120, Unit.PIXELS);
 			textfield.addStyleName(ValoTheme.TEXTFIELD_ALIGN_RIGHT);
 			descriptionTxt.setReadOnly(true);
 			descriptionTxt.setWidth(100, Unit.PERCENTAGE);
 			button.setIcon(FontAwesome.SEARCH);
-			subcontent.addComponent(textfield);
-			subcontent.addComponent(descriptionTxt);
-			subcontent.addComponent(button);
-			subcontent.setExpandRatio(descriptionTxt, 1.0f);
+			content.addComponent(textfield);
+			content.addComponent(descriptionTxt);
+			content.addComponent(button);
+			content.setExpandRatio(descriptionTxt, 1.0f);
 			
 			searchWindow = new SearcherResultWindow2<Object>((Class<Object>) entityClazz);
-			content = new VerticalLayout();
-			content.setWidth(100, Unit.PERCENTAGE);
-			content.addComponent(captionLabel);
-			content.addComponent(subcontent);
 			bindEvents();
 		}catch(FMWException ex){
 			MessageDialog.showExceptions(ex, LOGGER);
@@ -106,9 +94,7 @@ public class SearcherField2<T> extends CustomField<T> implements SearchSelection
 	
 	
 	private void initEntityConfig() throws FMWException{
-		configurator = EntityConfigurationManager.getInstance().getConfigurator(entityClazz);
-		masterConfigData = configurator.configure();
-		manager = EntityCRUDOperationsManager.getInstance(entityClazz);
+		masterConfigData = EntityConfigurationManager.getInstance().getConfigurator(entityClazz).configure();
 	}
 	
 	private void bindEvents(){

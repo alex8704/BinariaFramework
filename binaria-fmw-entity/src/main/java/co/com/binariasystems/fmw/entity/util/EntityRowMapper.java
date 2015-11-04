@@ -29,17 +29,15 @@ import co.com.binariasystems.fmw.reflec.TypeHelper;
  * @author Alexander Castro O.
  */
 
-public class EntityRowMapper implements RowMapper<Object>{
-	private EntityConfigData entityConfigData;
-	private EntityConfigurator configurator;
+public class EntityRowMapper<T> implements RowMapper<T>{
+	private EntityConfigData<T> entityConfigData;
 	
-	public EntityRowMapper(EntityConfigData entityConfigData, EntityConfigurator configurator){
+	public EntityRowMapper(EntityConfigData<T> entityConfigData){
 		this.entityConfigData = entityConfigData;
-		this.configurator = configurator;
 	}
 	
-	public Object mapRow(ResultSet rs, int rowIndex) throws SQLException {
-		Object bean = newInstanceOf(entityConfigData.getEntityClass()); 
+	public T mapRow(ResultSet rs, int rowIndex) throws SQLException {
+		T bean = (T) newInstanceOf(entityConfigData.getEntityClass()); 
 		for(String fieldName : entityConfigData.getFieldsData().keySet()){
 			FieldConfigData fieldCfg = entityConfigData.getFieldsData().get(fieldName);
 			
@@ -59,20 +57,21 @@ public class EntityRowMapper implements RowMapper<Object>{
 	}
 	
 	
+	@SuppressWarnings("unchecked")
 	private Object mapEntityField(FieldConfigData fieldCfg, String aliasPrefix, ResultSet rs, boolean includeForeigns) throws Exception{
 		Object fieldValue = null;
 		String columnAlias = StringUtils.defaultIfEmpty(aliasPrefix, "") + fieldCfg.getFieldName();
-		if(fieldCfg.isEnumType() && configurator.getEnumKeyProperty() == EnumKeyProperty.NAME){
+		if(fieldCfg.isEnumType() && entityConfigData.getEnumKeyProperty() == EnumKeyProperty.NAME){
 			if(!StringUtils.isEmpty(rs.getString(columnAlias)))
 				fieldValue = Enum.valueOf((Class)fieldCfg.getFieldType(), rs.getString(columnAlias));
-		}else if(fieldCfg.isEnumType() && configurator.getEnumKeyProperty() == EnumKeyProperty.ORDINAL){
+		}else if(fieldCfg.isEnumType() && entityConfigData.getEnumKeyProperty() == EnumKeyProperty.ORDINAL){
 			if(!StringUtils.isEmpty(rs.getString(columnAlias)))
 				fieldValue = TypeHelper.enumFromOrdinal(rs.getInt(columnAlias), (Class)fieldCfg.getFieldType());
 		}
 		else if(fieldCfg instanceof RelationFieldConfigData && !TypeHelper.isBasicType(fieldCfg.getFieldType())){
 			Object fieldBean = newInstanceOf(fieldCfg.getFieldType());
-			EntityConfigurator fieldEntityConfigurator = EntityConfigurationManager.getInstance().getConfigurator(fieldCfg.getFieldType());
-			EntityConfigData fieldEntityConfigData = null;
+			EntityConfigurator<?> fieldEntityConfigurator = EntityConfigurationManager.getInstance().getConfigurator(fieldCfg.getFieldType());
+			EntityConfigData<?> fieldEntityConfigData = null;
 			try {
 				fieldEntityConfigData = fieldEntityConfigurator.configure();
 			} catch (Exception e) {
@@ -106,8 +105,8 @@ public class EntityRowMapper implements RowMapper<Object>{
 		return fieldValue;
 	}
 	
-	private Object newInstanceOf(Class clazz){
-		Object bean = null; 
+	private <C> C newInstanceOf(Class<C> clazz){
+		C bean = null; 
 		try {
 			bean = clazz.getConstructor().newInstance();
 		} catch (Exception e) {
@@ -116,7 +115,7 @@ public class EntityRowMapper implements RowMapper<Object>{
 		return bean;
 	}
 	
-	private Object determineTypeAndGetValueFromRs(ResultSet rs, String columnName, Class expectedType) throws SQLException{
+	private Object determineTypeAndGetValueFromRs(ResultSet rs, String columnName, Class<?> expectedType) throws SQLException{
 		Object obj = null;
 		if(Boolean.TYPE.isAssignableFrom(expectedType) || Boolean.class.isAssignableFrom(expectedType))
 			obj = rs.getBoolean(columnName);

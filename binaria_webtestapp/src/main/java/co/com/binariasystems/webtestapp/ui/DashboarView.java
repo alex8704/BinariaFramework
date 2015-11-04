@@ -56,8 +56,7 @@ public class DashboarView extends AbstractView{
 		rightPanel = new VerticalLayout();
 		welcomeLabel = new Label("Welcome My People");
 		linkLabel = new LinkLabel("Este es mi LinkLabel");
-		gatewayTxt = new SearcherField2<Long>(Gateway.class, Long.TYPE);
-		gatewayTxt.setCaption("Gateway");
+		gatewayTxt = new SearcherField2<Long>(Gateway.class, Long.TYPE, "Gateway");
 
 		gridDs = new BeanItemContainer<Medidor>(Medidor.class);
 		container = new GeneratedPropertyContainer(gridDs);

@@ -13,10 +13,10 @@ import co.com.binariasystems.fmw.exception.FMWException;
  * @author Alexander Castro O.
  */
 
-public interface EntityConfigurator {
+public interface EntityConfigurator<T> {
 	public String getTitleKey();
-	public Class<?> getEntityClass();
-	public EntityConfigData configure() throws FMWException;
+	public Class<T> getEntityClass();
+	public EntityConfigData<T> configure() throws FMWException;
 	public EnumKeyProperty getEnumKeyProperty();
 	public Map<String, String> getFieldLabelMappings();
 	public Map<String, EntityConfigUIControl> getFieldUIControlMappings();
