@@ -44,7 +44,6 @@ import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.data.util.GeneratedPropertyContainer;
 import com.vaadin.server.Page;
-import com.vaadin.server.Sizeable.Unit;
 import com.vaadin.shared.ui.grid.HeightMode;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
@@ -84,6 +83,7 @@ public class SearcherResultWindow2<T> extends Window implements CloseListener, C
 	private MessageFormat labelsFmt;
 	private String selectionEventFunction;
 	private SearchSelectionChangeListener<T> selectionChangeListener;
+	private boolean wasChoice;
 	
 	private MessageBundleManager entityStrings = MessageBundleManager.forPath(
 			StringUtils.defaultIfBlank(IOCHelper.getBean(VWebCommonConstants.APP_ENTITIES_MESSAGES_FILE_IOC_KEY, String.class), VWebCommonConstants.ENTITY_STRINGS_PROPERTIES_FILENAME),
@@ -195,6 +195,9 @@ public class SearcherResultWindow2<T> extends Window implements CloseListener, C
 		setContent(form);
 		setWidth(1000, Unit.PIXELS);
 		setHeight(Page.getCurrent().getBrowserWindowHeight() - 25, Unit.PIXELS);
+		center();
+		setModal(true);
+		
 		cleanBtn.click();
 	}
 	
@@ -265,9 +268,11 @@ public class SearcherResultWindow2<T> extends Window implements CloseListener, C
 			beanItem.getItemProperty(propertyId).setValue(PropertyUtils.getProperty(emptyBean, (String)propertyId));
 		}
 		pager.reset();
-		currentSearchType = null;
-		oldValue = selectedValue;
-		selectedValue = null;
+		if(wasChoice){
+			oldValue = selectedValue;
+			selectedValue = null;
+		}
+		wasChoice = false;
 		form.initFocus();
 	}
 	
@@ -293,8 +298,10 @@ public class SearcherResultWindow2<T> extends Window implements CloseListener, C
 	
 	//Busca y abre la ventana solo si no encuentra resultado
 	private void doFilterSearch(Object filterValue){
-		if(filterValue == null)
-			fireSelectionChangeEvent();
+		if(filterValue == null || (filterValue instanceof CharSequence && StringUtils.isEmpty((CharSequence)filterValue))){
+			fireResetSelectionEvent();
+			return;
+		}
 		beanItem.getItemProperty(entityConfigData.getSearchFieldName()).setValue(filterValue);
 		searchBtn.click();
 		if(gridContainer.size() != 1)
@@ -307,8 +314,10 @@ public class SearcherResultWindow2<T> extends Window implements CloseListener, C
 	
 	//Busca y retorna unicamente
 	private void doPKSearch(Object pkValue){
-		if(pkValue == null)
-			fireSelectionChangeEvent();
+		if(pkValue == null || (pkValue instanceof CharSequence && StringUtils.isEmpty((CharSequence)pkValue))){
+			fireResetSelectionEvent();
+			return;
+		}
 		beanItem.getItemProperty(entityConfigData.getPkFieldName()).setValue(pkValue);
 		searchBtn.click();
 		if(gridContainer.size() == 1)
@@ -325,11 +334,26 @@ public class SearcherResultWindow2<T> extends Window implements CloseListener, C
 				break;
 			}
 		}
+		wasChoice = true;
 		close();
 	}
 	
+	
+	///Se pasa el parametro wasChoice, indicando si se selecciono algun item o no
 	private void fireSelectionChangeEvent(){
-		SearchSelectionChangeEvent<T> event = new SearchSelectionChangeEvent<T>(oldValue, selectedValue, currentSearchType);
+		doSelectionChangeEvent(false);
+	}
+	
+	private void fireResetSelectionEvent(){
+		doSelectionChangeEvent(true);
+	}
+	
+	private void doSelectionChangeEvent(boolean isReset){
+		if(isReset){
+			oldValue = null;
+			selectedValue = null;
+		}
+		SearchSelectionChangeEvent<T> event = new SearchSelectionChangeEvent<T>(oldValue, selectedValue, currentSearchType, isReset);
 		cleanBtn.click();
 		if(selectionChangeListener != null)
 			selectionChangeListener.selectionChange(event);
@@ -340,15 +364,18 @@ public class SearcherResultWindow2<T> extends Window implements CloseListener, C
 	}
 	
 	public static class SearchSelectionChangeEvent<T>{
-		public T oldValue;
-		public T newValue;
-		public SearchType searchType;
+		private T oldValue;
+		private T newValue;
+		private SearchType searchType;
+		private boolean reset;
 		
-		public SearchSelectionChangeEvent(T oldValue, T newValue, SearchType searchType) {
+		
+		public SearchSelectionChangeEvent(T oldValue, T newValue, SearchType searchType, boolean reset) {
 			super();
 			this.oldValue = oldValue;
 			this.newValue = newValue;
 			this.searchType = searchType;
+			this.reset = reset;
 		}
 		public T getOldValue() {
 			return oldValue;
@@ -367,6 +394,12 @@ public class SearcherResultWindow2<T> extends Window implements CloseListener, C
 		}
 		public void setSearchType(SearchType searchType) {
 			this.searchType = searchType;
+		}
+		public boolean isReset() {
+			return reset;
+		}
+		public void setReset(boolean reset) {
+			this.reset = reset;
 		}
 		
 	}

@@ -168,6 +168,10 @@ public class StringUtils {
 	}
 	
 	public static String quote(String str) {
+		return (str != null ? "\"" + str + "\"" : null);
+	}
+	
+	public static String singleQuote(String str) {
 		return (str != null ? "'" + str + "'" : null);
 	}
 }

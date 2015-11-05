@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import co.com.binariasystems.fmw.constants.FMWConstants;
 import co.com.binariasystems.fmw.entity.cfg.EntityConfigData;
+import co.com.binariasystems.fmw.entity.cfg.EntityConfigData.FieldConfigData;
 import co.com.binariasystems.fmw.entity.cfg.EntityConfigurationManager;
 import co.com.binariasystems.fmw.entity.util.FMWEntityUtils;
 import co.com.binariasystems.fmw.exception.FMWException;
@@ -18,16 +19,13 @@ import co.com.binariasystems.fmw.vweb.uicomponet.SearcherResultWindow2.SearchTyp
 import com.vaadin.data.Property;
 import com.vaadin.data.util.ObjectProperty;
 import com.vaadin.server.FontAwesome;
-import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.CustomField;
 import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
 import com.vaadin.ui.TextField;
-import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
 
@@ -42,6 +40,7 @@ public class SearcherField2<T> extends CustomField<T> implements SearchSelection
 	private SearcherResultWindow2<Object> searchWindow;
 	
 	private ObjectProperty<Object> textfieldProperty;
+	private ObjectProperty<String> descriptionProperty;
 	
 	private EntityConfigData<?> masterConfigData;
 	
@@ -63,8 +62,9 @@ public class SearcherField2<T> extends CustomField<T> implements SearchSelection
 		try{
 			initEntityConfig();
 			textfieldProperty = new ObjectProperty<Object>(null, (Class<Object>)masterConfigData.getSearchFieldData().getFieldType());
+			descriptionProperty = new ObjectProperty<String>(null, String.class);
 			textfield = new TextField(textfieldProperty);
-			descriptionTxt = new TextField(new ObjectProperty<String>(null, String.class));
+			descriptionTxt = new TextField(descriptionProperty);
 			button = new Button();
 			textfield.setNullRepresentation("");
 			textfield.setValidationVisible(false);
@@ -115,6 +115,7 @@ public class SearcherField2<T> extends CustomField<T> implements SearchSelection
 		addValueChangeListener(valueChangeListener);
 		textfieldProperty.addValueChangeListener(valueChangeListener);
 		button.addClickListener(buttonClickListener);
+		searchWindow.setSelectionChangeListener(this);
 	}
 	
 	private void onTextfieldValueChange(Property.ValueChangeEvent event) {
@@ -137,18 +138,19 @@ public class SearcherField2<T> extends CustomField<T> implements SearchSelection
 	}
 	
 	private Object extractPKValue(Object originalValue){
-		try {
-			return entityClazz.equals(returnType) ? PropertyUtils.getProperty(originalValue, masterConfigData.getPkFieldName()) : originalValue;
-		} catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException ex) {
-			MessageDialog.showExceptions(ex, LOGGER);
-		}
-		return originalValue;	
+		return entityClazz.equals(returnType) ? extractFieldValue(originalValue, masterConfigData.getPkFieldData()) : originalValue;
 	}
 	
 	@SuppressWarnings("unchecked")
 	private T extractReturnValue(Object originalValue){
+		return entityClazz.equals(returnType) ? (T)originalValue : (T)extractFieldValue(originalValue, masterConfigData.getPkFieldData());
+	}
+	
+	@SuppressWarnings("unchecked")
+	private Object extractFieldValue(Object originalValue, FieldConfigData fieldInfo){
+		if(originalValue == null) return null;
 		try {
-			return entityClazz.equals(returnType) ? (T)originalValue : (T)PropertyUtils.getProperty(originalValue, masterConfigData.getPkFieldName());
+			return PropertyUtils.getProperty(originalValue, fieldInfo.getFieldName());
 		} catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException ex) {
 			MessageDialog.showExceptions(ex, LOGGER);
 		}
@@ -159,22 +161,21 @@ public class SearcherField2<T> extends CustomField<T> implements SearchSelection
 	public void selectionChange(SearchSelectionChangeEvent<Object> event) {
 		omitSearchCall = true;
 		String description = "";
+		Object newValue = event.getNewValue();
 		try{
-			if(event.getSearchType().equals(SearchType.PK) && event.getNewValue() != null){
-				textfieldProperty.setValue(PropertyUtils.getProperty(event.getNewValue(), masterConfigData.getSearchFieldName()));
-				description = FMWEntityUtils.generateStringRepresentationForField(event.getNewValue(), FMWConstants.PIPE);
-			}else {
-				Object newValue = event.getNewValue() != null ? event.getNewValue() : event.getOldValue();
-				textfieldProperty.setValue(PropertyUtils.getProperty(newValue, masterConfigData.getSearchFieldName()));
-				setValue(extractReturnValue(newValue));
-				description = FMWEntityUtils.generateStringRepresentationForField(event.getNewValue(), FMWConstants.PIPE);
+			if(event.getSearchType().equals(SearchType.PK) && event.getNewValue() != null)
+				textfieldProperty.setValue(event.isReset() ? null : extractFieldValue(event.getNewValue(), masterConfigData.getSearchFieldData()));
+			else {
+				newValue = event.getNewValue() != null ? event.getNewValue() : event.getOldValue();
+				textfieldProperty.setValue(event.isReset() ? null : extractFieldValue(newValue, masterConfigData.getSearchFieldData()));
+				setValue(event.isReset() ? null : extractReturnValue(newValue));
 			}
-			
-		} catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException | FMWException ex) {
+			description = FMWEntityUtils.generateStringRepresentationForField(newValue, FMWConstants.PIPE);
+		} catch (FMWException ex) {
 			MessageDialog.showExceptions(ex, LOGGER);
 		}finally{
 			omitSearchCall = false;
-			descriptionTxt.setValue(description);
+			descriptionProperty.setValue(description);
 		}
 	}
 

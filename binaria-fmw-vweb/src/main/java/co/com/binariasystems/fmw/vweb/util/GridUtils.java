@@ -175,8 +175,8 @@ public class GridUtils {
 			this.enableValidator = enableValidator;
 			this.setFunctionName(functionName);
 			this.setActionHandler(actionHandler);
-			actionLinkFmt = new MessageFormat(VWebCommonConstants.ACTION_LINK_TEMPLATE_TEXT);
-			disabledActionLinkFmt = new MessageFormat(VWebCommonConstants.ACTION_LINK_DISALE_TEMPLATE_TEXT);
+			actionLinkFmt = new MessageFormat(VWebUtils.getCommonString(VWebCommonConstants.ACTION_LINK_TEMPLATE_TEXT));
+			disabledActionLinkFmt = new MessageFormat(VWebUtils.getCommonString(VWebCommonConstants.ACTION_LINK_DISALE_TEMPLATE_TEXT));
 		}
 
 		@Override
@@ -264,8 +264,8 @@ public class GridUtils {
 			this.enableValidator = enableValidator;
 			this.setFunctionName(functionName);
 			this.setActionHandler(actionHandler);
-			actionIconFmt = new MessageFormat(VWebCommonConstants.ACTION_ICON_TEMPLATE_TEXT);
-			disabledActionIconFmt = new MessageFormat(VWebCommonConstants.ACTION_ICON_DISALE_TEMPLATE_TEXT);
+			actionIconFmt = new MessageFormat(VWebUtils.getCommonString(VWebCommonConstants.ACTION_ICON_TEMPLATE_TEXT));
+			disabledActionIconFmt = new MessageFormat(VWebUtils.getCommonString(VWebCommonConstants.ACTION_ICON_DISALE_TEMPLATE_TEXT));
 		}
 
 		@Override
