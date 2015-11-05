@@ -2,6 +2,7 @@ package co.com.binariasystems.webtestapp.ui;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
@@ -143,6 +144,4 @@ public class DashboardViewController extends AbstractViewController {
 		
 		menuContainer.setItems(opciones);
 	}
-	
-	
 }

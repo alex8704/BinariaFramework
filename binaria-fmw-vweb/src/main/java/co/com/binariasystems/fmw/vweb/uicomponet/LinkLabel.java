@@ -34,7 +34,9 @@ public class LinkLabel extends CustomField<String>{
 	
 	@Override
 	protected Component initContent() {
-		content = new Label(textFmt.format(new Object[]{functionName, StringUtils.defaultString(getValue())}),ContentMode.HTML);
+		content = new Label();
+		content.setContentMode(ContentMode.HTML);
+		content.setValue((isEnabled() ? textFmt : textDisableFmt).format(isEnabled() ? new Object[]{functionName, StringUtils.defaultString(getValue())} :new Object[]{StringUtils.defaultString(getValue())}));
 		return content;
 	}
 

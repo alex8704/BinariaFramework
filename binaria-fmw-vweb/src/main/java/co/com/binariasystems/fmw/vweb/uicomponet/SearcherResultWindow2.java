@@ -43,6 +43,8 @@ import com.vaadin.data.Item;
 import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.data.util.GeneratedPropertyContainer;
+import com.vaadin.server.Page;
+import com.vaadin.server.Sizeable.Unit;
 import com.vaadin.shared.ui.grid.HeightMode;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
@@ -88,8 +90,6 @@ public class SearcherResultWindow2<T> extends Window implements CloseListener, C
 			IOCHelper.getBean(FMWConstants.APPLICATION_DEFAULT_CLASS_FOR_RESOURCE_LOAD_IOC_KEY, Class.class));
 	
 	public static enum SearchType{PK, FILTER, BUTTON};
-	
-	private boolean attached;
 	
 	public SearcherResultWindow2(Class<T> entityClazz) {
 		this.entityClazz = entityClazz;
@@ -193,6 +193,8 @@ public class SearcherResultWindow2<T> extends Window implements CloseListener, C
 		form.setResetButton(cleanBtn);
 		
 		setContent(form);
+		setWidth(1000, Unit.PIXELS);
+		setHeight(Page.getCurrent().getBrowserWindowHeight() - 25, Unit.PIXELS);
 		cleanBtn.click();
 	}
 	

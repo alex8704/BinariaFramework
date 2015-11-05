@@ -55,7 +55,6 @@ public class Pager2<FILTER_TYPE, RESULT_TYPE> extends HorizontalLayout implement
 	private FILTER_TYPE filterDto;
 	private int maxCachedPages=1;
 	private int currentCacheGroup;
-	private boolean attached;//Usada internamente como bandera para no volver a crear todos los componentes
 	
 	
 	public Pager2(){
@@ -69,30 +68,25 @@ public class Pager2<FILTER_TYPE, RESULT_TYPE> extends HorizontalLayout implement
 	public Pager2(PagerMode pMode, int rowsByPage){
 		this.pagerMode = (pMode != null) ? pMode : PagerMode.PAGE;
 		rowsByPageProperty.setValue(pagerMode.equals(PagerMode.ITEM) ? 1 : ROWS_BY_PAGE_ITEMS[0]);
+		//Se invoca dentro del constructor ya que hay ocasiones en que se hacen operaciones
+		//Con el componente antes de ser atado al componente padre, lo cual desemboca en errores NullPointer
+		//Por ejemplo el SercherResultWindow
+		initContent();
 	}
 	
-	
-	@Override
-	public void attach() {
-		super.attach();
-		if(!attached){
-			initContent();
-			attached = !attached;
-		}
-	}
 	
 	private void initContent() {
 		foundItemsLbl = new Label(VWebUtils.getCommonString(VWebCommonConstants.PAGER_NO_ROWS_FORSHOW));
 		rowsByPageConfLbl = new Label(VWebUtils.getCommonString(VWebCommonConstants.PAGER_ROWS_CAPTION)+":");
 		rowsByPageConfCmb = new ComboBox();
-		firstPLink = new LinkLabel("<<");
-		backPLink = new LinkLabel("<");
+		firstPLink = new LinkLabel("&lt;&lt;");
+		backPLink = new LinkLabel("&lt;");
 		currentPageLeftLbl = new Label(VWebUtils.getCommonString(VWebCommonConstants.PAGER_PAGE_CAPTION)+":");
 		currentPageTxt = new TextField(currentPageProperty);
 		currentPageRightLbl = new Label(VWebUtils.getCommonString(VWebCommonConstants.PAGER_PAGE_OF_CAPTION));
 		totalPagesLbl = new Label(pageCountProperty);
-		nextPLink = new LinkLabel(">");
-		lastPLink = new LinkLabel(">>");
+		nextPLink = new LinkLabel("&gt;");
+		lastPLink = new LinkLabel("&gt;&gt;");
 		
 		filler = new Label("");
 		rangeValidator = new IntegerRangeValidator("", 0, 0);
@@ -169,7 +163,6 @@ public class Pager2<FILTER_TYPE, RESULT_TYPE> extends HorizontalLayout implement
 	}
 	
 	private void bindEvents(){
-		
 		currentPageProperty.addValueChangeListener(this);
 		pageCountProperty.addValueChangeListener(this);
 		rowsByPageProperty.addValueChangeListener(this);
