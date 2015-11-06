@@ -83,4 +83,6 @@ public interface VWebCommonConstants {
 	
 	public static final String YES_NO_COLUMN_TEMPLATE = "yesNoImageColumn.templateText";
 	
+	public static final String VALIDATION_ERRORLIST_TEMPLATE = "form.validationErrors.listTemplate";
+	public static final String VALIDATION_ERRORITEM_TEMPLATE = "form.validationErrors.item";
 }

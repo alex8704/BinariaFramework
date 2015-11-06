@@ -20,6 +20,7 @@ import co.com.binariasystems.fmw.reflec.TypeHelper;
 import co.com.binariasystems.fmw.util.messagebundle.MessageBundleManager;
 import co.com.binariasystems.fmw.vweb.uicomponet.SearcherField;
 import co.com.binariasystems.fmw.vweb.uicomponet.SearcherField2;
+import co.com.binariasystems.fmw.vweb.uicomponet.builders.OptionGroupBuilder;
 import co.com.binariasystems.fmw.vweb.util.converter.DateToTimestampConverter;
 
 import com.vaadin.data.Item;
@@ -34,6 +35,7 @@ import com.vaadin.ui.OptionGroup;
 import com.vaadin.ui.PasswordField;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.TextField;
+import com.vaadin.ui.themes.ValoTheme;
 
 public class EntityConfigUtils {
 	public static final int TEXTFIELD_MAX_LENGTH = 100;
@@ -91,6 +93,7 @@ public class EntityConfigUtils {
 			}
 			else if(controlType == EntityConfigUIControl.RADIO){
 				OptionGroup widget = new OptionGroup(caption);
+				widget.addStyleName(ValoTheme.OPTIONGROUP_HORIZONTAL);
 				widget.setValidationVisible(true);
 				resp = widget;
 				

@@ -7,7 +7,6 @@ import java.util.List;
 import co.com.binariasystems.fmw.exception.FMWUncheckedException;
 import co.com.binariasystems.fmw.vweb.util.VWebUtils;
 
-import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
@@ -16,7 +15,6 @@ import com.vaadin.ui.ComponentContainer;
 import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
-import com.vaadin.ui.Button.ClickShortcut;
 
 public class PanelGroup extends HorizontalLayout{
 	protected List<Component> childComponents = new LinkedList<Component>();
@@ -38,7 +36,7 @@ public class PanelGroup extends HorizontalLayout{
 	
 	private void initContent(){
 		content = new GridLayout(columns, 1);
-		
+		content.setSpacing(true);
 		addComponent(content);
 		
 		setWidth(fixedWidth.value, fixedWidth.unit);
@@ -68,12 +66,17 @@ public class PanelGroup extends HorizontalLayout{
 	}
 	
 	public PanelGroup add(Component component, int colSpan){
-		add(component, colSpan, null);
+		add(component, colSpan, null, null);
 		return this;
 	}
 	
 	public PanelGroup add(Component component, int colSpan, Alignment align){
 		add(component, colSpan, align, null);
+		return this;
+	}
+	
+	public PanelGroup add(Component component, int colSpan, Dimension width){
+		add(component, colSpan, null, width);
 		return this;
 	}
 	
@@ -105,7 +108,7 @@ public class PanelGroup extends HorizontalLayout{
 			else{
 				for(Component component : components){
 					component.setWidth(uniformWidth.value, uniformWidth.unit);
-					add(component);
+					layout.addComponent(component);
 				}
 			}
 			comp = layout;
@@ -158,7 +161,7 @@ public class PanelGroup extends HorizontalLayout{
 	private void validateSpaceAndPosition(int colSpan){
 		if(currentColumn >= columns)
 			createNewRow();
-		int availableCells = columns - currentRow;
+		int availableCells = columns - currentColumn;
 		if(colSpan > availableCells)
 			throw new FMWUncheckedException("colSpan cause an overlap in container, availableColumns = "+availableCells+", requiredColumns = "+colSpan);
 	}

@@ -26,6 +26,11 @@ public class FormValidationException extends FMWException {
 		super(message);
 		// TODO Auto-generated constructor stub
 	}
+	
+	public FormValidationException(String message, List<String> validationMessages) {
+		super(message);
+		this.validationMessages = validationMessages;
+	}
 
 	public FormValidationException(Throwable cause) {
 		super(cause);

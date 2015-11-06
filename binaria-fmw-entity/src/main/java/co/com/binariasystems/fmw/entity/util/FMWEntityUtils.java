@@ -129,7 +129,7 @@ public class FMWEntityUtils {
 				resp.add(0, fieldCfgdData);
 			else{
 				for(index = 0; index < resp.size(); index++)
-					if(fieldCfgdData.getFieldUIControl().ordinal() < resp.get(index).getFieldUIControl().ordinal()) break;
+					if(fieldCfgdData.getFieldUIControl().getPriority() < resp.get(index).getFieldUIControl().getPriority()) break;
 				resp.add(index, fieldCfgdData);
 			}
 		}

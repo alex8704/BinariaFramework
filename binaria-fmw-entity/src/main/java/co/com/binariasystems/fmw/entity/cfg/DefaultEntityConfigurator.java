@@ -244,7 +244,6 @@ public class DefaultEntityConfigurator<T> implements EntityConfigurator<T>{
 		}
 		fieldCfg.setFieldUIControl(fieldUIControl);
 	}
-	
 
 	
 	public EnumKeyProperty getEnumKeyProperty() {

@@ -10,11 +10,20 @@ import co.com.binariasystems.fmw.vweb.uicomponet.TreeMenu;
 import co.com.binariasystems.fmw.vweb.uicomponet.UIForm;
 
 import com.vaadin.server.VaadinService;
+import com.vaadin.ui.AbstractSelect;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.CheckBox;
+import com.vaadin.ui.CustomField;
+import com.vaadin.ui.DateField;
 import com.vaadin.ui.Field;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Link;
+import com.vaadin.ui.OptionGroup;
+import com.vaadin.ui.PasswordField;
+import com.vaadin.ui.ProgressBar;
+import com.vaadin.ui.Slider;
+import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.Upload;
 
@@ -62,4 +71,19 @@ public final class VWebUtils {
                 Upload.class.isAssignableFrom(fieldClass) ||
                 Button.class.isAssignableFrom(fieldClass));
     }
+	
+	public static boolean isArrowUpNavigableField(Class clazz){
+		return (isArrowDownNavigableField(clazz) || DateField.class.isAssignableFrom(clazz));
+	}
+	
+	public static  boolean isArrowDownNavigableField(Class clazz){
+		return (Button.class.isAssignableFrom(clazz) || CheckBox.class.isAssignableFrom(clazz) || CustomField.class.isAssignableFrom(clazz) ||
+				TextField.class.isAssignableFrom(clazz) || PasswordField.class.isAssignableFrom(clazz) || Upload.class.isAssignableFrom(clazz));
+	}
+	
+	public static boolean isEnterNavigableField(Class clazz){
+		return (DateField.class.isAssignableFrom(clazz) || AbstractSelect.class.isAssignableFrom(clazz) ||
+		Slider.class.isAssignableFrom(clazz) || ProgressBar.class.isAssignableFrom(clazz) ||
+		isArrowDownNavigableField(clazz) || OptionGroup.class.isAssignableFrom(clazz));
+	}
 }
