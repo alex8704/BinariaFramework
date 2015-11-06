@@ -15,7 +15,6 @@ import org.slf4j.LoggerFactory;
 import co.com.binariasystems.fmw.constants.FMWConstants;
 import co.com.binariasystems.fmw.entity.cfg.EntityConfigData;
 import co.com.binariasystems.fmw.entity.cfg.EntityConfigData.FieldConfigData;
-import co.com.binariasystems.fmw.entity.cfg.EntityConfigUIControl;
 import co.com.binariasystems.fmw.entity.cfg.EntityConfigurationManager;
 import co.com.binariasystems.fmw.entity.manager.EntityCRUDOperationsManager;
 import co.com.binariasystems.fmw.entity.util.FMWEntityUtils;
@@ -42,7 +41,7 @@ import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.Field;
 
-public class EntityCRUDPanel<T> extends UIForm implements ClickListener{
+public class EntityCRUDPanel<T> extends FormPanel implements ClickListener{
 	private static final Logger LOGGER = LoggerFactory.getLogger(EntityCRUDPanel.class);
 	private Class<T> entityClass;
 	private Button saveBtn;
@@ -56,7 +55,6 @@ public class EntityCRUDPanel<T> extends UIForm implements ClickListener{
 	private EntityCRUDOperationsManager<T> manager;
 	private Map<String, Component> componentMap = new HashMap<String, Component>();
 	private Pager2<T,T> pager;
-	private PageChangeHandler<T, T> pageChangeHanlder;
 	private Object initialKeyValue;
 	
 	private BeanItem<T> beanItem;
@@ -76,11 +74,13 @@ public class EntityCRUDPanel<T> extends UIForm implements ClickListener{
 	private static final int TEXTAREA_MAX_LENGTH = 4000;
 	
 	private EntityCRUDPanel() {
-		super(null, 90.0f, Unit.PERCENTAGE);
+		super(2);
+		setWidth(Dimension.percent(90.0f));
 	}
 	
 	public EntityCRUDPanel(Class<T> entityClass) {
-		super(null, 90.0f, Unit.PERCENTAGE);
+		super(2);
+		setWidth(Dimension.percent(90.0f));
 		this.entityClass = entityClass;
 		labelsFmt = FMWEntityUtils.createEntityLabelsMessageFormat();
 		titleFmt = FMWEntityUtils.createEntityFormTitleMessageFormat();
@@ -113,30 +113,12 @@ public class EntityCRUDPanel<T> extends UIForm implements ClickListener{
 		String titleKey =  StringUtils.defaultIfEmpty(entityConfigData.getTitleKey(), titleFmt.format(new String[]{entityConfigData.getEntityClass().getSimpleName()}));
 		setTitle(LocaleMessagesUtil.getLocalizedMessage(entityStrings, titleKey));
 		
-		List<FieldConfigData> controlsList = FMWEntityUtils.sortByUIControlTypePriority(entityConfigData.getFieldsData(), entityConfigData.getPkFieldName());
-		float widthPercent = 0;
-		int flags = 0;
-		boolean newRow = true;
+		List<FieldConfigData> sortedFields = FMWEntityUtils.sortByUIControlTypePriority(entityConfigData.getFieldsData(), entityConfigData.getPkFieldName());
 		
-		for(int i = 0; i < controlsList.size(); i++){
-			FieldConfigData fcd = controlsList.get(i);
-			if(fcd.getFieldUIControl() == EntityConfigUIControl.RADIO || fcd.getFieldUIControl() == EntityConfigUIControl.CHECKBOX || fcd.getFieldName().equals(entityConfigData.getPkFieldName())){
-				flags = UIForm.FIRST | UIForm.LAST;
-				widthPercent = 100;
-			}else{
-				flags = newRow ? (flags | UIForm.FIRST) : flags;
-				if(i == controlsList.size() - 1 || controlsList.get(i+1).getFieldUIControl() == EntityConfigUIControl.RADIO || 
-						controlsList.get(i+1).getFieldUIControl() == EntityConfigUIControl.CHECKBOX || !newRow)
-					flags = flags | UIForm.LAST;
-				widthPercent = ((flags & UIForm.FIRST) != 0 && (flags & UIForm.LAST) != 0 && i < controlsList.size() - 1) ? 100 : 50;
-			}
-			
-			Component comp = EntityConfigUtils.createComponentForField(fcd, entityConfigData, labelsFmt, entityStrings);
-			add(comp, flags, widthPercent);
-			componentMap.put(fcd.getFieldName(), comp);
-			newRow = (flags & UIForm.LAST) != 0;
-			flags = 0;
-			widthPercent = 0;
+		for(FieldConfigData fieldCfg : sortedFields){
+			Component comp = EntityConfigUtils.createComponentForField(fieldCfg, entityConfigData, labelsFmt, entityStrings);
+			add(comp, Dimension.percent(100));
+			componentMap.put(fieldCfg.getFieldName(), comp);
 		}
 		
 		pager = new Pager2<T,T>(PagerMode.ITEM);
@@ -146,15 +128,15 @@ public class EntityCRUDPanel<T> extends UIForm implements ClickListener{
 		searchAllBtn = new Button(VWebUtils.getCommonString(VWebCommonConstants.MASTER_CRUD_MSG_SEARCHALLCAPTION));
 		cleanBtn = new Button(VWebUtils.getCommonString(VWebCommonConstants.MASTER_CRUD_MSG_CLEANCAPTION));
 		
-		addCentered();
-		add(pager);
-		addCentered();
+		addEmptyRow();
+		addCenteredOnNewRow(Dimension.fullPercent(), pager);
+		addEmptyRow();
 		
 		if(entityConfigData.isDeleteEnabled()){
 			deleteBtn = new Button(VWebUtils.getCommonString(VWebCommonConstants.MASTER_CRUD_MSG_DELETECAPTION));
-			addCentered(BUTTONS_WIDTH, BUTTONS_WIDTH_UNIT, saveBtn, editBtn, searchBtn, searchAllBtn, deleteBtn, cleanBtn);
+			addCenteredOnNewRow(Dimension.pixels(EntityConfigUtils.BUTTONS_WIDTH), saveBtn, editBtn, searchBtn, searchAllBtn, deleteBtn, cleanBtn);
 		}else
-			addCentered(BUTTONS_WIDTH, BUTTONS_WIDTH_UNIT, saveBtn, editBtn, searchBtn, searchAllBtn, cleanBtn);
+			addCenteredOnNewRow(Dimension.pixels(EntityConfigUtils.BUTTONS_WIDTH), saveBtn, editBtn, searchBtn, searchAllBtn, cleanBtn);
 		
 		bindComponentsToModel();
 		

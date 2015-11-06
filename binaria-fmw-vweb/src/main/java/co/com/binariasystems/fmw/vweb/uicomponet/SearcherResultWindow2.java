@@ -61,7 +61,7 @@ import com.vaadin.ui.renderers.Renderer;
 
 public class SearcherResultWindow2<T> extends Window implements CloseListener, ClickListener, ActionHandler {
 	private Class<T> entityClazz;
-	private PanelGrid form;
+	private FormPanel form;
 	private Button cleanBtn;
 	private Button searchBtn;
 	private Button searchAllBtn;
@@ -119,38 +119,14 @@ public class SearcherResultWindow2<T> extends Window implements CloseListener, C
 		selectionEventFunction = SearcherResultWindow2.class.getSimpleName()+"_fn"+Math.abs(hashCode());
 		
 		setCaption(VWebUtils.getCommonString(VWebCommonConstants.SEARCH_WIN_CAPTION));
-		form = new PanelGrid(2);//new UIForm(null,100, Unit.PERCENTAGE);
+		form = new FormPanel(2);//new UIForm(null,100, Unit.PERCENTAGE);
 		List<FieldConfigData> sortedFields = FMWEntityUtils.sortByUIControlTypePriority(entityConfigData.getFieldsData(), entityConfigData.getPkFieldName());
-		float widthPercent = 0;
-		int flags = 0;
-		boolean newRow = true;
-		
 		
 		for(FieldConfigData fieldCfg : sortedFields){
 			Component comp = EntityConfigUtils.createComponentForField(fieldCfg, entityConfigData, labelsFmt, entityStrings);
 			form.add(comp, Dimension.percent(100));
 			componentMap.put(fieldCfg.getFieldName(), comp);
 		}
-//		for(int i = 0; i < controlsList.size(); i++){
-//			FieldConfigData fcd = controlsList.get(i);
-//			if(fcd.getFieldUIControl() == EntityConfigUIControl.RADIO || fcd.getFieldUIControl() == EntityConfigUIControl.CHECKBOX || fcd.getFieldName().equals(entityConfigData.getPkFieldName())){
-//				flags = UIForm.FIRST | UIForm.LAST;
-//				widthPercent = 100;
-//			}else{
-//				flags = newRow ? (flags | UIForm.FIRST) : flags;
-//				if(i == controlsList.size() - 1 || controlsList.get(i+1).getFieldUIControl() == EntityConfigUIControl.RADIO || 
-//						controlsList.get(i+1).getFieldUIControl() == EntityConfigUIControl.CHECKBOX || !newRow)
-//					flags = flags | UIForm.LAST;
-//				widthPercent = ((flags & UIForm.FIRST) != 0 && (flags & UIForm.LAST) != 0 && i < controlsList.size() - 1) ? 100 : 50;
-//			}
-//			
-//			Component comp = EntityConfigUtils.createComponentForField(fcd, entityConfigData, labelsFmt, entityStrings);
-//			form.add(comp, flags, widthPercent);
-//			componentMap.put(fcd.getFieldName(), comp);
-//			newRow = (flags & UIForm.LAST) != 0;
-//			flags = 0;
-//			widthPercent = 0;
-//		}
 		
 		pager = new Pager2<T, T>(PagerMode.PAGE);
 		searchBtn = new Button(VWebUtils.getCommonString(VWebCommonConstants.MASTER_CRUD_MSG_SEARCHCAPTION));
@@ -170,7 +146,6 @@ public class SearcherResultWindow2<T> extends Window implements CloseListener, C
 		Collection<String> descriptionFields = entityConfigData.getSearchDescriptionFields().isEmpty() ? entityConfigData.getFieldsData().keySet() : entityConfigData.getSearchDescriptionFields();
 		GenericStringPropertyGenerator genericPropertyGenerator = new GenericStringPropertyGenerator();
 		for(String fieldName : descriptionFields){
-			//if(fieldName.equals(entityConfigData.getPkFieldName())) continue;
 			FieldConfigData fieldCfg = entityConfigData.getFieldData(fieldName);
 			Renderer<?> renderer = GridUtils.obtainRendererForType(fieldCfg.getFieldType());
 			Column column = resultsGrid.addColumn(fieldName);
@@ -188,11 +163,8 @@ public class SearcherResultWindow2<T> extends Window implements CloseListener, C
 		
 		form.addEmptyRow();
 		form.addCenteredOnNewRow(Dimension.pixels(EntityConfigUtils.BUTTONS_WIDTH), searchBtn, searchAllBtn, cleanBtn);
-		//form.addCentered(EntityConfigUtils.BUTTONS_WIDTH, EntityConfigUtils.BUTTONS_WIDTH_UNIT, searchBtn, searchAllBtn, cleanBtn);
 		form.add(resultsGrid, 2, Dimension.fullPercent());
 		form.addCenteredOnNewRow(Dimension.fullPercent(), pager);
-//		form.add(resultsGrid);
-//		form.add(pager);
 		
 		bindComponentsToModel();
 		

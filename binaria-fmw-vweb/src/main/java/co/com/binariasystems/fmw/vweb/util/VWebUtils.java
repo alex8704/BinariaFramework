@@ -1,5 +1,7 @@
 package co.com.binariasystems.fmw.vweb.util;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 import co.com.binariasystems.fmw.util.messagebundle.MessageBundleManager;
@@ -9,10 +11,16 @@ import co.com.binariasystems.fmw.vweb.uicomponet.SearcherField;
 import co.com.binariasystems.fmw.vweb.uicomponet.TreeMenu;
 import co.com.binariasystems.fmw.vweb.uicomponet.UIForm;
 
+import com.vaadin.event.Action.Notifier;
+import com.vaadin.event.ShortcutAction.KeyCode;
+import com.vaadin.event.ShortcutListener;
 import com.vaadin.server.VaadinService;
 import com.vaadin.ui.AbstractSelect;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.CheckBox;
+import com.vaadin.ui.Component;
+import com.vaadin.ui.Component.Focusable;
+import com.vaadin.ui.ComponentContainer;
 import com.vaadin.ui.CustomField;
 import com.vaadin.ui.DateField;
 import com.vaadin.ui.Field;
@@ -72,18 +80,113 @@ public final class VWebUtils {
                 Button.class.isAssignableFrom(fieldClass));
     }
 	
-	public static boolean isArrowUpNavigableField(Class clazz){
+	public static boolean isArrowUpNavigableField(Class<?> clazz){
 		return (isArrowDownNavigableField(clazz) || DateField.class.isAssignableFrom(clazz));
 	}
 	
-	public static  boolean isArrowDownNavigableField(Class clazz){
+	public static  boolean isArrowDownNavigableField(Class<?> clazz){
 		return (Button.class.isAssignableFrom(clazz) || CheckBox.class.isAssignableFrom(clazz) || CustomField.class.isAssignableFrom(clazz) ||
 				TextField.class.isAssignableFrom(clazz) || PasswordField.class.isAssignableFrom(clazz) || Upload.class.isAssignableFrom(clazz));
 	}
 	
-	public static boolean isEnterNavigableField(Class clazz){
+	public static boolean isEnterNavigableField(Class<?> clazz){
 		return (DateField.class.isAssignableFrom(clazz) || AbstractSelect.class.isAssignableFrom(clazz) ||
 		Slider.class.isAssignableFrom(clazz) || ProgressBar.class.isAssignableFrom(clazz) ||
 		isArrowDownNavigableField(clazz) || OptionGroup.class.isAssignableFrom(clazz));
 	}
+	
+	public static List<Component> getKeyNavigableChilds(ComponentContainer container){
+		List<Component> navigableChilds = new ArrayList<Component>();
+		Component child = null;
+		for(;container.iterator().hasNext();child = container.iterator().next()){
+			if(child instanceof ComponentContainer)
+				navigableChilds.addAll(getKeyNavigableChilds((ComponentContainer)child));
+			else if(isFocusableControlClass(child.getClass()))
+				navigableChilds.add(child);
+		}
+		return navigableChilds;
+	}
+	
+	public static void applyNavigationActions(Notifier notifier, ComponentContainer container){
+		applyNavigationActions(notifier, container, null);
+	}
+	
+	public static void applyNavigationActions(Notifier notifier, ComponentContainer container, final Button submitButton){
+		final List<Component> childComponents = getKeyNavigableChilds(container);
+		final Component lastComponent = childComponents.isEmpty() ? null : childComponents.get(childComponents.size() - 1);
+		Field<?> auxFirstFocusComp = null;
+		
+		for(int i = 0; i < childComponents.size() && auxFirstFocusComp == null; i++){
+			if(childComponents.get(i) instanceof Field &&  ((Field<?>)childComponents.get(i)).isEnabled()  && !((Field<?>)childComponents.get(i)).isReadOnly())
+				auxFirstFocusComp = (Field<?>)childComponents.get(i);
+		}
+		
+		final Field<?> firstFocusComp = auxFirstFocusComp;
+		
+		notifier.addAction(new ShortcutListener("ControlsNavDown@"+notifier.hashCode(), KeyCode.ARROW_DOWN, null) {
+			@Override
+			public void handleAction(Object sender, Object target) {
+				if(VWebUtils.isArrowDownNavigableField(target.getClass())){
+					int targetIdx = childComponents.indexOf(target);
+					if(targetIdx < 0)return;
+					
+					for(int i = targetIdx + 1; i < childComponents.size(); i++){
+						Component comp = childComponents.get(i);
+						if(comp instanceof Focusable && ((Focusable)comp).isEnabled() && !((Focusable)comp).isReadOnly() ){
+							((Focusable)comp).focus();
+							return;
+						}
+					}
+					if(firstFocusComp != null)
+						firstFocusComp.focus();
+				}
+			}
+		});
+		
+		//Navegacion con Tecla ARROW_UP
+		notifier.addAction(new ShortcutListener("ControlsNavUp@"+notifier.hashCode(), KeyCode.ARROW_UP, null) {
+			@Override
+			public void handleAction(Object sender, Object target) {
+				if(VWebUtils.isArrowUpNavigableField(target.getClass())){
+					int targetIdx = childComponents.indexOf(target);
+					if(targetIdx < 0)return;
+					
+					for(int i= targetIdx - 1; i >= 0; i--){
+						Component comp = childComponents.get(i);
+						if(comp instanceof Focusable && ((Focusable)comp).isEnabled() && !((Focusable)comp).isReadOnly() ){
+							((Focusable)comp).focus();
+							return;
+						}
+					}
+				}
+			}
+		});
+		
+		//Navegacion con Tecla ENTER
+		notifier.addAction(new ShortcutListener("EnterPress@"+notifier.hashCode(), KeyCode.ENTER, null) {
+			@Override
+			public void handleAction(Object sender, Object target) {
+				if(target == lastComponent && lastComponent.isEnabled() && !lastComponent.isReadOnly() &&
+					(target instanceof TextField || target instanceof PasswordField || target instanceof DateField) && submitButton != null)
+					submitButton.click();
+				
+				if(VWebUtils.isEnterNavigableField(target.getClass())){
+					int targetIdx = childComponents.indexOf(target);
+					if(targetIdx < 0)return;
+					
+					for(int i = targetIdx + 1; i < childComponents.size(); i++){
+						Component comp = childComponents.get(i);
+						if(comp instanceof Focusable && ((Focusable)comp).isEnabled() && !((Focusable)comp).isReadOnly() ){
+							((Focusable)comp).focus();
+							return;
+						}
+					}
+					
+					if(firstFocusComp != null)
+						((Field<?>)firstFocusComp).focus();
+				}
+			}
+		});
+	}
+	
 }

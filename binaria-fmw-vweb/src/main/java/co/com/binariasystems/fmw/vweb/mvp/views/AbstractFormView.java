@@ -5,11 +5,11 @@ import org.slf4j.Logger;
 import co.com.binariasystems.fmw.util.messagebundle.MessageBundleManager;
 import co.com.binariasystems.fmw.vweb.mvp.event.UIEvent;
 import co.com.binariasystems.fmw.vweb.mvp.eventbus.EventBus;
+import co.com.binariasystems.fmw.vweb.uicomponet.FormPanel;
 import co.com.binariasystems.fmw.vweb.uicomponet.MessageDialog;
-import co.com.binariasystems.fmw.vweb.uicomponet.UIForm;
 import co.com.binariasystems.fmw.vweb.util.LocaleMessagesUtil;
 
-public abstract class AbstractFormView extends UIForm {
+public abstract class AbstractFormView extends FormPanel {
 	protected MessageBundleManager messages;
 	protected EventBus eventBus;
 

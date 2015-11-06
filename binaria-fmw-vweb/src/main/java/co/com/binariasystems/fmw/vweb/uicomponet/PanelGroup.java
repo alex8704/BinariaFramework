@@ -122,6 +122,9 @@ public class PanelGroup extends HorizontalLayout{
 		validateComponentAlreadyAdded(component);
 		int realColSpan = colSpan <= 0 ? 1 : colSpan;
 		validateSpaceAndPosition(realColSpan);
+		if(component instanceof PanelGroup || component instanceof FormPanel){
+			((HorizontalLayout)component).setMargin(false);
+		}
 		content.addComponent(component, currentColumn, currentRow, currentColumn + (realColSpan - 1), currentRow);
 		content.setComponentAlignment(component, align != null ? align : Alignment.TOP_LEFT);
 		if(width != null)
@@ -166,8 +169,9 @@ public class PanelGroup extends HorizontalLayout{
 			throw new FMWUncheckedException("colSpan cause an overlap in container, availableColumns = "+availableCells+", requiredColumns = "+colSpan);
 	}
 	
-	protected boolean containsButton(Button button){
-		return childComponents.contains(button);
+	protected void setColumns(int columns){
+		this.columns = columns <= 0 ? 1 : columns;
+		content.setColumns(columns);
 	}
 	
 	private void createNewRow(){
