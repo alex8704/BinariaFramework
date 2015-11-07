@@ -1,15 +1,15 @@
 package co.com.binariasystems.fmw.vweb.util;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 
 import co.com.binariasystems.fmw.util.messagebundle.MessageBundleManager;
 import co.com.binariasystems.fmw.vweb.constants.VWebCommonConstants;
 import co.com.binariasystems.fmw.vweb.resources.messages.messages;
-import co.com.binariasystems.fmw.vweb.uicomponet.SearcherField;
+import co.com.binariasystems.fmw.vweb.uicomponet.FormPanel;
 import co.com.binariasystems.fmw.vweb.uicomponet.TreeMenu;
-import co.com.binariasystems.fmw.vweb.uicomponet.UIForm;
 
 import com.vaadin.event.Action.Notifier;
 import com.vaadin.event.ShortcutAction.KeyCode;
@@ -28,6 +28,7 @@ import com.vaadin.ui.Grid;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Link;
 import com.vaadin.ui.OptionGroup;
+import com.vaadin.ui.Panel;
 import com.vaadin.ui.PasswordField;
 import com.vaadin.ui.ProgressBar;
 import com.vaadin.ui.Slider;
@@ -63,7 +64,7 @@ public final class VWebUtils {
 	public static boolean isVField(Class<?> clazz){
 		boolean resp = false;
 		
-		resp = SearcherField.class.isAssignableFrom(clazz) ||  UIForm.class.isAssignableFrom(clazz) ||
+		resp = FormPanel.class.isAssignableFrom(clazz) || Panel.class.isAssignableFrom(clazz) ||
 				TreeMenu.class.isAssignableFrom(clazz) || Upload.class.isAssignableFrom(clazz) ||
 				Label.class.isAssignableFrom(clazz) || Link.class.isAssignableFrom(clazz) || 
 				Button.class.isAssignableFrom(clazz) || Grid.class.isAssignableFrom(clazz) || 
@@ -98,7 +99,9 @@ public final class VWebUtils {
 	public static List<Component> getKeyNavigableChilds(ComponentContainer container){
 		List<Component> navigableChilds = new ArrayList<Component>();
 		Component child = null;
-		for(;container.iterator().hasNext();child = container.iterator().next()){
+		Iterator<Component> iterator = container.iterator();
+		while(iterator.hasNext()){
+			child = iterator.next();
 			if(child instanceof ComponentContainer)
 				navigableChilds.addAll(getKeyNavigableChilds((ComponentContainer)child));
 			else if(isFocusableControlClass(child.getClass()))
@@ -113,15 +116,18 @@ public final class VWebUtils {
 	
 	public static void applyNavigationActions(Notifier notifier, ComponentContainer container, final Button submitButton){
 		final List<Component> childComponents = getKeyNavigableChilds(container);
-		final Component lastComponent = childComponents.isEmpty() ? null : childComponents.get(childComponents.size() - 1);
+		Component auxlastComponent = null;
 		Field<?> auxFirstFocusComp = null;
 		
-		for(int i = 0; i < childComponents.size() && auxFirstFocusComp == null; i++){
-			if(childComponents.get(i) instanceof Field &&  ((Field<?>)childComponents.get(i)).isEnabled()  && !((Field<?>)childComponents.get(i)).isReadOnly())
-				auxFirstFocusComp = (Field<?>)childComponents.get(i);
+		for(Component child : childComponents){
+			if(child instanceof Field &&  ((Field<?>)child).isEnabled()  && !((Field<?>)child).isReadOnly())
+				auxFirstFocusComp = (Field<?>)child;
+			if(child instanceof TextField || child instanceof PasswordField || child instanceof DateField)
+				auxlastComponent = child;
 		}
 		
 		final Field<?> firstFocusComp = auxFirstFocusComp;
+		final Component lastComponent = auxlastComponent;
 		
 		notifier.addAction(new ShortcutListener("ControlsNavDown@"+notifier.hashCode(), KeyCode.ARROW_DOWN, null) {
 			@Override
@@ -166,10 +172,8 @@ public final class VWebUtils {
 		notifier.addAction(new ShortcutListener("EnterPress@"+notifier.hashCode(), KeyCode.ENTER, null) {
 			@Override
 			public void handleAction(Object sender, Object target) {
-				if(target == lastComponent && lastComponent.isEnabled() && !lastComponent.isReadOnly() &&
-					(target instanceof TextField || target instanceof PasswordField || target instanceof DateField) && submitButton != null)
+				if(target == lastComponent && lastComponent.isEnabled() && !lastComponent.isReadOnly() && submitButton != null)
 					submitButton.click();
-				
 				if(VWebUtils.isEnterNavigableField(target.getClass())){
 					int targetIdx = childComponents.indexOf(target);
 					if(targetIdx < 0)return;

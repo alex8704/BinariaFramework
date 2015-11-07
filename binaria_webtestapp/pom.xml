@@ -8,7 +8,7 @@
 	<name>binaria_webtestapp</name>
 	
 	<properties>
-		<vaadin.version>7.4.5</vaadin.version>
+		<vaadin.version>7.5.8</vaadin.version>
 		<vaadin.plugin.version>${vaadin.version}</vaadin.plugin.version>
 		<servlet.api.version>3.0.1</servlet.api.version>
 		<spring.version>4.2.0.RELEASE</spring.version>

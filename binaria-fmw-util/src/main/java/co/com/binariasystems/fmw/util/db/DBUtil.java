@@ -8,11 +8,13 @@ import javax.sql.DataSource;
 
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import co.com.binariasystems.fmw.dto.DTOPrueba;
 
 public class DBUtil {
-
+	private static final Logger LOGGER = LoggerFactory.getLogger(DBUtil.class);
 	public enum DBMS{MYSQL,POSTGRES,SQLSERVER,ORACLE,HSQLDB,UNSUPPORTED}
 	private static DBMS currentDBMS;
 	private static final String STANDARD_SQL_DATETIME_FMT = "yyyy-MM-dd HH:mm:ss.SSS";
@@ -23,7 +25,7 @@ public class DBUtil {
         
         try {
             dbName = dataSource.getConnection().getMetaData().getDatabaseProductName();
-            System.out.println(DBUtil.class.getSimpleName()+".init('"+dbName+"')");
+            LOGGER.info("{0}.init(''{1}'')", DBUtil.class.getSimpleName(), dbName);
         } catch (SQLException ex) {
             dbName = null;
         }
@@ -62,18 +64,5 @@ public class DBUtil {
 	
 	public static DBMS getCurrentDBMS(){
 		return currentDBMS;
-	}
-	
-	public static void main(String[] args) throws Exception {
-		DTOPrueba dto = new DTOPrueba();
-		//dto.setAnidado(new DTOAnidado());
-		dto.setNombre("FRANKLIN");
-		dto.setIdentificador(1200);
-//		dto.getAnidado().setCantidad(25);
-//		dto.getAnidado().setDescripcion(null);
-//		dto.getAnidado().setValor(1300.0d);
-		PropertyUtils.setNestedProperty(dto, "anidado.descripcion", "JORGE MELENDEZ");
-		Object obj = PropertyUtils.getNestedProperty(dto, "anidado.descripcion");
-		System.out.println("{"+obj+"}");
 	}
 }

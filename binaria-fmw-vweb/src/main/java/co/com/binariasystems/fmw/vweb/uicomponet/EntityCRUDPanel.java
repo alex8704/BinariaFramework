@@ -26,7 +26,7 @@ import co.com.binariasystems.fmw.util.messagebundle.MessageBundleManager;
 import co.com.binariasystems.fmw.util.pagination.ListPage;
 import co.com.binariasystems.fmw.vweb.constants.VWebCommonConstants;
 import co.com.binariasystems.fmw.vweb.uicomponet.MessageDialog.Type;
-import co.com.binariasystems.fmw.vweb.uicomponet.Pager2.PagerMode;
+import co.com.binariasystems.fmw.vweb.uicomponet.Pager.PagerMode;
 import co.com.binariasystems.fmw.vweb.uicomponet.pager.PageChangeEvent;
 import co.com.binariasystems.fmw.vweb.uicomponet.pager.PageChangeHandler;
 import co.com.binariasystems.fmw.vweb.util.EntityConfigUtils;
@@ -54,7 +54,7 @@ public class EntityCRUDPanel<T> extends FormPanel implements ClickListener{
 	private EntityConfigData<T> entityConfigData;
 	private EntityCRUDOperationsManager<T> manager;
 	private Map<String, Component> componentMap = new HashMap<String, Component>();
-	private Pager2<T,T> pager;
+	private Pager<T,T> pager;
 	private Object initialKeyValue;
 	
 	private BeanItem<T> beanItem;
@@ -66,12 +66,6 @@ public class EntityCRUDPanel<T> extends FormPanel implements ClickListener{
 			IOCHelper.getBean(FMWConstants.APPLICATION_DEFAULT_CLASS_FOR_RESOURCE_LOAD_IOC_KEY, Class.class));
 	
 	private boolean attached;
-	
-	
-	private static final float BUTTONS_WIDTH = 100.0f;
-	private static final Unit BUTTONS_WIDTH_UNIT = Unit.PIXELS;
-	private static final int TEXTFIELD_MAX_LENGTH = 100;
-	private static final int TEXTAREA_MAX_LENGTH = 4000;
 	
 	private EntityCRUDPanel() {
 		super(2);
@@ -116,12 +110,12 @@ public class EntityCRUDPanel<T> extends FormPanel implements ClickListener{
 		List<FieldConfigData> sortedFields = FMWEntityUtils.sortByUIControlTypePriority(entityConfigData.getFieldsData(), entityConfigData.getPkFieldName());
 		
 		for(FieldConfigData fieldCfg : sortedFields){
-			Component comp = EntityConfigUtils.createComponentForField(fieldCfg, entityConfigData, labelsFmt, entityStrings);
+			Component comp = EntityConfigUtils.createComponentForCrudField(fieldCfg, entityConfigData, labelsFmt, entityStrings);
 			add(comp, Dimension.percent(100));
 			componentMap.put(fieldCfg.getFieldName(), comp);
 		}
 		
-		pager = new Pager2<T,T>(PagerMode.ITEM);
+		pager = new Pager<T,T>(PagerMode.ITEM);
 		saveBtn = new Button(VWebUtils.getCommonString(VWebCommonConstants.MASTER_CRUD_MSG_SAVECAPTION));
 		editBtn = new Button(VWebUtils.getCommonString(VWebCommonConstants.MASTER_CRUD_MSG_EDITCAPTION));
 		searchBtn = new Button(VWebUtils.getCommonString(VWebCommonConstants.MASTER_CRUD_MSG_SEARCHCAPTION));

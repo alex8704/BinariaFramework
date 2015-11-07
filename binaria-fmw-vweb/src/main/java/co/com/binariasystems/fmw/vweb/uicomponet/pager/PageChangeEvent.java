@@ -9,7 +9,7 @@ public class PageChangeEvent<FILTER_TYPE> implements FMWEvent{
 	private int rowsByPage;
 	private int pagesPerGroup;
 	private FILTER_TYPE filterDTO;
-	private Pager pager;
+	private Pager<FILTER_TYPE, ?> pager;
 	
 	
 	public int getOldPage() {
@@ -36,10 +36,10 @@ public class PageChangeEvent<FILTER_TYPE> implements FMWEvent{
 	public void setFilterDTO(FILTER_TYPE filterDTO) {
 		this.filterDTO = filterDTO;
 	}
-	public Pager getPager() {
+	public Pager<FILTER_TYPE, ?> getPager() {
 		return pager;
 	}
-	public void setPager(Pager pager) {
+	public void setPager(Pager<FILTER_TYPE, ?> pager) {
 		this.pager = pager;
 	}
 	

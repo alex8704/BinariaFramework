@@ -18,11 +18,7 @@ public class ShiroBasedJDBCRealm extends JdbcRealm{
 	public void setSaltStyleName(String saltStyleName) {
 		this.saltStyleName = saltStyleName;
 		if(StringUtils.isNotEmpty(saltStyleName))
-			for(SaltStyle style : SaltStyle.values())
-				if(style.name().equalsIgnoreCase(saltStyleName)){
-					setSaltStyle(style);
-					break;
-				}
+			SaltStyle.valueOf(saltStyleName.toUpperCase());
 	}
 	
 	

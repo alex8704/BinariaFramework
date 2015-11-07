@@ -4,15 +4,14 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
+import co.com.binariasystems.fmw.vweb.uicomponet.FormPanel;
 import co.com.binariasystems.fmw.vweb.uicomponet.SearcherField;
 import co.com.binariasystems.fmw.vweb.uicomponet.TreeMenu;
-import co.com.binariasystems.fmw.vweb.uicomponet.UIForm;
 import co.com.binariasystems.fmw.vweb.uicomponet.treemenu.MenuElement;
 
 import com.vaadin.data.Container;
 import com.vaadin.data.Property;
 import com.vaadin.server.Resource;
-import com.vaadin.server.Sizeable.Unit;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Button.ClickListener;
 
@@ -242,15 +241,23 @@ public class Builders {
 		return new TreeMenu(title, items, showSearcher);
 	}
 	
-	public static SearcherField searcherField(Class<? extends Object> entityClass, String caption){
-		return new SearcherField(entityClass, caption);
+	public static <T> SearcherField<T> searcherField(Class<T> entityClass, String caption){
+		return new SearcherField<T>(entityClass, caption);
 	}
 	
-	public static UIForm form(){
-		return new UIForm();
+	public static FormPanel form(){
+		return new FormPanel(1);
 	}
 	
-	public static UIForm form(String title, float width, Unit widthUnit){
-		return new UIForm(title, width, widthUnit);
+	public static FormPanel form(int columns){
+		return new FormPanel(columns);
+	}
+	
+	public static FormPanel form(String title){
+		return new FormPanel(title);
+	}
+	
+	public static FormPanel form(int columns, String title){
+		return new FormPanel(columns, title);
 	}
 }

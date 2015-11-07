@@ -18,7 +18,7 @@ import co.com.binariasystems.fmw.vweb.mvp.controller.AbstractViewController;
 import co.com.binariasystems.fmw.vweb.uicomponet.LinkLabel;
 import co.com.binariasystems.fmw.vweb.uicomponet.LinkLabel.ClickHandler;
 import co.com.binariasystems.fmw.vweb.uicomponet.LinkLabel.LinkClickEvent;
-import co.com.binariasystems.fmw.vweb.uicomponet.Pager2;
+import co.com.binariasystems.fmw.vweb.uicomponet.Pager;
 import co.com.binariasystems.fmw.vweb.uicomponet.TreeMenu;
 import co.com.binariasystems.fmw.vweb.uicomponet.pager.PageChangeEvent;
 import co.com.binariasystems.fmw.vweb.uicomponet.pager.PageChangeHandler;
@@ -46,7 +46,7 @@ public class DashboardViewController extends AbstractViewController {
 	@ViewField private Label welcomeLabel;
 	@Dependency
 	private AuthenticationBusiness authBusiness;
-	@ViewField private Pager2<Medidor, Medidor> pager;
+	@ViewField private Pager<Medidor, Medidor> pager;
 	@ViewField private LinkLabel linkLabel;
 	private List<Medidor> items = new ArrayList<Medidor>();
 	@ViewField private Grid grid;

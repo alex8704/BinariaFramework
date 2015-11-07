@@ -1,10 +1,10 @@
 // Global variable overrides. Must be declared before importing Valo.
 $v-app-loading-text: "Cargando...";
 // Defines the plaintext font size, weight and family. Font size affects general component sizing.
-$v-font-size: 9pt;
+$v-font-size: 12px;
 $v-font-weight: 300;
-$v-caption-font-size: $v-font-size;
-$v-caption-font-weight: $v-font-weight;
+//$v-caption-font-size: $v-font-size;
+//$v-caption-font-weight: $v-font-weight;
 //$v-font-family: "Open Sans", sans-serif;
 
 // Defines the border used by all components.

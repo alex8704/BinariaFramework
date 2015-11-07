@@ -11,13 +11,12 @@ import org.apache.shiro.crypto.hash.Hash;
 import org.apache.shiro.crypto.hash.format.DefaultHashFormatFactory;
 import org.apache.shiro.crypto.hash.format.HashFormat;
 import org.apache.shiro.crypto.hash.format.HashFormatFactory;
-import org.apache.shiro.realm.jdbc.JdbcRealm;
 import org.apache.shiro.util.ByteSource;
 import org.apache.shiro.util.SimpleByteSource;
 
 import co.com.binariasystems.fmw.security.authc.credential.ShiroBasedHashedCredentialsMatcher;
-import co.com.binariasystems.fmw.security.crypto.CredentialsCryptoId;
 import co.com.binariasystems.fmw.security.crypto.CredentialsCrypto;
+import co.com.binariasystems.fmw.security.crypto.CredentialsCryptoId;
 import co.com.binariasystems.fmw.security.crypto.CredentialsCryptoProvider;
 import co.com.binariasystems.fmw.security.crypto.EncryptionRequest;
 import co.com.binariasystems.fmw.security.crypto.MatchingRequest;

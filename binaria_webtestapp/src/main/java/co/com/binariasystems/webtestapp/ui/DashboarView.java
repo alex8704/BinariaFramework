@@ -8,8 +8,8 @@ import co.com.binariasystems.fmw.vweb.mvp.annotation.View.Root;
 import co.com.binariasystems.fmw.vweb.mvp.annotation.ViewBuild;
 import co.com.binariasystems.fmw.vweb.mvp.views.AbstractView;
 import co.com.binariasystems.fmw.vweb.uicomponet.LinkLabel;
-import co.com.binariasystems.fmw.vweb.uicomponet.Pager2;
-import co.com.binariasystems.fmw.vweb.uicomponet.SearcherField2;
+import co.com.binariasystems.fmw.vweb.uicomponet.Pager;
+import co.com.binariasystems.fmw.vweb.uicomponet.SearcherField;
 import co.com.binariasystems.fmw.vweb.uicomponet.TreeMenu;
 import co.com.binariasystems.webtestapp.dto.Gateway;
 import co.com.binariasystems.webtestapp.dto.Medidor;
@@ -43,12 +43,12 @@ public class DashboarView extends AbstractView{
 	private TreeMenu menuContainer;
 	private Label welcomeLabel;
 	private LinkLabel linkLabel;
-	private Pager2<Medidor, Medidor> pager;
+	private Pager<Medidor, Medidor> pager;
 	private Grid grid;
 	private BeanItemContainer<Medidor> gridDs;
 	private GeneratedPropertyContainer container;
 	private MessageFormat doChooseFmt = new MessageFormat("javascript:doChoose({0})");
-	private SearcherField2<Long> gatewayTxt;
+	private SearcherField<Long> gatewayTxt;
 	
 	@ViewBuild
 	public Component init(){
@@ -56,7 +56,7 @@ public class DashboarView extends AbstractView{
 		rightPanel = new VerticalLayout();
 		welcomeLabel = new Label("Welcome My People");
 		linkLabel = new LinkLabel("Este es mi LinkLabel");
-		gatewayTxt = new SearcherField2<Long>(Gateway.class, Long.TYPE, "Gateway");
+		gatewayTxt = new SearcherField<Long>(Gateway.class, Long.TYPE, "Gateway");
 
 		gridDs = new BeanItemContainer<Medidor>(Medidor.class);
 		container = new GeneratedPropertyContainer(gridDs);
@@ -91,7 +91,7 @@ public class DashboarView extends AbstractView{
 		grid.getColumn("gateway").setRenderer(new HtmlRenderer());
 		
 		
-		pager = new Pager2<Medidor, Medidor>();
+		pager = new Pager<Medidor, Medidor>();
 		pager.setMaxCachedPages(5);
 		
 		menuContainer = new TreeMenu();

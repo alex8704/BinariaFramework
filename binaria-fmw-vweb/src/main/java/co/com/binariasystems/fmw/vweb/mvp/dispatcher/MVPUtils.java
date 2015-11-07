@@ -17,14 +17,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.vaadin.data.Validatable;
-import com.vaadin.ui.AbstractComponent;
-import com.vaadin.ui.Grid;
-import com.vaadin.ui.Grid.Column;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Table;
-import com.vaadin.ui.Table.ColumnHeaderMode;
-
 import co.com.binariasystems.fmw.annotation.Dependency;
 import co.com.binariasystems.fmw.constants.FMWConstants;
 import co.com.binariasystems.fmw.exception.FMWException;
@@ -39,12 +31,20 @@ import co.com.binariasystems.fmw.vweb.mvp.annotation.validation.NullValidator;
 import co.com.binariasystems.fmw.vweb.mvp.annotation.validation.RegExpValidator;
 import co.com.binariasystems.fmw.vweb.mvp.annotation.validation.StringLengthValidator;
 import co.com.binariasystems.fmw.vweb.mvp.dispatcher.data.ViewInfo;
-import co.com.binariasystems.fmw.vweb.uicomponet.SearcherField;
+import co.com.binariasystems.fmw.vweb.uicomponet.FormPanel;
 import co.com.binariasystems.fmw.vweb.uicomponet.TreeMenu;
-import co.com.binariasystems.fmw.vweb.uicomponet.UIForm;
 import co.com.binariasystems.fmw.vweb.util.LocaleMessagesUtil;
 import co.com.binariasystems.fmw.vweb.util.VWebUtils;
 import co.com.binariasystems.fmw.vweb.util.ValidationUtils;
+
+import com.vaadin.data.Validatable;
+import com.vaadin.ui.AbstractComponent;
+import com.vaadin.ui.Grid;
+import com.vaadin.ui.Grid.Column;
+import com.vaadin.ui.Label;
+import com.vaadin.ui.Panel;
+import com.vaadin.ui.Table;
+import com.vaadin.ui.Table.ColumnHeaderMode;
 
 public class MVPUtils {
 	private static final Logger LOGGER = LoggerFactory.getLogger(MVPUtils.class);
@@ -58,23 +58,25 @@ public class MVPUtils {
 		return resp;
 	}
 
+	@SuppressWarnings("unchecked")
 	public static void copyHomonymFieldsFromViewToController(ViewInfo viewInfo, Object sourceView, Object targetController) throws ViewInstantiationException, IllegalAccessException {
-//		Reflections reflections = new Reflections(new ConfigurationBuilder()
-//				.filterInputsBy(new FilterBuilder().includePackage(viewInfo.getControllerInfo().getControllerClass().getName()))
-//				.setUrls(ClasspathHelper.forPackage(viewInfo.getControllerInfo().getControllerClass().getPackage().getName()))
-//				.setScanners(new SubTypesScanner(), new FieldAnnotationsScanner()));
-
-		Set<Field> annotated = ReflectionUtils.getFields(viewInfo.getControllerInfo().getControllerClass(), ReflectionUtils.withAnnotation(ViewField.class));//reflections.getFieldsAnnotatedWith(ViewField.class);
+		Set<Field> annotated = ReflectionUtils.getFields(viewInfo.getControllerInfo().getControllerClass(), ReflectionUtils.withAnnotation(ViewField.class));
 		Field sourceField = null;
 		String sourceName = null;
 		Object sourceValue = null;
+		ViewField annotationInfo = null;
 		boolean forceAccess = true;
 		for (Field field : annotated) {
-			sourceName = StringUtils.defaultIfEmpty(field.getAnnotation(ViewField.class).value(), field.getName());
+			annotationInfo = field.getAnnotation(ViewField.class);
+			sourceName = StringUtils.defaultIfEmpty(annotationInfo.value(), field.getName());
 			sourceField = FieldUtils.getField(viewInfo.getViewClass(), sourceName, forceAccess);
-			if (sourceField == null)
-				throw new ViewInstantiationException("Cannot find the @" + ViewField.class.getSimpleName()
-						+ " source value for " + viewInfo.getControllerInfo().getControllerClass().getName() + "."+ field.getName() + " on view class " + viewInfo.getViewClass().getName());
+			if (sourceField == null){
+				if(!annotationInfo.isViewReference())
+					throw new ViewInstantiationException("Cannot find the @" + ViewField.class.getSimpleName()
+							+ " source value for " + viewInfo.getControllerInfo().getControllerClass().getName() + "."+ field.getName() + " on view class " + viewInfo.getViewClass().getName());
+				FieldUtils.writeField(field, targetController, sourceView, forceAccess);
+				continue;
+			}
 			if (!field.getType().isAssignableFrom(sourceField.getType()))
 				throw new ViewInstantiationException("Cannot bind the @" + ViewField.class.getSimpleName()
 						+ " source value for" + viewInfo.getControllerInfo().getControllerClass().getName() + "." + field.getName() + ", because are incopatible types");
@@ -91,9 +93,9 @@ public class MVPUtils {
 		String localizedDescription = "";
 		String localizedTitle = "";
 
-		if (viewInfo.isViewStringsByConventions() && messageManager != null && viewInstance instanceof UIForm) {
+		if (viewInfo.isViewStringsByConventions() && messageManager != null && viewInstance instanceof FormPanel) {
 			localizedTitle = LocaleMessagesUtil.conventionTitle(viewInfo.getViewClass(), messageManager);
-			((UIForm) viewInstance).setTitle(localizedTitle);
+			((FormPanel) viewInstance).setTitle(localizedTitle);
 		}
 
 		for (Field viewField : viewInfo.getViewClass().getDeclaredFields()) {
@@ -110,13 +112,14 @@ public class MVPUtils {
 				localizedDescription = LocaleMessagesUtil.conventionDescription(viewInfo.getViewClass(), messageManager,
 						viewField.getName());
 				if (viewInfo.isViewStringsByConventions() && messageManager != null) {
-					if (SearcherField.class.isAssignableFrom(viewField.getType())) {
-						((SearcherField) fieldValue).setCaption(localizedCaption);
-						((SearcherField) fieldValue).setDescription(StringUtils.defaultIfEmpty(localizedDescription, localizedCaption));
-					} else if (UIForm.class.isAssignableFrom(viewField.getType()) && fieldValue != viewInstance) {
+					if (FormPanel.class.isAssignableFrom(viewField.getType()) && fieldValue != viewInstance) {
 						localizedTitle = LocaleMessagesUtil.conventionTitle(viewInfo.getViewClass(), messageManager);
-						((UIForm) fieldValue).setTitle(localizedTitle);
-					} else if (TreeMenu.class.isAssignableFrom(viewField.getType()))
+						((FormPanel) fieldValue).setTitle(localizedTitle);
+					}
+					else if (Panel.class.isAssignableFrom(viewField.getType()) && fieldValue != viewInstance) {
+						((Panel) fieldValue).setCaption(localizedCaption);
+					}
+					else if (TreeMenu.class.isAssignableFrom(viewField.getType()))
 						((TreeMenu) fieldValue).setTitle(localizedCaption);
 					else if (Label.class.isAssignableFrom(viewField.getType()))
 						((Label) fieldValue).setValue(localizedCaption);
@@ -175,19 +178,15 @@ public class MVPUtils {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	public static void injectIOCProviderDependencies(Object targetObject, Class<?> targetClazz) throws FMWException {
-//		Reflections reflections = new Reflections(
-//				new ConfigurationBuilder().filterInputsBy(new FilterBuilder().includePackage(targetClazz.getName()))
-//						.setUrls(ClasspathHelper.forPackage(targetClazz.getPackage().getName()))
-//						.setScanners(new SubTypesScanner(), new FieldAnnotationsScanner(), new MethodAnnotationsScanner()));
-
 		boolean forceAccess = true;
 		Set<Field> annotatedFields = null;
 		Set<Method> annotatedMethods = null;
 		
 		for (Class<?> annot : dependencyAnnotations) {
-			annotatedFields = ReflectionUtils.getFields(targetClazz, ReflectionUtils.withAnnotation((Class<? extends Annotation>) annot));//reflections.getFieldsAnnotatedWith((Class<? extends Annotation>) annot);
-			annotatedMethods = ReflectionUtils.getMethods(targetClazz, ReflectionUtils.withAnnotation((Class<? extends Annotation>) annot));//reflections.getMethodsAnnotatedWith((Class<? extends Annotation>) annot);
+			annotatedFields = ReflectionUtils.getFields(targetClazz, ReflectionUtils.withAnnotation((Class<? extends Annotation>) annot));
+			annotatedMethods = ReflectionUtils.getMethods(targetClazz, ReflectionUtils.withAnnotation((Class<? extends Annotation>) annot));
 			try {
 				for (Field field : annotatedFields) {
 					FieldUtils.writeField(field, targetObject, IOCHelper.getBean(field.getType()), forceAccess);

@@ -65,6 +65,11 @@ public class PanelGroup extends HorizontalLayout{
 		return this;
 	}
 	
+	public PanelGroup add(Component component, Alignment align, Dimension width){
+		add(component, 1, align, width, null);
+		return this;
+	}
+	
 	public PanelGroup add(Component component, int colSpan){
 		add(component, colSpan, null, null);
 		return this;
@@ -95,7 +100,8 @@ public class PanelGroup extends HorizontalLayout{
 	
 	public PanelGroup addCenteredOnNewRow(Dimension uniformWidth, Component... components){
 		Component comp = null;
-		createNewRow();
+		if(currentColumn > 0)
+			createNewRow();
 		if(components.length == 1){
 			comp = components[0];
 			if(uniformWidth != null)

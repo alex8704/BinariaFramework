@@ -12,6 +12,22 @@ import co.com.binariasystems.fmw.vweb.util.LocaleMessagesUtil;
 public abstract class AbstractFormView extends FormPanel {
 	protected MessageBundleManager messages;
 	protected EventBus eventBus;
+	
+	public AbstractFormView() {
+		super();
+	}
+
+	public AbstractFormView(int columns, String title) {
+		super(columns, title);
+	}
+
+	public AbstractFormView(int columns) {
+		super(columns);
+	}
+
+	public AbstractFormView(String title) {
+		super(title);
+	}
 
 	public void setMessages(MessageBundleManager messages) {
 		this.messages = messages;

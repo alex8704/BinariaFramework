@@ -15,9 +15,9 @@
 	</util:list>
 
 	<bean id="defaultViewInstanceCreator" class="co.com.binariasystems.fmw.vweb.mvp.dispatcher.DefaultViewInstanceCreator">
-		<property name="controllerInstantiator">
-			<bean class="co.com.binariasystems.fmw.vweb.mvp.dispatcher.IOCBasedControllerInstantiator"></bean>
-		</property>
+		<constructor-arg>
+			<bean class="co.com.binariasystems.fmw.vweb.mvp.dispatcher.IOCBasedControllerInstantiator"/>
+		</constructor-arg>
 	</bean>
 
 	<bean id="entityCRUDViewInstanceCreator" class="co.com.binariasystems.fmw.vweb.mvp.dispatcher.EntityCRUDViewInstanceCreator"></bean>

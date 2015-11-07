@@ -32,6 +32,10 @@ public class DefaultViewInstanceCreator implements ViewInstanceCreator {
 		controllerInstantiator = new DefaultControllerInstantiator();
 	}
 	
+	public DefaultViewInstanceCreator(ControllerInstantiator controllerInstantiator){
+		this.controllerInstantiator = controllerInstantiator;
+	}
+	
 
 	@Override
 	public ViewAndController createAndCongigureView(ViewInfo viewInfo, RequestData request) throws ViewInstantiationException {

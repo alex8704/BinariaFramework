@@ -40,7 +40,7 @@ public class FormPanel extends HorizontalLayout{
 	private Field<?> firstFocusComp;
 	
 	
-	protected FormPanel(){
+	public FormPanel(){
 		this(1);
 	}
 	
@@ -94,6 +94,11 @@ public class FormPanel extends HorizontalLayout{
 	
 	public FormPanel add(Component component, Alignment align){
 		panelGroup.add(component, align);
+		return this;
+	}
+	
+	public FormPanel add(Component component, Alignment align, Dimension width){
+		panelGroup.add(component, align, width);
 		return this;
 	}
 	
@@ -159,7 +164,8 @@ public class FormPanel extends HorizontalLayout{
 	
 	
 	public void initFocus(){
-		
+		if(firstFocusComp != null)
+			firstFocusComp.focus();
 	}
 	
 	public boolean isValid(){
@@ -207,8 +213,7 @@ public class FormPanel extends HorizontalLayout{
 		if(!navigationEventApplieds){
 			applyNavigationActions();
 		}
-		if(firstFocusComp != null)
-			firstFocusComp.focus();
+		initFocus();
 	}
 	
 	private void applyNavigationActions(){

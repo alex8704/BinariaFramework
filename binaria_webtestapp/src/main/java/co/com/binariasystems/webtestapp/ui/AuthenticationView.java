@@ -10,7 +10,7 @@ import co.com.binariasystems.fmw.vweb.mvp.annotation.View.Root;
 import co.com.binariasystems.fmw.vweb.mvp.annotation.validation.NullValidator;
 import co.com.binariasystems.fmw.vweb.mvp.annotation.validation.StringLengthValidator;
 import co.com.binariasystems.fmw.vweb.mvp.views.AbstractFormView;
-import co.com.binariasystems.fmw.vweb.uicomponet.UIForm;
+import co.com.binariasystems.fmw.vweb.uicomponet.Dimension;
 
 import com.vaadin.data.util.ObjectProperty;
 import com.vaadin.data.util.PropertysetItem;
@@ -31,11 +31,17 @@ public class AuthenticationView extends AbstractFormView{
 	private PasswordField passwordField;
 	private Button logInBtn;
 	private PropertysetItem item;
-	private UIForm form;
 	
+	
+
+	public AuthenticationView() {
+		super(3);
+	}
+
+
+
 	@Init
 	public void init(){
-		form = this;
 		item = new PropertysetItem();
 		item.addItemProperty("usernameField", new ObjectProperty<String>(null, String.class));
 		item.addItemProperty("passwordField", new ObjectProperty<String>(null, String.class));
@@ -44,9 +50,12 @@ public class AuthenticationView extends AbstractFormView{
 		
 		passwordField = passwordField().withProperty(item.getItemProperty("passwordField"));
 		
-		logInBtn =button();
+		logInBtn = button();
 		
-		add(usernameField, FIRST, 100).add(passwordField, 0, 100).add(logInBtn, LAST, 100, Alignment.BOTTOM_LEFT);
+		add(usernameField, Dimension.fullPercent());
+		add(passwordField, Dimension.fullPercent());
+		add(logInBtn, Alignment.BOTTOM_LEFT, Dimension.fullPercent());
+		setSubmitButton(logInBtn);
 	}
 	
 }

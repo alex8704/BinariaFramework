@@ -6,15 +6,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.vaadin.data.util.PropertysetItem;
-import com.vaadin.server.VaadinService;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.PasswordField;
-import com.vaadin.ui.TextField;
-import com.vaadin.ui.UI;
-
 import co.com.binariasystems.fmw.annotation.Dependency;
 import co.com.binariasystems.fmw.util.mail.SimpleMailMessage;
 import co.com.binariasystems.fmw.util.messagebundle.PropertiesManager;
@@ -28,11 +19,20 @@ import co.com.binariasystems.fmw.vweb.mvp.controller.AbstractViewController;
 import co.com.binariasystems.fmw.vweb.mvp.security.SecurityManager;
 import co.com.binariasystems.fmw.vweb.mvp.security.model.AuthorizationAndAuthenticationInfo;
 import co.com.binariasystems.fmw.vweb.mvp.security.model.FMWSecurityException;
+import co.com.binariasystems.fmw.vweb.uicomponet.FormPanel;
 import co.com.binariasystems.fmw.vweb.uicomponet.FormValidationException;
 import co.com.binariasystems.fmw.vweb.uicomponet.MessageDialog;
 import co.com.binariasystems.fmw.vweb.uicomponet.MessageDialog.Type;
-import co.com.binariasystems.fmw.vweb.uicomponet.UIForm;
 import co.com.binariasystems.webtestapp.business.AuthenticationBusiness;
+
+import com.vaadin.data.util.PropertysetItem;
+import com.vaadin.server.VaadinService;
+import com.vaadin.ui.Button;
+import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.Button.ClickListener;
+import com.vaadin.ui.PasswordField;
+import com.vaadin.ui.TextField;
+import com.vaadin.ui.UI;
 
 
 @ViewController
@@ -42,7 +42,7 @@ public class AuthenticationViewController extends AbstractViewController{
 	@ViewField private PasswordField passwordField;
 	@ViewField private Button logInBtn;
 	@ViewField private PropertysetItem item;
-	@ViewField private UIForm form;
+	@ViewField(isViewReference = true) private FormPanel form;
 	private PropertiesManager mailProperties;
 	@Autowired
 	private AuthenticationBusiness authBusiness;

@@ -19,8 +19,6 @@ import co.com.binariasystems.fmw.exception.FMWException;
 import co.com.binariasystems.fmw.reflec.TypeHelper;
 import co.com.binariasystems.fmw.util.messagebundle.MessageBundleManager;
 import co.com.binariasystems.fmw.vweb.uicomponet.SearcherField;
-import co.com.binariasystems.fmw.vweb.uicomponet.SearcherField2;
-import co.com.binariasystems.fmw.vweb.uicomponet.builders.OptionGroupBuilder;
 import co.com.binariasystems.fmw.vweb.util.converter.DateToTimestampConverter;
 
 import com.vaadin.data.Item;
@@ -103,7 +101,7 @@ public class EntityConfigUtils {
 				resp = widget;
 			}
 			else if(controlType == EntityConfigUIControl.SEARCHBOX){
-				SearcherField2<?> widget = new SearcherField2(((RelationFieldConfigData)fieldInfo).getRelationEntityClass(), fieldInfo.getFieldType(), caption);
+				SearcherField<?> widget = new SearcherField<>(((RelationFieldConfigData)fieldInfo).getRelationEntityClass(), fieldInfo.getFieldType(), caption);
 				widget.setRequired(fieldInfo.isMandatory());
 				resp = widget;
 			}
@@ -141,7 +139,7 @@ public class EntityConfigUtils {
 		return resp;
 	}
 	
-	public Component createComponentForFielForCrud(FieldConfigData fieldInfo, EntityConfigData<?> entityConfig, MessageFormat labelsFmt, MessageBundleManager messages) throws FMWException{
+	public static Component createComponentForCrudField(FieldConfigData fieldInfo, EntityConfigData<?> entityConfig, MessageFormat labelsFmt, MessageBundleManager messages) throws FMWException{
 		Component resp = null;
 		EntityConfigUIControl controlType = fieldInfo.getFieldUIControl();
 		String caption = getFieldCaptionText(fieldInfo, entityConfig, labelsFmt, messages);
@@ -214,6 +212,7 @@ public class EntityConfigUtils {
 			else if(controlType == EntityConfigUIControl.RADIO){
 				OptionGroup widget = new OptionGroup(caption);
 				
+				widget.addStyleName(ValoTheme.OPTIONGROUP_HORIZONTAL);
 				widget.setRequired(fieldInfo.isMandatory());
 				widget.setRequiredError(ValidationUtils.requiredErrorFor(widget.getCaption()));
 				widget.setValidationVisible(true);
@@ -227,7 +226,7 @@ public class EntityConfigUtils {
 				resp = widget;
 			}
 			else if(controlType == EntityConfigUIControl.SEARCHBOX){
-				SearcherField2<?> widget = new SearcherField2(((RelationFieldConfigData)fieldInfo).getRelationEntityClass(), fieldInfo.getFieldType(), caption);
+				SearcherField<?> widget = new SearcherField<>(((RelationFieldConfigData)fieldInfo).getRelationEntityClass(), fieldInfo.getFieldType(), caption);
 				widget.setRequired(fieldInfo.isMandatory());
 				resp = widget;
 			}
