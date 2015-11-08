@@ -127,7 +127,7 @@ public class CriteriaUtils {
 		return new NotNull(entityField);
 	}
 	
-	public static Criteria between(String entityField, Date minValue, Date maxValue){
+	public static ValueRangeCriteria<Date> between(String entityField, Date minValue, Date maxValue){
 		if(StringUtils.isBlank(entityField))
 			throw new FMWUncheckedException("Cannot create an "+BetweenDates.class.getName()+" with null entityField");
 		if(minValue == null)
@@ -140,7 +140,7 @@ public class CriteriaUtils {
 		return new BetweenDates(minValue, maxValue, entityField);
 	}
 	
-	public static Criteria between(String entityField, Number minValue, Number maxValue){
+	public static ValueRangeCriteria<Number> between(String entityField, Number minValue, Number maxValue){
 		if(StringUtils.isBlank(entityField))
 			throw new FMWUncheckedException("Cannot create an "+BetweenNumbers.class.getName()+" with null entityField");
 		if(minValue == null)

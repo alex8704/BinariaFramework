@@ -1,18 +1,13 @@
 
 package co.com.binariasystems.fmw.vweb.mvp.dispatcher;
 
-import static co.com.binariasystems.fmw.vweb.constants.VWebCommonConstants.SECURITY_SUBJECT_ATTRIBUTE;
-import static co.com.binariasystems.fmw.vweb.mvp.security.model.AuthorizationAndAuthenticationInfo.RESOURCE_URL_ARG;
-
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import co.com.binariasystems.fmw.vweb.mvp.event.RequestDispatchEvent;
-import co.com.binariasystems.fmw.vweb.mvp.security.SecurityManager;
-import co.com.binariasystems.fmw.vweb.mvp.security.model.AuthorizationAndAuthenticationInfo;
-
-import com.vaadin.server.VaadinService;
+import co.com.binariasystems.fmw.security.mgt.SecurityManager;
+import co.com.binariasystems.fmw.security.model.AuthorizationRequest;
+import co.com.binariasystems.fmw.vweb.mvp.event.ViewDispatchRequest;
 
 public class DispatchEventInterceptor {
 	private static final Logger LOGGER = LoggerFactory.getLogger(DispatchEventInterceptor.class);
@@ -21,27 +16,26 @@ public class DispatchEventInterceptor {
 	private boolean dummy;
 	
 	public void intercept(ProceedingJoinPoint joinPoint) throws ViewDispatchException{
-		RequestDispatchEvent dispatchEvent = (RequestDispatchEvent)joinPoint.getArgs()[0];
-		String requestedUrl = dispatchEvent.getString(RequestDispatchEvent.URL_PROPERTY);
+		ViewDispatchRequest dispatchEvent = (ViewDispatchRequest)joinPoint.getArgs()[0];
 		
+		AuthorizationRequest authRequest = new AuthorizationRequest();
+		authRequest.setResourceURL(dispatchEvent.getViewURL());
+		authRequest.setHttpRequest(dispatchEvent.getHttpRequest());
+		authRequest.setHttpSession(dispatchEvent.getHttpSession());
 		
-		AuthorizationAndAuthenticationInfo authInfo = new AuthorizationAndAuthenticationInfo()
-		.set(RESOURCE_URL_ARG, requestedUrl)
-		.set(AuthorizationAndAuthenticationInfo.SECURITY_SUBJECT_ARG, VaadinService.getCurrentRequest().getAttribute(SECURITY_SUBJECT_ATTRIBUTE));
-		
-		boolean authenticated = securityManager.isAuthenticated(authInfo);
+		boolean authenticated = securityManager.isAuthenticated(authRequest);
 		boolean authorized = false;
 		try{
 			if(authenticated){
-				authorized = securityManager.isAuthorized(authInfo);
+				authorized = securityManager.isAuthorized(authRequest);
 			}else 
-				authorized = securityManager.isPublicView(requestedUrl);
+				authorized = securityManager.isPublicView(dispatchEvent.getViewURL());
 			String targetUrl = new StringBuilder(ViewProvider.SPECIAL_VIEWS_URL).append("?").append(ViewProvider.AUTHENTICATION_VIEW_PARAM_IDENTIFIER).toString();
-			targetUrl = authorized ? requestedUrl : (authenticated ? securityManager.getForbiddenViewUrl() : targetUrl);
+			targetUrl = authorized ? dispatchEvent.getViewURL() : (authenticated ? securityManager.getForbiddenViewUrl() : targetUrl);
 			
-			printDebugInformation(authorized, requestedUrl, targetUrl);
+			printDebugInformation(authorized, dispatchEvent.getViewURL(), targetUrl);
 			
-			dispatchEvent.set(RequestDispatchEvent.URL_PROPERTY, targetUrl);
+			dispatchEvent.setViewURL(targetUrl);
 			joinPoint.proceed(new Object[]{dispatchEvent});
 		}catch(Throwable ex){
 			throw new ViewDispatchException(ex);

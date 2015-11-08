@@ -1,12 +1,13 @@
 package co.com.binariasystems.webtestapp.ui;
 
-import static co.com.binariasystems.fmw.vweb.constants.VWebCommonConstants.SECURITY_SUBJECT_ATTRIBUTE;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import co.com.binariasystems.fmw.annotation.Dependency;
+import co.com.binariasystems.fmw.security.FMWSecurityException;
+import co.com.binariasystems.fmw.security.mgt.SecurityManager;
+import co.com.binariasystems.fmw.security.model.AuthenticationRequest;
 import co.com.binariasystems.fmw.util.mail.SimpleMailMessage;
 import co.com.binariasystems.fmw.util.messagebundle.PropertiesManager;
 import co.com.binariasystems.fmw.util.velocity.VelocityMailSender;
@@ -16,9 +17,6 @@ import co.com.binariasystems.fmw.vweb.mvp.annotation.ViewController.OnLoad;
 import co.com.binariasystems.fmw.vweb.mvp.annotation.ViewController.OnUnLoad;
 import co.com.binariasystems.fmw.vweb.mvp.annotation.ViewField;
 import co.com.binariasystems.fmw.vweb.mvp.controller.AbstractViewController;
-import co.com.binariasystems.fmw.vweb.mvp.security.SecurityManager;
-import co.com.binariasystems.fmw.vweb.mvp.security.model.AuthorizationAndAuthenticationInfo;
-import co.com.binariasystems.fmw.vweb.mvp.security.model.FMWSecurityException;
 import co.com.binariasystems.fmw.vweb.uicomponet.FormPanel;
 import co.com.binariasystems.fmw.vweb.uicomponet.FormValidationException;
 import co.com.binariasystems.fmw.vweb.uicomponet.MessageDialog;
@@ -27,6 +25,7 @@ import co.com.binariasystems.webtestapp.business.AuthenticationBusiness;
 
 import com.vaadin.data.util.PropertysetItem;
 import com.vaadin.server.VaadinService;
+import com.vaadin.server.VaadinServletRequest;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
@@ -62,12 +61,13 @@ public class AuthenticationViewController extends AbstractViewController{
 				try{
 					form.validate();
 					
-					AuthorizationAndAuthenticationInfo authInfo = new AuthorizationAndAuthenticationInfo()
-							.set(AuthorizationAndAuthenticationInfo.USERNAME_ARG, (String)item.getItemProperty("usernameField").getValue())
-							.set(AuthorizationAndAuthenticationInfo.USERPASSWORD_ARG, (String)item.getItemProperty("passwordField").getValue())
-							.set(AuthorizationAndAuthenticationInfo.SECURITY_SUBJECT_ARG, VaadinService.getCurrentRequest().getAttribute(SECURITY_SUBJECT_ATTRIBUTE));
+					AuthenticationRequest authRequest = new AuthenticationRequest();
+					authRequest.setUsername((String)item.getItemProperty("usernameField").getValue());
+					authRequest.setPassword((String)item.getItemProperty("passwordField").getValue());
+					authRequest.setHttpRequest(getVaadinRequest().getHttpServletRequest());
 					
-					securityManager.authenticate(authInfo);
+					
+					securityManager.authenticate(authRequest);
 					System.out.println(authBusiness.dato());
 					//sendAuthenticationMail();
 					new MessageDialog("Bienvenido", "La validaci\u00f3n de las credenciales de autenticaci\u00f3n ha sida satisfactoria", Type.INFORMATION)
@@ -89,6 +89,10 @@ public class AuthenticationViewController extends AbstractViewController{
 				
 			}
 		});
+	}
+	
+	private VaadinServletRequest getVaadinRequest(){
+		return (VaadinServletRequest) VaadinService.getCurrentRequest();
 	}
 	
 	

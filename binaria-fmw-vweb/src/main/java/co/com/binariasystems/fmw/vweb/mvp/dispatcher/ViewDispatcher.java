@@ -3,9 +3,9 @@ package co.com.binariasystems.fmw.vweb.mvp.dispatcher;
 import java.io.Serializable;
 
 import co.com.binariasystems.fmw.exception.FMWException;
-import co.com.binariasystems.fmw.vweb.mvp.event.RequestDispatchEvent;
+import co.com.binariasystems.fmw.vweb.mvp.event.ViewDispatchRequest;
 
 //FrontController que se provee de ViewProvider
 public interface ViewDispatcher extends Serializable{
-	public void dispatch(RequestDispatchEvent dispatchEvent) throws FMWException;
+	public void dispatch(ViewDispatchRequest dispatchRequest) throws FMWException;
 }

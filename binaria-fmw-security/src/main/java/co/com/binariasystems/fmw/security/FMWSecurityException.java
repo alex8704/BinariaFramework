@@ -1,6 +1,7 @@
-package co.com.binariasystems.fmw.vweb.mvp.security.model;
+package co.com.binariasystems.fmw.security;
 
 import co.com.binariasystems.fmw.exception.FMWException;
+
 
 public class FMWSecurityException extends FMWException {
 

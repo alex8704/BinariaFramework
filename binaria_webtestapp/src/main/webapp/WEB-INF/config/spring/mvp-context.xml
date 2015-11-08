@@ -32,9 +32,14 @@
 		<property name="viewsPackages" ref="application.mvp.viewProvider.viewsPackages" />
 		<property name="showConfigurationDebugInfo" value="true" />
 	</bean>
+	
+	<bean id="securityManagerDAO" class="co.com.binariasystems.fmw.security.dao.ShiroBasedSecurityManagerDAO">
+		<property name="supportAtmosphereWebSockets" value="true"/>
+	</bean>
 
-	<bean id="securityManager" class="co.com.binariasystems.fmw.vweb.mvp.security.ShiroBasedSecurityManagerImpl">
+	<bean id="securityManager" class="co.com.binariasystems.fmw.vweb.mvp.security.MVPBasedSecurityManagerImpl">
 		<property name="viewProvider" ref="viewProvider" />
+		<property name="dao" ref="securityManagerDAO"/>
 	</bean>
 
 	<bean id="dispatchEventInterceptor" class="co.com.binariasystems.fmw.vweb.mvp.dispatcher.DispatchEventInterceptor">

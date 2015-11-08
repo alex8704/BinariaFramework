@@ -11,7 +11,7 @@ import co.com.binariasystems.fmw.exception.FMWException;
 import co.com.binariasystems.fmw.vweb.mvp.dispatcher.data.RequestData;
 import co.com.binariasystems.fmw.vweb.mvp.dispatcher.data.ViewAndController;
 import co.com.binariasystems.fmw.vweb.mvp.dispatcher.data.ViewInfo;
-import co.com.binariasystems.fmw.vweb.mvp.event.RequestDispatchEvent;
+import co.com.binariasystems.fmw.vweb.mvp.event.ViewDispatchRequest;
 import co.com.binariasystems.fmw.vweb.mvp.eventbus.EventBus;
 
 import com.vaadin.ui.Component;
@@ -28,8 +28,8 @@ public class ViewDispatcherImpl implements ViewDispatcher{
 	}
 	
 	@Override
-	public void dispatch(RequestDispatchEvent dispatchEvent) throws FMWException {
-		RequestData requestData = buildRequestData(dispatchEvent);
+	public void dispatch(ViewDispatchRequest dispatchRequest) throws FMWException {
+		RequestData requestData = buildRequestData(dispatchRequest);
 		ViewAndController viewAndController = loadedViews.get(requestData.getUrl());
 		if(viewAndController == null){
 			viewAndController = viewProvider.getView(requestData);
@@ -113,9 +113,9 @@ public class ViewDispatcherImpl implements ViewDispatcher{
 	}
 
 
-	private RequestData buildRequestData(RequestDispatchEvent dispatchEvent){
+	private RequestData buildRequestData(ViewDispatchRequest dispatchRequest){
 		RequestData resp = new RequestData();
-		String url = StringUtils.defaultString(dispatchEvent.getString(RequestDispatchEvent.URL_PROPERTY));
+		String url = StringUtils.defaultString(dispatchRequest.getViewURL());
 		int urlinfoIndex = url.indexOf("?");
 		resp.setUrl((urlinfoIndex < 0) ? url : url.substring(0, urlinfoIndex));
 		if(urlinfoIndex >= 0)

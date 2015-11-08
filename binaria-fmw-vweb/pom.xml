@@ -61,6 +61,12 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
+			<groupId>co.com.binariasystems</groupId>
+			<artifactId>binaria-fmw-security</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
 			<scope>provided</scope>

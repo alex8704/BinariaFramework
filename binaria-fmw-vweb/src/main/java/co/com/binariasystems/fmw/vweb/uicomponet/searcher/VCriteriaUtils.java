@@ -35,32 +35,32 @@ public class VCriteriaUtils {
 		return CriteriaUtils.equals(entityField, value);
 	}
 
-	public static Criteria equals(String entityField, Property valueProperty) {
-		return new VSimpleCriteria((SingleValueCompareCriteria) equals(entityField, valueProperty.getValue()), valueProperty);
+	public static <T> Criteria equals(String entityField, Property<T> valueProperty) {
+		return new VSimpleCriteria<T>((SingleValueCompareCriteria) equals(entityField, valueProperty.getValue()), valueProperty);
 	}
 
 	public static Criteria notEquals(String entityField, Object value) {
 		return CriteriaUtils.notEquals(entityField, value);
 	}
 
-	public static Criteria notEquals(String entityField, Property valueProperty) {
-		return new VSimpleCriteria((SingleValueCompareCriteria) notEquals(entityField, valueProperty.getValue()), valueProperty);
+	public static <T> Criteria notEquals(String entityField, Property<T> valueProperty) {
+		return new VSimpleCriteria<T>((SingleValueCompareCriteria) notEquals(entityField, valueProperty.getValue()), valueProperty);
 	}
 
 	public static Criteria greater(String entityField, Object value) {
 		return CriteriaUtils.greater(entityField, value);
 	}
 
-	public static Criteria greater(String entityField, Property valueProperty) {
-		return new VSimpleCriteria((SingleValueCompareCriteria) greater(entityField, valueProperty.getValue()), valueProperty);
+	public static <T> Criteria greater(String entityField, Property<T> valueProperty) {
+		return new VSimpleCriteria<T>((SingleValueCompareCriteria) greater(entityField, valueProperty.getValue()), valueProperty);
 	}
 
 	public static Criteria less(String entityField, Object value) {
 		return CriteriaUtils.less(entityField, value);
 	}
 
-	public static Criteria less(String entityField, Property valueProperty) {
-		return new VSimpleCriteria((SingleValueCompareCriteria) less(entityField, valueProperty.getValue()), valueProperty);
+	public static <T> Criteria less(String entityField, Property<T> valueProperty) {
+		return new VSimpleCriteria<T>((SingleValueCompareCriteria) less(entityField, valueProperty.getValue()), valueProperty);
 	}
 
 	public static Criteria in(String entityField, Collection<Object> targetCollection) {
@@ -79,36 +79,37 @@ public class VCriteriaUtils {
 		return CriteriaUtils.isNotNull(entityField);
 	}
 
-	public static Criteria between(String entityField, Date minValue, Date maxValue) {
+	public static ValueRangeCriteria<Date> between(String entityField, Date minValue, Date maxValue) {
 		return CriteriaUtils.between(entityField, minValue, maxValue);
 	}
 
-	public static Criteria between(String entityField, Number minValue, Number maxValue) {
+	public static ValueRangeCriteria<Number> between(String entityField, Number minValue, Number maxValue) {
 		return CriteriaUtils.between(entityField, minValue, maxValue);
 	}
 
-	public static Criteria between(String entityField, Property minValueProperty, Property maxValueProperty, Class targetClazz) {
+	@SuppressWarnings("unchecked")
+	public static <T> VRangeCriteria<T> between(String entityField, Property<T> minValueProperty, Property<T> maxValueProperty, Class<T> targetClazz) {
 		if (targetClazz == null || (!TypeHelper.isDateOrTimeType(targetClazz) && !TypeHelper.isNumericType(targetClazz)))
 			throw new FMWUncheckedException("Argument 'targetClazz' of method " + VCriteriaUtils.class.getSimpleName() + ".between(String, Property, Property, Clazz) must be a Date or Number type");
 		if (TypeHelper.isDateOrTimeType(targetClazz))
-			return new VRangeCriteria((ValueRangeCriteria) between(entityField, (Date) minValueProperty.getValue(), (Date) maxValueProperty.getValue()), minValueProperty, maxValueProperty, Date.class);
-		return new VRangeCriteria((ValueRangeCriteria) between(entityField, (Number) minValueProperty.getValue(), (Number) maxValueProperty.getValue()), minValueProperty, maxValueProperty, Number.class);
+			return new VRangeCriteria<>((ValueRangeCriteria<T>) between(entityField, (Date) minValueProperty.getValue(), (Date) maxValueProperty.getValue()), minValueProperty, maxValueProperty, targetClazz);
+		return new VRangeCriteria<>((ValueRangeCriteria<T>) between(entityField, (Number) minValueProperty.getValue(), (Number) maxValueProperty.getValue()), minValueProperty, maxValueProperty, targetClazz);
 	}
 
 	public static Criteria like(String entityField, Object value) {
 		return CriteriaUtils.like(entityField, value);
 	}
 
-	public static Criteria like(String entityField, Property valueProperty) {
-		return new VSimpleCriteria((SingleValueCompareCriteria) like(entityField, valueProperty.getValue()), valueProperty);
+	public static <T> Criteria like(String entityField, Property<T> valueProperty) {
+		return new VSimpleCriteria<>((SingleValueCompareCriteria) like(entityField, valueProperty.getValue()), valueProperty);
 	}
 
 	public static Criteria notLike(String entityField, Object value) {
 		return CriteriaUtils.notLike(entityField, value);
 	}
 
-	public static Criteria notLike(String entityField, Property valueProperty) {
-		return new VSimpleCriteria((SingleValueCompareCriteria) notLike(entityField, valueProperty.getValue()), valueProperty);
+	public static <T> Criteria notLike(String entityField, Property<T> valueProperty) {
+		return new VSimpleCriteria<T>((SingleValueCompareCriteria) notLike(entityField, valueProperty.getValue()), valueProperty);
 	}
 
 	public static SingleValueCompareCriteria copyWithNewValue(SingleValueCompareCriteria criteria, Object newValue) {
@@ -128,12 +129,13 @@ public class VCriteriaUtils {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static ValueRangeCriteria copyWithNewValues(ValueRangeCriteria criteria, Object minValue, Object maxValue, Class dataClass) {
+	public static <T> ValueRangeCriteria<T> copyWithNewValues(ValueRangeCriteria<T> criteria, Object minValue, Object maxValue, Class<T> dataClass) {
 		if (Date.class.isAssignableFrom(dataClass))
-			return (ValueRangeCriteria<Date>) between(criteria.getEntityField(), (Date) minValue, (Date) maxValue);
-		return (ValueRangeCriteria<Number>) between(criteria.getEntityField(), (Number) minValue, (Number) maxValue);
+			return (ValueRangeCriteria<T>) between(criteria.getEntityField(), (Date) minValue, (Date) maxValue);
+		return (ValueRangeCriteria<T>) between(criteria.getEntityField(), (Number) minValue, (Number) maxValue);
 	}
 
+	@SuppressWarnings("unchecked")
 	public static Criteria castVCriteria(Criteria currentCriteria) {
 		if(currentCriteria == null) return null;
 		if (currentCriteria instanceof MultipleGroupedCriteria) {
@@ -147,12 +149,12 @@ public class VCriteriaUtils {
 				return and(multipleCriterias);
 		} else if (currentCriteria instanceof VCriteria) {
 			if (currentCriteria instanceof VSimpleCriteria)
-				return ((VSimpleCriteria) currentCriteria).getProperty().getValue().equals(((VSimpleCriteria)currentCriteria).getCriteria().getValue()) ? 
-						((VSimpleCriteria) currentCriteria).getCriteria() : copyWithNewValue(((VSimpleCriteria)currentCriteria).getCriteria(), ((VSimpleCriteria) currentCriteria).getProperty().getValue());
+				return ((VSimpleCriteria<?>) currentCriteria).getProperty().getValue().equals(((VSimpleCriteria<?>)currentCriteria).getCriteria().getValue()) ? 
+						((VSimpleCriteria<?>) currentCriteria).getCriteria() : copyWithNewValue(((VSimpleCriteria<?>)currentCriteria).getCriteria(), ((VSimpleCriteria<?>) currentCriteria).getProperty().getValue());
 			if(currentCriteria instanceof VRangeCriteria)
-				return ((VRangeCriteria) currentCriteria).getMinProperty().getValue().equals(((VRangeCriteria) currentCriteria).getCriteria().getMinValue()) &&
-						((VRangeCriteria) currentCriteria).getMaxProperty().getValue().equals(((VRangeCriteria) currentCriteria).getCriteria().getMaxValue())? 
-						((VRangeCriteria) currentCriteria).getCriteria() : copyWithNewValues(((VRangeCriteria) currentCriteria).getCriteria(), 
+				return ((VRangeCriteria<?>) currentCriteria).getMinProperty().getValue().equals(((VRangeCriteria<?>) currentCriteria).getCriteria().getMinValue()) &&
+						((VRangeCriteria<?>) currentCriteria).getMaxProperty().getValue().equals(((VRangeCriteria<?>) currentCriteria).getCriteria().getMaxValue())? 
+						((VRangeCriteria<?>) currentCriteria).getCriteria() : copyWithNewValues(((VRangeCriteria) currentCriteria).getCriteria(), 
 								((VRangeCriteria) currentCriteria).getMinProperty().getValue(), ((VRangeCriteria) currentCriteria).getMaxProperty().getValue(), ((VRangeCriteria) currentCriteria).getTargetClazz());
 		}
 		return currentCriteria;

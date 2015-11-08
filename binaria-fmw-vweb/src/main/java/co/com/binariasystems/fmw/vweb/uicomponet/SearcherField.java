@@ -10,11 +10,17 @@ import co.com.binariasystems.fmw.constants.FMWConstants;
 import co.com.binariasystems.fmw.entity.cfg.EntityConfigData;
 import co.com.binariasystems.fmw.entity.cfg.EntityConfigData.FieldConfigData;
 import co.com.binariasystems.fmw.entity.cfg.EntityConfigurationManager;
+import co.com.binariasystems.fmw.entity.criteria.Criteria;
+import co.com.binariasystems.fmw.entity.criteria.MultipleGroupedCriteria;
 import co.com.binariasystems.fmw.entity.util.FMWEntityUtils;
 import co.com.binariasystems.fmw.exception.FMWException;
 import co.com.binariasystems.fmw.vweb.uicomponet.SearcherResultWindow.SearchSelectionChangeEvent;
 import co.com.binariasystems.fmw.vweb.uicomponet.SearcherResultWindow.SearchSelectionChangeListener;
 import co.com.binariasystems.fmw.vweb.uicomponet.SearcherResultWindow.SearchType;
+import co.com.binariasystems.fmw.vweb.uicomponet.searcher.VCriteria;
+import co.com.binariasystems.fmw.vweb.uicomponet.searcher.VCriteriaUtils;
+import co.com.binariasystems.fmw.vweb.uicomponet.searcher.VRangeCriteria;
+import co.com.binariasystems.fmw.vweb.uicomponet.searcher.VSimpleCriteria;
 
 import com.vaadin.data.Property;
 import com.vaadin.data.util.ObjectProperty;
@@ -44,6 +50,9 @@ public class SearcherField<T> extends CustomField<T> implements SearchSelectionC
 	
 	private EntityConfigData<?> masterConfigData;
 	
+	private Criteria conditions;
+	private ValueChangeListener conditionsChangeListener;
+	
 	private boolean omitSearchCall;
 	
 	public SearcherField(Class<?> entityClazz, String caption) {
@@ -54,6 +63,11 @@ public class SearcherField<T> extends CustomField<T> implements SearchSelectionC
 		this.entityClazz = entityClazz;
 		this.returnType = returnType;
 		setCaption(caption);
+		conditionsChangeListener = new ValueChangeListener() {
+			@Override public void valueChange(Property.ValueChangeEvent event) {
+				onConditionsChange();
+			}
+		};
 	}
 
 	@SuppressWarnings("unchecked")
@@ -146,7 +160,6 @@ public class SearcherField<T> extends CustomField<T> implements SearchSelectionC
 		return entityClazz.equals(returnType) ? (T)originalValue : (T)extractFieldValue(originalValue, masterConfigData.getPkFieldData());
 	}
 	
-	@SuppressWarnings("unchecked")
 	private Object extractFieldValue(Object originalValue, FieldConfigData fieldInfo){
 		if(originalValue == null) return null;
 		try {
@@ -177,6 +190,56 @@ public class SearcherField<T> extends CustomField<T> implements SearchSelectionC
 			omitSearchCall = false;
 			descriptionProperty.setValue(description);
 		}
+	}
+	
+	
+	
+	public SearcherField<T> setCriteria(Criteria newConditios){
+		if(conditions != null)
+			freeConditionsPropertyListener(conditions);
+		conditions = newConditios;
+		if(conditions != null)
+			applyConditionsPropertyListener(conditions);
+		searchWindow.setConditions(VCriteriaUtils.castVCriteria(conditions));
+		return this;
+	}
+	
+	private void freeConditionsPropertyListener(Criteria oldCriteria) {
+		if(oldCriteria instanceof MultipleGroupedCriteria){
+			for(Criteria criteria : ((MultipleGroupedCriteria)oldCriteria).getCriteriaCollection())
+				freeConditionsPropertyListener(criteria);
+		}else{
+			if(oldCriteria instanceof VCriteria){
+				if(oldCriteria instanceof VSimpleCriteria && ((VSimpleCriteria<?>)oldCriteria).getProperty() instanceof ObjectProperty)
+					((ObjectProperty<?>)((VSimpleCriteria<?>)oldCriteria).getProperty()).removeValueChangeListener(conditionsChangeListener);
+				if(oldCriteria instanceof VRangeCriteria && ((VRangeCriteria<?>)oldCriteria).getMinProperty() instanceof ObjectProperty && ((VRangeCriteria<?>)oldCriteria).getMaxProperty() instanceof ObjectProperty){
+					((ObjectProperty<?>)((VRangeCriteria<?>)oldCriteria).getMinProperty()).removeValueChangeListener(conditionsChangeListener);
+					((ObjectProperty<?>)((VRangeCriteria<?>)oldCriteria).getMaxProperty()).removeValueChangeListener(conditionsChangeListener);
+				}
+			}
+		}
+	}
+	
+	private void applyConditionsPropertyListener(Criteria newCriteria) {
+		if(newCriteria instanceof MultipleGroupedCriteria){
+			for(Criteria criteria : ((MultipleGroupedCriteria)newCriteria).getCriteriaCollection())
+				freeConditionsPropertyListener(criteria);
+		}else{
+			if(newCriteria instanceof VCriteria){
+				if(newCriteria instanceof VSimpleCriteria && ((VSimpleCriteria<?>)newCriteria).getProperty() instanceof ObjectProperty)
+					((ObjectProperty<?>)((VSimpleCriteria<?>)newCriteria).getProperty()).addValueChangeListener(conditionsChangeListener);
+				if(newCriteria instanceof VRangeCriteria && ((VRangeCriteria<?>)newCriteria).getMinProperty() instanceof ObjectProperty && ((VRangeCriteria<?>)newCriteria).getMaxProperty() instanceof ObjectProperty){
+					((ObjectProperty<?>)((VRangeCriteria<?>)newCriteria).getMinProperty()).addValueChangeListener(conditionsChangeListener);
+					((ObjectProperty<?>)((VRangeCriteria<?>)newCriteria).getMaxProperty()).addValueChangeListener(conditionsChangeListener);
+				}
+			}
+		}
+	}
+	
+	private void onConditionsChange(){
+		if(getValue() == null) return;
+		searchWindow.setConditions(VCriteriaUtils.castVCriteria(conditions));
+		searchWindow.search(extractPKValue(getValue()), SearchType.PK);
 	}
 
 }
