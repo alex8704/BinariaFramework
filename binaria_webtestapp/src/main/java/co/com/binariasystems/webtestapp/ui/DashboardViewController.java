@@ -143,5 +143,7 @@ public class DashboardViewController extends AbstractViewController {
 		opciones.add(configuracion);
 		
 		menuContainer.setItems(opciones);
+		
+		pager.setFilterDto(null);
 	}
 }
