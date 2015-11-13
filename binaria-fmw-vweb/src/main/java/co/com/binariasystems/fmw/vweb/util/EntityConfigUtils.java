@@ -1,6 +1,5 @@
 package co.com.binariasystems.fmw.vweb.util;
 
-import java.lang.reflect.InvocationTargetException;
 import java.sql.Timestamp;
 import java.text.MessageFormat;
 import java.util.List;
@@ -133,7 +132,7 @@ public class EntityConfigUtils {
 					}
 				}
 			}
-		}catch(NoSuchMethodException | SecurityException | IllegalAccessException | InvocationTargetException | InstantiationException ex){
+		}catch(ReflectiveOperationException ex){
 			throw new FMWException(ex.getMessage(), ex);
 		}
 		return resp;
@@ -259,7 +258,7 @@ public class EntityConfigUtils {
 					}
 				}
 			}
-		}catch(NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException ex){
+		}catch(ReflectiveOperationException ex){
 			throw new FMWException(ex);
 		}
 		return resp;

@@ -145,6 +145,7 @@ public class SearcherResultWindow<T> extends Window implements CloseListener, Cl
 		GenericStringPropertyGenerator genericPropertyGenerator = new GenericStringPropertyGenerator();
 		for(String fieldName : descriptionFields){
 			FieldConfigData fieldCfg = entityConfigData.getFieldData(fieldName);
+			System.out.println(entityClazz.getSimpleName()+"."+fieldName);
 			Renderer<?> renderer = GridUtils.obtainRendererForType(fieldCfg.getFieldType());
 			Column column = resultsGrid.addColumn(fieldName);
 			column.setHeaderCaption(EntityConfigUtils.getFieldCaptionText(fieldCfg, entityConfigData, labelsFmt, entityStrings));

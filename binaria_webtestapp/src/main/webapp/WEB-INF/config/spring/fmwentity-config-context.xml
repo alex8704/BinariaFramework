@@ -88,5 +88,6 @@
 	<!-- Por defecto se inicia con los configurators matriculados en el masterEntityConfiguratorContextMap -->
 	<bean id="entityConfigurationManager" class="co.com.binariasystems.fmw.entity.cfg.EntityConfigurationManager" factory-method="getInstance">
 		<property name="configuratorsContext" ref="entityConfiguratorContextMap" />
+		<property name="auditoryDataProvider" ref="auditoryDataProvider"/>
 	</bean>
 </beans>

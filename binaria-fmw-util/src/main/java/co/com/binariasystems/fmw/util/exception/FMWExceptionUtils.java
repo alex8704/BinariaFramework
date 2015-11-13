@@ -2,7 +2,9 @@ package co.com.binariasystems.fmw.util.exception;
 
 import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
+import java.text.MessageFormat;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
@@ -74,16 +76,20 @@ public class FMWExceptionUtils {
 	}
 	
 	public static Throwable prettyMessageException(Throwable ex){
+		return prettyMessageException(ex, Locale.getDefault());
+	}
+	
+	public static Throwable prettyMessageException(Throwable ex, Locale locale){
 		if(ex instanceof FMWException || ex instanceof FMWUncheckedException || ex instanceof FMWDataAccessException)
 			return ex;			
 		if(ex instanceof SQLException){
 			String msgKey = "sql.state.code."+((SQLException)ex).getSQLState();
-			boolean foundMessage = !StringUtils.defaultIfEmpty(mm.getString(msgKey), msgKey).equals(msgKey);
+			boolean foundMessage = !StringUtils.defaultIfEmpty(getSQLErrorMessage(msgKey, ex, locale), msgKey).equals(msgKey);
 			if(foundMessage)
-				return new FMWDataAccessException(mm.getString(msgKey));
+				return new FMWDataAccessException(getSQLErrorMessage(msgKey, ex, locale));
 		}else if(ex instanceof DataAccessException){
 			String msgKey = StringUtils.defaultIfEmpty(springExceptionMsgMapping.get(ex.getClass()), DEFAUL_DATAACCESERROR_MSG_KEY);
-			return new FMWDataAccessException(mm.getString(msgKey));
+			return new FMWDataAccessException(getSQLErrorMessage(msgKey, ex, locale));
 		}else if(ex instanceof RuntimeException || ex instanceof InvocationTargetException){
 			Throwable tr = ex;
 			while(tr.getCause() != null){
@@ -92,5 +98,13 @@ public class FMWExceptionUtils {
 			return new FMWException(tr instanceof NullPointerException ? "Null Value" : ex.getMessage(), tr);
 		}
 		return ex;
+	}
+	
+	private static String getSQLErrorMessage(String messageKey, Throwable cause, Locale locale){
+		String defaultDataAcessError = mm.getString(DEFAUL_DATAACCESERROR_MSG_KEY, locale);
+		String message = mm.getString(messageKey, locale);
+		if(defaultDataAcessError.equals(message))
+			return MessageFormat.format(message, new Object[]{cause.getMessage()});
+		return message;
 	}
 }

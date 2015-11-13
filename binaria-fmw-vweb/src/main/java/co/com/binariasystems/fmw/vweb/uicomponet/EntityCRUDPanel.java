@@ -2,6 +2,7 @@ package co.com.binariasystems.fmw.vweb.uicomponet;
 
 import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import co.com.binariasystems.fmw.constants.FMWConstants;
 import co.com.binariasystems.fmw.entity.cfg.EntityConfigData;
+import co.com.binariasystems.fmw.entity.cfg.EntityConfigData.AuditableEntityConfigData;
 import co.com.binariasystems.fmw.entity.cfg.EntityConfigData.FieldConfigData;
 import co.com.binariasystems.fmw.entity.cfg.EntityConfigurationManager;
 import co.com.binariasystems.fmw.entity.manager.EntityCRUDOperationsManager;
@@ -21,6 +23,7 @@ import co.com.binariasystems.fmw.entity.util.FMWEntityUtils;
 import co.com.binariasystems.fmw.exception.FMWException;
 import co.com.binariasystems.fmw.exception.FMWUncheckedException;
 import co.com.binariasystems.fmw.ioc.IOCHelper;
+import co.com.binariasystems.fmw.security.auditory.AuditoryDataProvider;
 import co.com.binariasystems.fmw.util.exception.FMWExceptionUtils;
 import co.com.binariasystems.fmw.util.messagebundle.MessageBundleManager;
 import co.com.binariasystems.fmw.util.pagination.ListPage;
@@ -41,6 +44,7 @@ import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.Field;
 
+@SuppressWarnings("serial")
 public class EntityCRUDPanel<T> extends FormPanel implements ClickListener{
 	private static final Logger LOGGER = LoggerFactory.getLogger(EntityCRUDPanel.class);
 	private Class<T> entityClass;
@@ -66,11 +70,6 @@ public class EntityCRUDPanel<T> extends FormPanel implements ClickListener{
 			IOCHelper.getBean(FMWConstants.APPLICATION_DEFAULT_CLASS_FOR_RESOURCE_LOAD_IOC_KEY, Class.class));
 	
 	private boolean attached;
-	
-	private EntityCRUDPanel() {
-		super(2);
-		setWidth(Dimension.percent(90.0f));
-	}
 	
 	public EntityCRUDPanel(Class<T> entityClass) {
 		super(2);
@@ -142,11 +141,11 @@ public class EntityCRUDPanel<T> extends FormPanel implements ClickListener{
 	}
 	
 	private void bindComponentsToModel() throws FMWException{
-		Object bean = null;
+		T bean = null;
 		try {
 			bean = entityConfigData.getEntityClass().getConstructor().newInstance();
 		
-			beanItem = new BeanItem(bean, componentMap.keySet());
+			beanItem = new BeanItem<T>(bean, componentMap.keySet());
 			for(String fieldName :componentMap.keySet()){
 				Component comp = componentMap.get(fieldName);
 				if(comp instanceof Field)
@@ -181,6 +180,7 @@ public class EntityCRUDPanel<T> extends FormPanel implements ClickListener{
 		});
 		
 		pager.setPageDataTarget(new PageDataTarget<T>() {
+			@SuppressWarnings("unchecked")
 			@Override
 			public void refreshPageData(List<T> pageData) {
 				try{
@@ -219,9 +219,11 @@ public class EntityCRUDPanel<T> extends FormPanel implements ClickListener{
 		
 		MessageDialog md = new MessageDialog(saveBtn.getCaption(), MessageFormat.format(VWebUtils.getCommonString(VWebCommonConstants.MASTER_CRUD_AREYOU_SURE_CONTINUE), saveBtn.getCaption()), Type.QUESTION);
 		md.addYesClickListener(new ClickListener() {
+			@SuppressWarnings("unchecked")
 			@Override
 			public void buttonClick(ClickEvent event) {
 				try{
+					addAuditoryDataIfNecessary(true);
 					Object resp = manager.save(beanItem.getBean());
 					for(Object propertyId : beanItem.getItemPropertyIds())
 						beanItem.getItemProperty(propertyId).setValue(PropertyUtils.getProperty(resp, (String)propertyId));
@@ -237,10 +239,7 @@ public class EntityCRUDPanel<T> extends FormPanel implements ClickListener{
 	
 	private void handleEdit() throws Exception{
 		if((initialKeyValue != null && initialKeyValue.equals(beanItem.getItemProperty(entityConfigData.getPkFieldName()).getValue())) ||
-				beanItem.getItemProperty(entityConfigData.getPkFieldName()).getValue() == null)
-			return;
-		
-		if(!isValid())
+				beanItem.getItemProperty(entityConfigData.getPkFieldName()).getValue() == null || !isValid())
 			return;
 		
 		MessageDialog md = new MessageDialog(editBtn.getCaption(), MessageFormat.format(VWebUtils.getCommonString(VWebCommonConstants.MASTER_CRUD_AREYOU_SURE_CONTINUE), editBtn.getCaption()), Type.QUESTION);
@@ -248,6 +247,7 @@ public class EntityCRUDPanel<T> extends FormPanel implements ClickListener{
 			@Override
 			public void buttonClick(ClickEvent event) {
 				try{
+					addAuditoryDataIfNecessary(false);
 					manager.edit(beanItem.getBean());
 					new MessageDialog(editBtn.getCaption(), VWebUtils.getCommonString(VWebCommonConstants.MASTER_CRUD_MSG_SUCCESSUPDATE)).show();
 				}catch(Exception ex){
@@ -259,6 +259,7 @@ public class EntityCRUDPanel<T> extends FormPanel implements ClickListener{
 		md.show();
 	}
 	
+	@SuppressWarnings("unchecked")
 	private void handleSearch(Button btn) throws Exception{
 		if(btn == searchAllBtn)
 			handleClean();
@@ -287,11 +288,35 @@ public class EntityCRUDPanel<T> extends FormPanel implements ClickListener{
 		md.show();
 	}
 	
+	@SuppressWarnings("unchecked")
 	private void handleClean() throws Exception{
 		Object emptyBean = entityConfigData.getEntityClass().getConstructor().newInstance();
 		for(Object propertyId : beanItem.getItemPropertyIds())
 			beanItem.getItemProperty(propertyId).setValue(PropertyUtils.getProperty(emptyBean, (String)propertyId));
 		pager.reset();
 		initFocus();
+	}
+	
+	private void addAuditoryDataIfNecessary(boolean isNew) throws IllegalAccessException, InvocationTargetException, NoSuchMethodException{
+		if(!(entityConfigData instanceof AuditableEntityConfigData))return;
+		AuditableEntityConfigData<T> configData = (AuditableEntityConfigData<T>)entityConfigData;
+		AuditoryDataProvider<?> auditoryDataProvider = EntityConfigurationManager.getInstance().getAuditoryDataProvider();
+		String creationUserProperty = configData.getCreationUserFieldCfg().getFieldName();
+		String modificationUserProperty = configData.getModificationUserFieldCfg().getFieldName();
+		String creationDateProperty = configData.getCreationDateFieldCfg().getFieldName();
+		String modificationDateProperty = configData.getModificationDateFieldCfg().getFieldName();
+		Object auditoryUser = auditoryDataProvider.getCurrenAuditoryUserByServletRequest(VWebUtils.getCurrentHttpRequest());
+		Date currentDate = auditoryDataProvider.getCurrentDate();
+		//Creation User and Date
+		if(isNew && StringUtils.isNotEmpty(creationUserProperty))
+			PropertyUtils.setProperty(beanItem.getBean(), creationUserProperty, auditoryUser);
+		if(isNew &&StringUtils.isNotEmpty(creationDateProperty))
+			PropertyUtils.setProperty(beanItem.getBean(), creationDateProperty, currentDate);
+		//Modification User and Date
+		if(StringUtils.isNotEmpty(modificationUserProperty))
+			PropertyUtils.setProperty(beanItem.getBean(), modificationUserProperty, auditoryUser);
+		if(StringUtils.isNotEmpty(modificationDateProperty))
+			PropertyUtils.setProperty(beanItem.getBean(), modificationDateProperty, currentDate);
+		
 	}
 }

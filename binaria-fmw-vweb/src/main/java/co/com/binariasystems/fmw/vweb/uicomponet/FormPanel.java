@@ -196,7 +196,7 @@ public class FormPanel extends HorizontalLayout{
 		StringBuilder itemsBuilder = new StringBuilder();
 		List<String> validationMessages = new LinkedList<String>();
 		for(InvalidValueException cause: exceptions){
-			itemsBuilder.append(StringUtils.isEmpty(cause.getHtmlMessage()) ? "" : validationErrorItem.format(new Object[]{})).append(ln());
+			itemsBuilder.append(StringUtils.isEmpty(cause.getHtmlMessage()) ? "" : validationErrorItem.format(new Object[]{cause.getHtmlMessage()})).append(ln());
 			validationMessages.add(cause.getHtmlMessage());
 			for(InvalidValueException subex : cause.getCauses()){
 				itemsBuilder.append(StringUtils.isEmpty(subex.getHtmlMessage()) ? "" : validationErrorItem.format(new Object[]{subex.getHtmlMessage()})).append(ln());

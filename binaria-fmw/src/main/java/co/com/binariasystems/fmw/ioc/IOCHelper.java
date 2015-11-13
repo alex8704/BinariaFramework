@@ -7,10 +7,10 @@ public class IOCHelper {
 		defaultIOC = iocProvider;
 	}
 	
-    public static <T extends Object> T getBean(String beanId, Class<T> clazz){
+    public static <T> T getBean(String beanId, Class<T> clazz){
     	return defaultIOC.getBean(beanId, clazz);
     }
-    public static <T extends Object> T getBean(Class<T> clazz){
+    public static <T> T getBean(Class<T> clazz){
     	return defaultIOC.getBean(clazz);
     }
     public static Object getBean(String beanId){

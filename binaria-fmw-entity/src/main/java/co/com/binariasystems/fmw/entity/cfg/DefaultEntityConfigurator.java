@@ -23,7 +23,6 @@ import co.com.binariasystems.fmw.entity.Nullable;
 import co.com.binariasystems.fmw.entity.Relation;
 import co.com.binariasystems.fmw.entity.SearchField;
 import co.com.binariasystems.fmw.entity.SearchTarget;
-import co.com.binariasystems.fmw.entity.cfg.EntityConfigData.AuditFieldConfigData;
 import co.com.binariasystems.fmw.entity.cfg.EntityConfigData.AuditableEntityConfigData;
 import co.com.binariasystems.fmw.entity.cfg.EntityConfigData.FieldConfigData;
 import co.com.binariasystems.fmw.entity.cfg.EntityConfigData.RelationFieldConfigData;
@@ -56,6 +55,7 @@ public class DefaultEntityConfigurator<T> implements EntityConfigurator<T>{
 	protected DefaultEntityConfigurator(){
 	}
 	
+	@SuppressWarnings("unchecked")
 	public DefaultEntityConfigurator(String entityClazzName){
 		try{
 			this.entityClazz = (Class<T>) Class.forName(entityClazzName);
@@ -76,7 +76,7 @@ public class DefaultEntityConfigurator<T> implements EntityConfigurator<T>{
 		if(entityConfigData != null) 
 			return entityConfigData;
 		
-		entityConfigData = entityClazz.isAnnotationPresent(Auditable.class) ? new AuditableEntityConfigData<T>() : new EntityConfigData<T>();
+		entityConfigData = entityClazz.isAnnotationPresent(Auditable.class) ? new AuditableEntityConfigData<T>(entityClazz.getAnnotation(Auditable.class)) : new EntityConfigData<T>();
 		entityConfigData.setEntityClass(entityClazz);
 		entityConfigData.setTable(entityClazz.getSimpleName().toLowerCase());
 		for(Annotation annot : entityClazz.getAnnotations()){
@@ -94,7 +94,7 @@ public class DefaultEntityConfigurator<T> implements EntityConfigurator<T>{
 			}
 		}
 		
-		Class currentClass = entityClazz;
+		Class<?> currentClass = entityClazz;
 		while(!currentClass.equals(Object.class)){
 			processEntityClazzConfig(currentClass, entityConfigData);
 			currentClass = currentClass.getSuperclass();
@@ -120,7 +120,7 @@ public class DefaultEntityConfigurator<T> implements EntityConfigurator<T>{
 	}
 	
 	
-	private void processEntityClazzConfig(Class clazz, EntityConfigData entityConfigData) throws FMWException{
+	private void processEntityClazzConfig(Class<?> clazz, EntityConfigData<T> entityConfigData) throws FMWException{
 		Field[] declaredFields = clazz.getDeclaredFields();
 		for(Field field : declaredFields){
 			FieldConfigData fieldCfg = null;
@@ -128,12 +128,13 @@ public class DefaultEntityConfigurator<T> implements EntityConfigurator<T>{
 					(!field.getType().isEnum() && !TypeHelper.isBasicType(field.getType()) && !field.isAnnotationPresent(ForeignKey.class)
 							&& !field.isAnnotationPresent(Relation.class) && !field.isAnnotationPresent(FieldValues.class)))
 				continue;
-			if(entityConfigData instanceof AuditableEntityConfigData && AuditableEntityConfigData.isAuditField(field.getName(), (Auditable)clazz.getAnnotation(Auditable.class)))
-				fieldCfg = new AuditFieldConfigData();
-			else if(field.isAnnotationPresent(Relation.class) || field.isAnnotationPresent(ForeignKey.class))
+			if(field.isAnnotationPresent(Relation.class) || field.isAnnotationPresent(ForeignKey.class))
 				fieldCfg = new RelationFieldConfigData();
 			else
 				fieldCfg = new FieldConfigData();
+			
+			fieldCfg.setAuditoryField((entityConfigData instanceof AuditableEntityConfigData) && 
+					(AuditableEntityConfigData.isAuditField(field.getName(), (Auditable)clazz.getAnnotation(Auditable.class))));
 			
 			for(Annotation annot : field.getAnnotations()){
 				//Manejo informacion para campos que representan claves foraneas (hacen referencias a otras entidades)
@@ -143,7 +144,7 @@ public class DefaultEntityConfigurator<T> implements EntityConfigurator<T>{
 							throw new FMWException("The basic standard type field "+clazz.getName()+"."+field.getName()+" must declare a entityClazz");
 						((RelationFieldConfigData)fieldCfg).setRelationEntityClass(((ForeignKey)annot).entityClazz());
 					}else{
-						Class relationClazz = field.getType();
+						Class<?> relationClazz = field.getType();
 						((RelationFieldConfigData)fieldCfg).setRelationEntityClass(relationClazz);
 					}
 				}
@@ -153,7 +154,7 @@ public class DefaultEntityConfigurator<T> implements EntityConfigurator<T>{
 					//La anotacion @Relation solo se puede usar cuando el campo es del tipo de la entidad foranea
 					if(TypeHelper.isBasicType(field.getType()))
 						throw new FMWException("Cannot determine entityClass of @"+Relation.class.getSimpleName()+" field "+clazz.getName()+"."+field.getName());
-					Class relationClazz = field.getType();
+					Class<?> relationClazz = field.getType();
 					((RelationFieldConfigData)fieldCfg).setRelationEntityClass(relationClazz);
 					fieldCfg.setColumnName(StringUtils.defaultIfEmpty(((Relation)annot).column(), fieldCfg.getColumnName()));
 				}
@@ -209,7 +210,7 @@ public class DefaultEntityConfigurator<T> implements EntityConfigurator<T>{
 	}
 	
 	
-	private void ensureFieldConfig(Field field, FieldConfigData fieldCfg, EntityConfigData entityConfigData) throws FMWException{
+	private void ensureFieldConfig(Field field, FieldConfigData fieldCfg, EntityConfigData<T> entityConfigData) throws FMWException{
 		fieldCfg.setFieldName(field.getName());
 		fieldCfg.setFieldType(field.getType());
 		fieldCfg.setColumnName(StringUtils.defaultIfEmpty(fieldCfg.getColumnName(), field.getName()));
@@ -217,8 +218,7 @@ public class DefaultEntityConfigurator<T> implements EntityConfigurator<T>{
 		if(fieldCfg instanceof RelationFieldConfigData)
 			((RelationFieldConfigData)fieldCfg).setQueryAlias(generateRelationFieldQueryAlias(fieldCfg));
 		
-		if(fieldCfg instanceof AuditFieldConfigData)
-			return;
+		if(fieldCfg.isAuditoryField())return;
 		
 		EntityConfigUIControl fieldUIControl = getFieldUIControlMappings().get(fieldCfg.getFieldName());
 		if(fieldUIControl != null){

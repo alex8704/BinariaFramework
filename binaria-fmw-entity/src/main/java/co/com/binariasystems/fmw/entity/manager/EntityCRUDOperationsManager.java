@@ -2,7 +2,6 @@ package co.com.binariasystems.fmw.entity.manager;
 
 import static co.com.binariasystems.fmw.entity.criteria.CriteriaUtils.instanceOfMultipleGroupedCriteria;
 
-import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -63,15 +62,15 @@ public class EntityCRUDOperationsManager<T> {
 
 	private EntityValidator<T> entityValidator;
 	private EntityConfigData<T> entityConfigData;
-	//private EntityConfigurator configurator;
 	private EntityCRUDDAO<T> dao;
 
 	public static enum CRUDOperation {
 		INSERT, UPDATE, DELETE
 	}
 
-	public static EntityCRUDOperationsManager<?> getInstance(Class<?> entityClazz) {
-		EntityCRUDOperationsManager<?> resp = entityCRUDMgrContext.get(entityClazz);
+	@SuppressWarnings("unchecked")
+	public static <E> EntityCRUDOperationsManager<E> getInstance(Class<E> entityClazz) {
+		EntityCRUDOperationsManager<E> resp = (EntityCRUDOperationsManager<E>) entityCRUDMgrContext.get(entityClazz);
 		if (resp == null) {
 			synchronized (EntityCRUDOperationsManager.class) {
 				try {
@@ -85,10 +84,11 @@ public class EntityCRUDOperationsManager<T> {
 		return resp;
 	}
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private static EntityCRUDOperationsManager<?> createInstance(Class<?> entityClazz) throws Exception {
-		EntityCRUDOperationsManager<?> resp = new EntityCRUDOperationsManager<Object>();
-		resp.entityConfigData = (EntityConfigData) EntityConfigurationManager.getInstance().getConfigurator(entityClazz).configure();
+	
+	@SuppressWarnings({ "unchecked" })
+	private static <E> EntityCRUDOperationsManager<E> createInstance(Class<E> entityClazz) throws FMWException, ReflectiveOperationException {
+		EntityCRUDOperationsManager<E> resp = new EntityCRUDOperationsManager<E>();
+		resp.entityConfigData = (EntityConfigData<E>) EntityConfigurationManager.getInstance().getConfigurator(entityClazz).configure();
 		resp.dao = IOCHelper.getBean(EntityCRUDDAO.class);
 
 		if (resp.entityConfigData.getValidationClass() != null) {
@@ -98,7 +98,7 @@ public class EntityCRUDOperationsManager<T> {
 		return resp;
 	}
 
-	public Object save(T entityBean) throws Exception {
+	public Object save(T entityBean) throws FMWException, ReflectiveOperationException{
 		applyValidations(entityBean, CRUDOperation.INSERT);
 		StringBuilder sqlBuilder = new StringBuilder();
 		StringBuilder colNamesBuilder = new StringBuilder();
@@ -159,7 +159,7 @@ public class EntityCRUDOperationsManager<T> {
 		return postSearch.getRowCount() > 0 ? postSearch.getData().get(postSearch.getData().size() - 1) : entityBean;
 	}
 
-	public void edit(T entityBean) throws Exception {
+	public void edit(T entityBean) throws FMWException, ReflectiveOperationException{
 		applyValidations(entityBean, CRUDOperation.UPDATE);
 		StringBuilder sqlBuilder = new StringBuilder();
 		MapSqlParameterSource paramSource = new MapSqlParameterSource();
@@ -202,7 +202,7 @@ public class EntityCRUDOperationsManager<T> {
 		dao.edit(sqlBuilder.toString(), paramSource);
 	}
 
-	private List<String> getColumnsForSQLSearchStatementFromEntity(Class<?> entityClazz, String prefix, boolean includeRelations, String aliasPrefix) throws FMWException {
+	private List<String> getColumnsForSQLSearchStatementFromEntity(Class<?> entityClazz, String prefix, boolean includeRelations, String aliasPrefix) throws FMWException{
 		List<String> resp = new LinkedList<String>();
 		EntityConfigurator<?> mtd_configurator = EntityConfigurationManager.getInstance().getConfigurator(entityClazz);
 		EntityConfigData<?> mtd_cfgData = mtd_configurator.configure();
@@ -223,8 +223,44 @@ public class EntityCRUDOperationsManager<T> {
 
 		return resp;
 	}
+	
+	public ListPage<T> search(T entityBean, int offset, int rowsByPage, Criteria conditions) throws FMWException, ReflectiveOperationException{
+		return search(entityBean, offset, rowsByPage, conditions, false, true);
+	}
+	
+	/**
+	 * Similar al metodo {@link #search(Object, int, int, Criteria)}, pero
+	 * teniendo en cuenta para la Busqueda los campos que representan la Clave
+	 * Primaria de la Entidad a Buscar. Este metodo se ha creado especialmente
+	 * para ser usado por componentes del Framework
+	 * 
+	 * @param entityBean
+	 * @param offset
+	 * @param rowsByPage
+	 * @return
+	 * @throws FMWException 
+	 * @throws ReflectiveOperationException
+	 */
+	public ListPage<T> searchForFmwComponent(T entityBean, int offset, int rowsByPage, Criteria conditions) throws FMWException, ReflectiveOperationException {
+		return search(entityBean, offset, rowsByPage, conditions, false, false);
+	}
+	
+	/**
+	 * Realiza busquedas para una Entidad determinada, sin realizar paginacion,
+	 * perfecto para llenar componentes de lista de seleccion, con entidades
+	 * cuyos registros no superen las decenas
+	 * 
+	 * @param searchDTO
+	 * @return
+	 * @throws FMWException 
+	 * @throws ReflectiveOperationException
+	 */
+	public List<T> searchWithoutPaging(T searchDTO) throws FMWException, ReflectiveOperationException{
+		T entityBean = searchDTO != null ? searchDTO : ConstructorUtils.invokeConstructor(entityConfigData.getEntityClass());
+		return search(entityBean, 0, 0, null, true, true).getData();
+	}
 
-	public ListPage<T> search(T entityBean, int offset, int rowsByPage, Criteria conditions) throws Exception {
+	public ListPage<T> search(T entityBean, int offset, int rowsByPage, Criteria conditions, boolean ignorePagination, boolean skipPkFilter) throws FMWException, ReflectiveOperationException{
 		StringBuilder sqlBuilder = new StringBuilder();
 		StringBuilder whereBuilder = new StringBuilder();
 		MapSqlParameterSource paramSource = new MapSqlParameterSource();
@@ -251,14 +287,13 @@ public class EntityCRUDOperationsManager<T> {
 			}
 		}
 
-		first = true;
 		String propertyName = null;
 		Object fieldValue = null;
 		String comparingOperator = null;
 		for (String fieldName : entityConfigData.getFieldsData().keySet()) {
 			FieldConfigData fieldCfg = entityConfigData.getFieldsData().get(fieldName);
 
-			if (fieldName.equals(entityConfigData.getPkFieldName()))
+			if (skipPkFilter && fieldName.equals(entityConfigData.getPkFieldName()))
 				continue;
 
 			if (fieldCfg instanceof RelationFieldConfigData && !TypeHelper.isBasicType(fieldCfg.getFieldType())) {
@@ -312,10 +347,13 @@ public class EntityCRUDOperationsManager<T> {
 		
 		if(FMWEntityUtils.showOpeationsSql())
 			LOGGER.info("SEARCH_SQL: {" + sqlBuilder.toString() + "}");
+		
+		if(ignorePagination)
+			return dao.searchWithoutPaging(sqlBuilder.toString(), paramSource, new EntityRowMapper<T>(entityConfigData));
 		return dao.search(sqlBuilder.toString(), paramSource, offset, rowsByPage, new EntityRowMapper<T>(entityConfigData));
 	}
 
-	public void delete(T entityBean) throws Exception {
+	public void delete(T entityBean) throws FMWException, ReflectiveOperationException{
 		applyValidations(entityBean, CRUDOperation.DELETE);
 		StringBuilder sqlBuilder = new StringBuilder();
 		MapSqlParameterSource paramSource = new MapSqlParameterSource();
@@ -327,203 +365,6 @@ public class EntityCRUDOperationsManager<T> {
 		if(FMWEntityUtils.showOpeationsSql())
 			LOGGER.info("DELETE_SQL: {" + sqlBuilder.toString() + "}");
 		dao.delete(sqlBuilder.toString(), paramSource);
-	}
-
-	/**
-	 * Similar al metodo {@link #search(Object, int, int, Criteria)}, pero
-	 * teniendo en cuenta para la Busqueda los campos que representan la Clave
-	 * Primario de la Entidad a Buscar. Este metodo se ha creado especialmente
-	 * para ser usado por componentes del Framework
-	 * 
-	 * @param entityBean
-	 * @param offset
-	 * @param rowsByPage
-	 * @return
-	 * @throws Exception
-	 */
-	public ListPage<T> searchForFmwComponent(T entityBean, int offset, int rowsByPage, Criteria conditions) throws Exception {
-		StringBuilder sqlBuilder = new StringBuilder();
-		StringBuilder whereBuilder = new StringBuilder();
-		MapSqlParameterSource paramSource = new MapSqlParameterSource();
-		sqlBuilder.append("select ");
-
-		List<String> queryColumns = getColumnsForSQLSearchStatementFromEntity(entityConfigData.getEntityClass(), FMWEntityConstants.ENTITY_DYNASQL_MAIN_ALIAS, true, null);
-		boolean first = true;
-		for (String columnName : queryColumns) {
-			sqlBuilder.append(first ? "" : ", ").append(columnName);
-			first = false;
-		}
-		sqlBuilder.append(" from ").append(entityConfigData.getTable()).append(" ").append(FMWEntityConstants.ENTITY_DYNASQL_MAIN_ALIAS);
-
-		for (String fieldName : entityConfigData.getFieldsData().keySet()) {
-			FieldConfigData fieldCfg = entityConfigData.getFieldsData().get(fieldName);
-			if (fieldCfg instanceof RelationFieldConfigData && !TypeHelper.isBasicType(fieldCfg.getFieldType())) {
-				EntityConfigurator<?> mtd_configurator = EntityConfigurationManager.getInstance().getConfigurator(((RelationFieldConfigData) fieldCfg).getRelationEntityClass());
-				EntityConfigData<?> mtd_cfgData = mtd_configurator.configure();
-				sqlBuilder.append(" left join ").append(mtd_cfgData.getTable()).append(" ").append(((RelationFieldConfigData) fieldCfg).getQueryAlias());
-				sqlBuilder.append(" on(").append(FMWEntityConstants.ENTITY_DYNASQL_MAIN_ALIAS).append(".").append(fieldCfg.getColumnName()).append(" = ");
-				sqlBuilder.append(((RelationFieldConfigData) fieldCfg).getQueryAlias()).append(".").append(mtd_cfgData.getFieldsData().get(mtd_cfgData.getPkFieldName()).getColumnName()).append(")");
-
-			}
-		}
-
-		String propertyName = null;
-		Object fieldValue = null;
-		String comparingOperator = null;
-		for (String fieldName : entityConfigData.getFieldsData().keySet()) {
-			FieldConfigData fieldCfg = entityConfigData.getFieldsData().get(fieldName);
-			if (fieldCfg instanceof RelationFieldConfigData && !TypeHelper.isBasicType(fieldCfg.getFieldType())) {
-				EntityConfigurator<?> mtd_configurator = EntityConfigurationManager.getInstance().getConfigurator(((RelationFieldConfigData) fieldCfg).getRelationEntityClass());
-				EntityConfigData<?> mtd_cfgData = mtd_configurator.configure();
-				propertyName = fieldCfg.getFieldName() + "." + mtd_cfgData.getPkFieldName();
-			}
-
-			fieldValue = PropertyUtils.getNestedProperty(entityBean, fieldName);
-
-			if (TypeHelper.isNumericType(fieldCfg.getFieldType())) {
-				if (fieldValue == null || (Number.class.isAssignableFrom(fieldValue.getClass()) && ((Number) fieldValue).doubleValue() <= 0))
-					continue;
-				else if (fieldValue != null && fieldValue.getClass().isPrimitive() && (double)fieldValue <= 0)
-					continue;
-			}
-			
-			if(fieldCfg.isEnumType() && fieldValue != null)
-				fieldValue = entityConfigData.getEnumKeyProperty().equals(EnumKeyProperty.ORDINAL) ? ((Enum<?>)fieldValue).ordinal() : ((Enum<?>)fieldValue).name();
-			else if (fieldCfg instanceof RelationFieldConfigData && !TypeHelper.isBasicType(fieldCfg.getFieldType()) && fieldValue != null) {
-				fieldValue = PropertyUtils.getNestedProperty(entityBean, propertyName);
-			}else if(Listable.class.isAssignableFrom(fieldCfg.getFieldType()) && fieldValue != null)
-				fieldValue = ((Listable)fieldValue).getPK();
-
-			if (fieldValue instanceof CharSequence && StringUtils.isEmpty((CharSequence) fieldValue))
-				continue;
-
-			if (fieldValue != null) {
-				comparingOperator = determineComparisonOperator(fieldValue, fieldCfg);
-				if (whereBuilder.length() > 0)
-					whereBuilder.append(" and ");
-				whereBuilder.append(FMWEntityConstants.ENTITY_DYNASQL_MAIN_ALIAS).append(".").append(fieldCfg.getColumnName()).append(comparingOperator).append(":").append(fieldCfg.getFieldName());
-
-				if (CharSequence.class.isAssignableFrom(fieldValue.getClass()))
-					paramSource.addValue(fieldCfg.getFieldName(), fieldValue.toString().replace(FMWEntityConstants.LIKE_SQLCOMPARING_COMIDIN_CHAR, "%"));
-				else
-					paramSource.addValue(fieldCfg.getFieldName(), fieldValue);
-			}
-		}
-
-		if (conditions != null) {
-			String criteriaStatements = buildCriteriaStatements(entityConfigData, conditions);
-			if (!StringUtils.isBlank(criteriaStatements))
-				whereBuilder.append(whereBuilder.length() == 0 ? "" : " and ").append(criteriaStatements);
-		}
-
-		if (whereBuilder.length() > 0)
-			sqlBuilder.append(" where ").append(whereBuilder.toString());
-
-		sqlBuilder.append(" order by ").append(FMWEntityConstants.ENTITY_DYNASQL_MAIN_ALIAS).append(".").append(entityConfigData.getFieldsData().get(entityConfigData.getPkFieldName()).getColumnName()).append(" asc");
-		if(FMWEntityUtils.showOpeationsSql())
-			LOGGER.info("SEARCH_SQL: {" + sqlBuilder.toString() + "}");
-		
-		return dao.search(sqlBuilder.toString(), paramSource, offset, rowsByPage, new EntityRowMapper<T>(entityConfigData));
-	}
-
-	/**
-	 * Realiza busquedas para una Entidad determinada, sin realizar paginacion,
-	 * perfecto para llenar componentes de lista de seleccion, con entidades
-	 * cuyos registros no superen las decenas
-	 * 
-	 * @param searchDTO
-	 * @return
-	 * @throws InstantiationException 
-	 * @throws InvocationTargetException 
-	 * @throws IllegalAccessException 
-	 * @throws NoSuchMethodException 
-	 * @throws FMWException 
-	 * @throws Exception
-	 */
-	public List<T> searchWithoutPaging(T searchDTO) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException, FMWException{
-		Object entityBean = searchDTO != null ? searchDTO : ConstructorUtils.invokeConstructor(entityConfigData.getEntityClass());
-		StringBuilder sqlBuilder = new StringBuilder();
-		StringBuilder whereBuilder = new StringBuilder();
-		MapSqlParameterSource paramSource = new MapSqlParameterSource();
-		sqlBuilder.append("select ");
-
-		List<String> queryColumns = getColumnsForSQLSearchStatementFromEntity(entityConfigData.getEntityClass(), FMWEntityConstants.ENTITY_DYNASQL_MAIN_ALIAS, true, null);
-		boolean first = true;
-		for (String columnName : queryColumns) {
-			sqlBuilder.append(first ? "" : ", ").append(columnName);
-			first = false;
-		}
-		sqlBuilder.append(" from ").append(entityConfigData.getTable()).append(" ").append(FMWEntityConstants.ENTITY_DYNASQL_MAIN_ALIAS);
-
-		for (String fieldName : entityConfigData.getFieldsData().keySet()) {
-			FieldConfigData fieldCfg = entityConfigData.getFieldsData().get(fieldName);
-			if (fieldCfg instanceof RelationFieldConfigData && !TypeHelper.isBasicType(fieldCfg.getFieldType())) {
-				EntityConfigurator<?> mtd_configurator = EntityConfigurationManager.getInstance().getConfigurator(((RelationFieldConfigData) fieldCfg).getRelationEntityClass());
-				EntityConfigData<?> mtd_cfgData = mtd_configurator.configure();
-				sqlBuilder.append(" left join ").append(mtd_cfgData.getTable()).append(" ").append(((RelationFieldConfigData) fieldCfg).getQueryAlias());
-				sqlBuilder.append(" on(").append(FMWEntityConstants.ENTITY_DYNASQL_MAIN_ALIAS).append(".").append(fieldCfg.getColumnName()).append(" = ");
-				sqlBuilder.append(((RelationFieldConfigData) fieldCfg).getQueryAlias()).append(".").append(mtd_cfgData.getFieldsData().get(mtd_cfgData.getPkFieldName()).getColumnName()).append(")");
-
-			}
-		}
-
-		first = true;
-		String propertyName = null;
-		Object fieldValue = null;
-		String comparingOperator = null;
-		for (String fieldName : entityConfigData.getFieldsData().keySet()) {
-			FieldConfigData fieldCfg = entityConfigData.getFieldsData().get(fieldName);
-
-			if (fieldName.equals(entityConfigData.getPkFieldName()))
-				continue;
-
-			if (fieldCfg instanceof RelationFieldConfigData && !TypeHelper.isBasicType(fieldCfg.getFieldType())) {
-				EntityConfigurator<?> mtd_configurator = EntityConfigurationManager.getInstance().getConfigurator(((RelationFieldConfigData) fieldCfg).getRelationEntityClass());
-				EntityConfigData<?> mtd_cfgData = mtd_configurator.configure();
-				propertyName = fieldCfg.getFieldName() + "." + mtd_cfgData.getPkFieldName();
-			}
-
-			fieldValue = PropertyUtils.getNestedProperty(entityBean, fieldName);
-			
-			if (TypeHelper.isNumericType(fieldCfg.getFieldType())) {
-				if (fieldValue == null || (Number.class.isAssignableFrom(fieldValue.getClass()) && ((Number) fieldValue).doubleValue() <= 0))
-					continue;
-				else if (fieldValue != null && fieldValue.getClass().isPrimitive() && (double)fieldValue <= 0)
-					continue;
-			}
-			
-			if(fieldCfg.isEnumType() && fieldValue != null)
-				fieldValue = entityConfigData.getEnumKeyProperty().equals(EnumKeyProperty.ORDINAL) ? ((Enum<?>)fieldValue).ordinal() : ((Enum<?>)fieldValue).name();
-			else if (fieldCfg instanceof RelationFieldConfigData && !TypeHelper.isBasicType(fieldCfg.getFieldType()) && fieldValue != null) {
-				fieldValue = PropertyUtils.getNestedProperty(entityBean, propertyName);
-			}else if(Listable.class.isAssignableFrom(fieldCfg.getFieldType()) && fieldValue != null)
-				fieldValue = ((Listable)fieldValue).getPK();
-
-			if (fieldValue instanceof CharSequence && StringUtils.isEmpty((CharSequence) fieldValue))
-				continue;
-
-			if (fieldValue != null) {
-				comparingOperator = determineComparisonOperator(fieldValue, fieldCfg);
-				if (whereBuilder.length() > 0)
-					whereBuilder.append(" and ");
-				whereBuilder.append(FMWEntityConstants.ENTITY_DYNASQL_MAIN_ALIAS).append(".").append(fieldCfg.getColumnName()).append(comparingOperator).append(":").append(fieldCfg.getFieldName());
-
-				if (CharSequence.class.isAssignableFrom(fieldValue.getClass()))
-					paramSource.addValue(fieldCfg.getFieldName(), fieldValue.toString().replace(FMWEntityConstants.LIKE_SQLCOMPARING_COMIDIN_CHAR, "%"));
-				else
-					paramSource.addValue(fieldCfg.getFieldName(), fieldValue);
-			}
-		}
-
-		if (whereBuilder.length() > 0)
-			sqlBuilder.append(" where ").append(whereBuilder.toString());
-
-		sqlBuilder.append(" order by ").append(FMWEntityConstants.ENTITY_DYNASQL_MAIN_ALIAS).append(".").append(entityConfigData.getFieldsData().get(entityConfigData.getPkFieldName()).getColumnName()).append(" asc");
-		
-		if(FMWEntityUtils.showOpeationsSql())
-			LOGGER.info("SEARCH_WITHOUT_PAGING_SQL: {" + sqlBuilder.toString() + "}");
-		
-		return dao.searchWithoutPaging(sqlBuilder.toString(), paramSource, new EntityRowMapper<T>(entityConfigData));
 	}
 
 	private String buildCriteriaStatements(EntityConfigData<?> configData, Criteria criteria) {

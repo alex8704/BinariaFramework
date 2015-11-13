@@ -14,7 +14,6 @@ import co.com.binariasystems.fmw.constants.FMWConstants;
 import co.com.binariasystems.fmw.dto.Listable;
 import co.com.binariasystems.fmw.entity.Entity;
 import co.com.binariasystems.fmw.entity.cfg.EntityConfigData;
-import co.com.binariasystems.fmw.entity.cfg.EntityConfigData.AuditFieldConfigData;
 import co.com.binariasystems.fmw.entity.cfg.EntityConfigData.FieldConfigData;
 import co.com.binariasystems.fmw.entity.cfg.EntityConfigData.RelationFieldConfigData;
 import co.com.binariasystems.fmw.entity.cfg.EntityConfigUIControl;
@@ -124,7 +123,7 @@ public class FMWEntityUtils {
 		int index = 0;
 		for(String fieldName : fieldsDataMap.keySet()){
 			FieldConfigData fieldCfgdData = fieldsDataMap.get(fieldName);
-			if(fieldCfgdData instanceof AuditFieldConfigData) continue;
+			if(fieldCfgdData.isAuditoryField()) continue;
 			if(fieldName.equals(PKFieldName))
 				resp.add(0, fieldCfgdData);
 			else{

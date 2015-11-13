@@ -5,6 +5,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 
+import javax.servlet.http.HttpServletRequest;
+
 import co.com.binariasystems.fmw.util.messagebundle.MessageBundleManager;
 import co.com.binariasystems.fmw.vweb.constants.VWebCommonConstants;
 import co.com.binariasystems.fmw.vweb.resources.messages.messages;
@@ -15,6 +17,7 @@ import com.vaadin.event.Action.Notifier;
 import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.event.ShortcutListener;
 import com.vaadin.server.VaadinService;
+import com.vaadin.server.VaadinServletRequest;
 import com.vaadin.ui.AbstractSelect;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.CheckBox;
@@ -43,6 +46,11 @@ public final class VWebUtils {
 	
 	static{
 		commonStringsManager = MessageBundleManager.forPath(VWebCommonConstants.COMMON_MESSAGES_PROPERTIES_FILENAME, messages.class);
+	}
+	
+	public static HttpServletRequest getCurrentHttpRequest(){
+		VaadinServletRequest vaadinRequest = (VaadinServletRequest) VaadinService.getCurrentRequest();
+		return vaadinRequest.getHttpServletRequest();
 	}
 	
 	public static String getContextPath(){

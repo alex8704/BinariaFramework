@@ -142,13 +142,13 @@ public class EntityConfigData<T> implements Serializable {
 
 
 	public static class AuditableEntityConfigData<T> extends EntityConfigData<T> {
-		private AuditFieldConfigData creationUserFieldCfg;
-		private AuditFieldConfigData modificationUserFieldCfg;
-		private AuditFieldConfigData creationDateFieldCfg;
-		private AuditFieldConfigData modificationDateFieldCfg;
+		private Auditable auditableInfo;
+		
+		public AuditableEntityConfigData(Auditable auditableInfo){
+			this.auditableInfo = auditableInfo;
+		}
 
-		public static boolean isAuditField(String fieldName,
-				Auditable auditableInfo) {
+		public static boolean isAuditField(String fieldName,Auditable auditableInfo) {
 			if (fieldName == null || auditableInfo == null)
 				return false;
 			if (auditableInfo.creationUserField() != null
@@ -166,38 +166,20 @@ public class EntityConfigData<T> implements Serializable {
 			return false;
 		}
 
-		public AuditFieldConfigData getCreationUserFieldCfg() {
-			return creationUserFieldCfg;
+		public FieldConfigData getCreationUserFieldCfg() {
+			return getFieldData(auditableInfo.creationUserField());
 		}
 
-		public void setCreationUserFieldCfg(AuditFieldConfigData creationUserFieldCfg) {
-			this.creationUserFieldCfg = creationUserFieldCfg;
+		public FieldConfigData getModificationUserFieldCfg() {
+			return getFieldData(auditableInfo.modificationUserField());
 		}
 
-		public AuditFieldConfigData getModificationUserFieldCfg() {
-			return modificationUserFieldCfg;
+		public FieldConfigData getCreationDateFieldCfg() {
+			return getFieldData(auditableInfo.creationDateField());
 		}
 
-		public void setModificationUserFieldCfg(
-				AuditFieldConfigData modificationUserFieldCfg) {
-			this.modificationUserFieldCfg = modificationUserFieldCfg;
-		}
-
-		public AuditFieldConfigData getCreationDateFieldCfg() {
-			return creationDateFieldCfg;
-		}
-
-		public void setCreationDateFieldCfg(AuditFieldConfigData creationDateFieldCfg) {
-			this.creationDateFieldCfg = creationDateFieldCfg;
-		}
-
-		public AuditFieldConfigData getModificationDateFieldCfg() {
-			return modificationDateFieldCfg;
-		}
-
-		public void setModificationDateFieldCfg(
-				AuditFieldConfigData modificationDateFieldCfg) {
-			this.modificationDateFieldCfg = modificationDateFieldCfg;
+		public FieldConfigData getModificationDateFieldCfg() {
+			return getFieldData(auditableInfo.modificationDateField());
 		}
 
 	}
@@ -210,6 +192,7 @@ public class EntityConfigData<T> implements Serializable {
 		private String getterMethodName;
 		private boolean mandatory = true;
 		private boolean enumType;
+		private boolean auditoryField;
 		private Listable[] fixedValues;
 		private EntityConfigUIControl fieldUIControl;
 
@@ -289,13 +272,14 @@ public class EntityConfigData<T> implements Serializable {
 			return this instanceof RelationFieldConfigData;
 		}
 
-		public boolean isAuditField() {
-			return this instanceof RelationFieldConfigData;
+		public boolean isAuditoryField() {
+			return auditoryField;
 		}
 
-	}
+		public void setAuditoryField(boolean auditoryField) {
+			this.auditoryField = auditoryField;
+		}
 
-	public static class AuditFieldConfigData extends FieldConfigData {
 	}
 
 	public static class RelationFieldConfigData extends FieldConfigData {

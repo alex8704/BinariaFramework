@@ -4,6 +4,8 @@ package co.com.binariasystems.fmw.entity.cfg;
 import java.util.HashMap;
 import java.util.Map;
 
+import co.com.binariasystems.fmw.security.auditory.AuditoryDataProvider;
+
 /*
  * Clase que Actua como proveedor y Administrador de instancias de configuracion
  * de maestros, permite generar la configuracion y la logica de administracion de
@@ -18,6 +20,7 @@ import java.util.Map;
 public class EntityConfigurationManager {
 	private	static EntityConfigurationManager instance;
 	private Map<String, EntityConfigurator<?>> configuratorsContext = new HashMap<String, EntityConfigurator<?>>();
+	private AuditoryDataProvider<?> auditoryDataProvider;
 	
 	private EntityConfigurationManager(){}
 	
@@ -58,4 +61,14 @@ public class EntityConfigurationManager {
 		}
 		return resp;
 	}
+
+	public AuditoryDataProvider<?> getAuditoryDataProvider() {
+		return auditoryDataProvider;
+	}
+
+	public void setAuditoryDataProvider(AuditoryDataProvider<?> auditoryDataProvider) {
+		this.auditoryDataProvider = auditoryDataProvider;
+	}
+	
+	
 }

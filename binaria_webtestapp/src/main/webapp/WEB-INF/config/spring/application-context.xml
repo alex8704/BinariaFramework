@@ -124,6 +124,10 @@
 		<property name="mailSender" ref="mailSender"/>
 		<property name="velocityEngineFactory" ref="velocityEngineFactory"/>
 	</bean>
+	
+	<bean id="auditoryDataProvider" class="co.com.binariasystems.webtestapp.sec.BinariaAuditoryDataProvider">
+		<property name="supportAtmosphereWebSockets" value="true"/>
+	</bean>
 
 	<import resource="business-context.xml" />
 	<import resource="fmwentity-config-context.xml" />

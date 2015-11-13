@@ -1,9 +1,12 @@
 package co.com.binariasystems.fmw.security.auditory;
 
-import javax.servlet.ServletRequest;
+import java.util.Date;
+
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 public interface AuditoryDataProvider<T> {
-	public T getCurrenAuditoryUserByHttpSession(HttpSession ht);
-	public T getCurrenAuditoryUserByServletRequest(ServletRequest request);
+	public T getCurrenAuditoryUserByHttpSession(HttpSession httpSession);
+	public T getCurrenAuditoryUserByServletRequest(HttpServletRequest httpRequest);
+	public Date getCurrentDate();
 }
