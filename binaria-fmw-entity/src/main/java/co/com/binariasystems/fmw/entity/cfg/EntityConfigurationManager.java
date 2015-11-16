@@ -37,10 +37,11 @@ public class EntityConfigurationManager {
 		this.configuratorsContext = configuratorsContext;
 	}
 	
-	public EntityConfigurator<?> getConfigurator(String entityClass){
-		Class<?> clazz;
+	@SuppressWarnings("unchecked")
+	public <T> EntityConfigurator<T> getConfigurator(String entityClass){
+		Class<T> clazz;
 		try {
-			clazz = Class.forName(entityClass);
+			clazz = (Class<T>) Class.forName(entityClass);
 		} catch (ClassNotFoundException e) {
 			throw new RuntimeException("Cannot load class "+entityClass, e);
 		}
@@ -49,8 +50,8 @@ public class EntityConfigurationManager {
 	}
 	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public EntityConfigurator<?> getConfigurator(Class<?> entityClass){
-		EntityConfigurator<?> resp = configuratorsContext.get(entityClass.getName());
+	public <T> EntityConfigurator<T> getConfigurator(Class<T> entityClass){
+		EntityConfigurator<T> resp = (EntityConfigurator<T>) configuratorsContext.get(entityClass.getName());
 		if(resp == null){
 			synchronized (EntityConfigurationManager.class) {
 				resp = new DefaultEntityConfigurator(entityClass);

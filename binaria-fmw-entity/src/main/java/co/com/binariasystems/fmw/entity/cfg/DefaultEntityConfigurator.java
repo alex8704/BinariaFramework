@@ -87,10 +87,11 @@ public class DefaultEntityConfigurator<T> implements EntityConfigurator<T>{
 				if(!((Entity)annot).validationClass().equals(EntityValidator.class))
 					entityConfigData.setValidationClass(((Entity)annot).validationClass());
 			}if(annot instanceof SearchTarget){
-				if(((SearchTarget)annot).descriptionFields() != null){
-					for(int i = 0; i < ((SearchTarget)annot).descriptionFields().length; i++)
-						entityConfigData.getSearchDescriptionFields().add(((SearchTarget)annot).descriptionFields()[i]);
-				}
+				for(String descriptionField : ((SearchTarget)annot).descriptionFields())
+					entityConfigData.getSearchDescriptionFields().add(descriptionField);
+				for(String gridField : ((SearchTarget)annot).gridColumnFields())
+					entityConfigData.getGridColumnFields().add(gridField);
+				
 			}
 		}
 		

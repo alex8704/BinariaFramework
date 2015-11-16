@@ -1,6 +1,5 @@
 package co.com.binariasystems.fmw.entity.util;
 
-import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -69,7 +68,7 @@ public class FMWEntityUtils {
 				resp.append(entityConfigData.getSearchDescriptionFields().size() > 0 ? "" : TypeHelper.objectToString(fieldValue));
 			}else	//BasicTypes, Enums, Collections
 				resp.append(TypeHelper.objectToString(fieldValue));
-		}catch(FMWException | IllegalAccessException | InvocationTargetException | NoSuchMethodException ex){
+		}catch(ReflectiveOperationException ex){
 			throw new FMWException(ex);
 		}
 		

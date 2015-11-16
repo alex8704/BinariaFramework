@@ -22,6 +22,7 @@ public class EntityConfigData<T> implements Serializable {
 	private String pkFieldName;
 	private String searchFieldName;
 	private List<String> searchDescriptionFields;
+	private List<String> gridColumnFields;
 	private String titleKey;
 	private EnumKeyProperty enumKeyProperty;
 	private Map<String, String> fieldLabelMappings;
@@ -86,9 +87,11 @@ public class EntityConfigData<T> implements Serializable {
 			searchDescriptionFields = new LinkedList<String>();
 		return searchDescriptionFields;
 	}
-
-	public void setSearchDescriptionFields(List<String> searchDescriptionFields) {
-		this.searchDescriptionFields = searchDescriptionFields;
+	
+	public List<String> getGridColumnFields() {
+		if (gridColumnFields == null)
+			gridColumnFields = new LinkedList<String>();
+		return gridColumnFields;
 	}
 
 	public String getPkFieldName() {

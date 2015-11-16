@@ -95,7 +95,7 @@ public class FMWExceptionUtils {
 			while(tr.getCause() != null){
 				tr = tr.getCause();
 			}
-			return new FMWException(tr instanceof NullPointerException ? "Null Value" : ex.getMessage(), tr);
+			return new FMWException(tr instanceof NullPointerException ? "Null Value" : tr.getMessage(), tr);
 		}
 		return ex;
 	}

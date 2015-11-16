@@ -98,7 +98,6 @@ public class EntityCRUDPanel<T> extends FormPanel implements ClickListener{
 		cleanBtn.click();
 	}
 	
-	@SuppressWarnings("unchecked")
 	private void initContent() throws FMWException {
 		entityConfigData = (EntityConfigData<T>) EntityConfigurationManager.getInstance().getConfigurator(entityClass).configure();
 		manager = (EntityCRUDOperationsManager<T>) EntityCRUDOperationsManager.getInstance(entityClass);
@@ -152,7 +151,7 @@ public class EntityCRUDPanel<T> extends FormPanel implements ClickListener{
 					((Field<?>)comp).setPropertyDataSource(beanItem.getItemProperty(fieldName));
 			}
 			initialKeyValue = beanItem.getItemProperty(entityConfigData.getPkFieldName()).getValue();
-		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException ex) {
+		} catch (ReflectiveOperationException | SecurityException ex) {
 			throw new FMWException(ex);
 		}
 	}
@@ -301,10 +300,10 @@ public class EntityCRUDPanel<T> extends FormPanel implements ClickListener{
 		if(!(entityConfigData instanceof AuditableEntityConfigData))return;
 		AuditableEntityConfigData<T> configData = (AuditableEntityConfigData<T>)entityConfigData;
 		AuditoryDataProvider<?> auditoryDataProvider = EntityConfigurationManager.getInstance().getAuditoryDataProvider();
-		String creationUserProperty = configData.getCreationUserFieldCfg().getFieldName();
-		String modificationUserProperty = configData.getModificationUserFieldCfg().getFieldName();
-		String creationDateProperty = configData.getCreationDateFieldCfg().getFieldName();
-		String modificationDateProperty = configData.getModificationDateFieldCfg().getFieldName();
+		String creationUserProperty = configData.getCreationUserFieldCfg() != null ? configData.getCreationUserFieldCfg().getFieldName() : null;
+		String modificationUserProperty = configData.getModificationUserFieldCfg() != null ? configData.getModificationUserFieldCfg().getFieldName() : null;
+		String creationDateProperty = configData.getCreationDateFieldCfg() != null ? configData.getCreationDateFieldCfg().getFieldName() : null;
+		String modificationDateProperty = configData.getModificationDateFieldCfg() != null ?configData.getModificationDateFieldCfg().getFieldName() : null;
 		Object auditoryUser = auditoryDataProvider.getCurrenAuditoryUserByServletRequest(VWebUtils.getCurrentHttpRequest());
 		Date currentDate = auditoryDataProvider.getCurrentDate();
 		//Creation User and Date

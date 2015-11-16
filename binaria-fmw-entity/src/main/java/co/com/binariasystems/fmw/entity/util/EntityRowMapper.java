@@ -1,6 +1,5 @@
 package co.com.binariasystems.fmw.entity.util;
 
-import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.ResultSet;
@@ -43,7 +42,7 @@ public class EntityRowMapper<T> implements RowMapper<T>{
 			
 			try {
 				PropertyUtils.setProperty(bean, fieldName, mapEntityField(fieldCfg, null, rs, true));
-			} catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+			} catch (ReflectiveOperationException e) {
 				throw new FMWUncheckedException("Cannot set value for field '"+fieldCfg.getFieldName()+"' of entity "+entityConfigData.getEntityClass(), e);
 			} catch(Exception e){
 				if(e instanceof RuntimeException)

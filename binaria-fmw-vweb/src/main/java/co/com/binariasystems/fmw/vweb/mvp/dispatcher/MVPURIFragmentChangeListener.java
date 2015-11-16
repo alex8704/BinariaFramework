@@ -1,8 +1,11 @@
 package co.com.binariasystems.fmw.vweb.mvp.dispatcher;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import co.com.binariasystems.fmw.exception.FMWException;
-import co.com.binariasystems.fmw.exception.FMWUncheckedException;
 import co.com.binariasystems.fmw.vweb.mvp.event.ViewDispatchRequest;
+import co.com.binariasystems.fmw.vweb.uicomponet.MessageDialog;
 
 import com.vaadin.server.Page.UriFragmentChangedEvent;
 import com.vaadin.server.Page.UriFragmentChangedListener;
@@ -10,6 +13,7 @@ import com.vaadin.server.VaadinService;
 import com.vaadin.server.VaadinServletRequest;
 
 public class MVPURIFragmentChangeListener implements UriFragmentChangedListener{
+	private static final Logger LOGGER = LoggerFactory.getLogger(MVPURIFragmentChangeListener.class);
 	private ViewDispatcher viewDispatcher;
 	@Override
 	public void uriFragmentChanged(UriFragmentChangedEvent event) {
@@ -21,8 +25,8 @@ public class MVPURIFragmentChangeListener implements UriFragmentChangedListener{
 		
 		try {
 			viewDispatcher.dispatch(dispatchRequest);
-		} catch (FMWException e) {
-			throw new FMWUncheckedException(e);
+		} catch (FMWException ex) {
+			MessageDialog.showExceptions(ex, LOGGER);
 		}
 	}
 	public ViewDispatcher getViewDispatcher() {

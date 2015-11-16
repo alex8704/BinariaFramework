@@ -12,7 +12,10 @@ import co.com.binariasystems.fmw.entity.SearchField;
 import co.com.binariasystems.fmw.entity.SearchTarget;
 
 @Entity(table="gateways")
-@SearchTarget(descriptionFields={"ip","descripcion", "creationUser", "modificationDate"})
+@SearchTarget(
+		descriptionFields = {"ip","descripcion"},
+		gridColumnFields = {"ip","descripcion", "creationUser", "modificationDate"}
+)
 @Auditable
 public class Gateway extends AbstractDTO {
 	@Key(column="id_gateway")

@@ -1,7 +1,7 @@
 package co.com.binariasystems.fmw.vweb.uicomponet;
 
-import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -82,6 +82,7 @@ public class SearcherResultWindow<T> extends Window implements CloseListener, Cl
 	private String selectionEventFunction;
 	private SearchSelectionChangeListener<T> selectionChangeListener;
 	private boolean wasChoice;
+	private static final String ACTIONS_COLUM_ID = "actions";
 	
 	private MessageBundleManager entityStrings = MessageBundleManager.forPath(
 			StringUtils.defaultIfBlank(IOCHelper.getBean(VWebCommonConstants.APP_ENTITIES_MESSAGES_FILE_IOC_KEY, String.class), VWebCommonConstants.ENTITY_STRINGS_PROPERTIES_FILENAME),
@@ -110,14 +111,13 @@ public class SearcherResultWindow<T> extends Window implements CloseListener, Cl
 		this.conditions = conditions;
 	}
 	
-	@SuppressWarnings("unchecked")
 	public void initContent() throws FMWException{
 		entityConfigData = (EntityConfigData<T>)EntityConfigurationManager.getInstance().getConfigurator(entityClazz).configure();
 		manager = (EntityCRUDOperationsManager<T>)EntityCRUDOperationsManager.getInstance(entityClazz);
 		selectionEventFunction = SearcherResultWindow.class.getSimpleName()+"_fn"+Math.abs(hashCode());
 		
 		setCaption(VWebUtils.getCommonString(VWebCommonConstants.SEARCH_WIN_CAPTION));
-		form = new FormPanel(2);//new UIForm(null,100, Unit.PERCENTAGE);
+		form = new FormPanel(2);
 		List<FieldConfigData> sortedFields = FMWEntityUtils.sortByUIControlTypePriority(entityConfigData.getFieldsData(), entityConfigData.getPkFieldName());
 		
 		for(FieldConfigData fieldCfg : sortedFields){
@@ -130,32 +130,32 @@ public class SearcherResultWindow<T> extends Window implements CloseListener, Cl
 		searchBtn = new Button(VWebUtils.getCommonString(VWebCommonConstants.MASTER_CRUD_MSG_SEARCHCAPTION));
 		searchAllBtn = new Button(VWebUtils.getCommonString(VWebCommonConstants.MASTER_CRUD_MSG_SEARCHALLCAPTION));
 		cleanBtn = new Button(VWebUtils.getCommonString(VWebCommonConstants.MASTER_CRUD_MSG_CLEANCAPTION));
-		gridContainer = new GeneratedPropertyContainer(new BeanItemContainer<Object>((Class<? super Object>) entityConfigData.getEntityClass()));
-		gridContainer.addGeneratedProperty("actions", new GridUtils.ActionLinkValueGenerator(entityConfigData.getPkFieldName(), null, this, selectionEventFunction, new ActionLinkInfo("select","Seleccionar")));
 		
-		resultsGrid = new Grid(VWebUtils.getCommonString(VWebCommonConstants.SEARCH_WIN_TABLE_CAPTION), new GeneratedPropertyContainer(gridContainer));
+		gridContainer = new GeneratedPropertyContainer(new BeanItemContainer<T>(entityConfigData.getEntityClass()));
+		gridContainer.addGeneratedProperty(ACTIONS_COLUM_ID, new GridUtils.ActionLinkValueGenerator(entityConfigData.getPkFieldName(), null, this, selectionEventFunction, new ActionLinkInfo("select","Seleccionar")));
+		resultsGrid = new Grid(VWebUtils.getCommonString(VWebCommonConstants.SEARCH_WIN_TABLE_CAPTION), gridContainer);
 		resultsGrid.setSelectionMode(SelectionMode.NONE);
-		resultsGrid.removeAllColumns();
 		
-		resultsGrid.addColumn("actions")
+		resultsGrid.getColumn(ACTIONS_COLUM_ID)
 		.setHeaderCaption("Seleccionar")
 		.setRenderer(new HtmlRenderer());
 		
-		Collection<String> descriptionFields = entityConfigData.getSearchDescriptionFields().isEmpty() ? entityConfigData.getFieldsData().keySet() : entityConfigData.getSearchDescriptionFields();
+		List<String> columnIds = getGridColumnFields();
 		GenericStringPropertyGenerator genericPropertyGenerator = new GenericStringPropertyGenerator();
-		for(String fieldName : descriptionFields){
-			FieldConfigData fieldCfg = entityConfigData.getFieldData(fieldName);
-			System.out.println(entityClazz.getSimpleName()+"."+fieldName);
+		for(String columnId : columnIds){
+			if(columnId.equals(ACTIONS_COLUM_ID)) continue;
+			FieldConfigData fieldCfg = entityConfigData.getFieldData(columnId);
 			Renderer<?> renderer = GridUtils.obtainRendererForType(fieldCfg.getFieldType());
-			Column column = resultsGrid.addColumn(fieldName);
+			Column column = resultsGrid.getColumn(columnId);
 			column.setHeaderCaption(EntityConfigUtils.getFieldCaptionText(fieldCfg, entityConfigData, labelsFmt, entityStrings));
 			if(fieldCfg.isRelationField() && FMWEntityUtils.isEntityClass(fieldCfg.getFieldType())){
-				gridContainer.addGeneratedProperty(fieldName, genericPropertyGenerator);
+				gridContainer.addGeneratedProperty(columnId, genericPropertyGenerator);
 			}
 			if(renderer != null)
 				column.setRenderer(renderer);	
 		}
 		
+		resultsGrid.setColumns(columnIds.toArray());
 		resultsGrid.setCellStyleGenerator(new SimpleCellStyleGenerator(new SimpleStyleInfo("actions", UIConstants.CENTER_ALIGN_STYLE), new SimpleStyleInfo(entityConfigData.getPkFieldName(), UIConstants.CENTER_ALIGN_STYLE)));
 		resultsGrid.setHeightMode(HeightMode.ROW);
 		resultsGrid.setHeightByRows(pager.getRowsByPage());
@@ -181,6 +181,20 @@ public class SearcherResultWindow<T> extends Window implements CloseListener, Cl
 		cleanBtn.click();
 	}
 	
+	private List<String> getGridColumnFields(){
+		List<String> gridColumnFields = new ArrayList<String>();
+		gridColumnFields.add(ACTIONS_COLUM_ID);
+		gridColumnFields.add(entityConfigData.getPkFieldName());
+		boolean hasGridFields = !entityConfigData.getGridColumnFields().isEmpty();
+		Collection<String> columnFields = hasGridFields ? entityConfigData.getGridColumnFields() : entityConfigData.getFieldsData().keySet();
+		for(String columnField : columnFields){
+			if(!columnField.equals(entityConfigData.getPkFieldName()))
+				gridColumnFields.add(columnField);
+		}
+		
+		return gridColumnFields;
+	}
+	
 	private void bindComponentsToModel() throws FMWException{
 		Object bean = null;
 		try{
@@ -191,7 +205,7 @@ public class SearcherResultWindow<T> extends Window implements CloseListener, Cl
 				if(comp instanceof Field)
 					((Field<?>)comp).setPropertyDataSource(beanItem.getItemProperty(fieldName));
 			}
-		}catch(InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException ex){
+		}catch(ReflectiveOperationException | SecurityException ex){
 			throw new FMWException(ex);
 		}
 	}

@@ -13,4 +13,5 @@ import java.lang.annotation.Target;
 @Retention(value = RetentionPolicy.RUNTIME)
 public @interface SearchTarget {
 	public abstract String[] descriptionFields() default {};
+	public abstract String[] gridColumnFields() default {};
 }
