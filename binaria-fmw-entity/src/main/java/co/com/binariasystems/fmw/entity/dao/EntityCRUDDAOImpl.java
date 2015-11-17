@@ -80,8 +80,8 @@ public class EntityCRUDDAOImpl<T> extends FMWAbstractDAO implements EntityCRUDDA
 			respBuilder.append(queryStatemet).append(" limit ").append(offset).append(", ").append(rowsByPage);
 		}
 		if(DBUtil.getCurrentDBMS() == DBMS.ORACLE){
-			respBuilder.append("select alias2.* from (select rownum rowidx, alias1.* from (")
-			.append(queryStatemet).append(") alias1) alias2 where alias2.rowidx between ").append(offset + 1).append(" and ").append(offset + 1 + rowsByPage);
+			respBuilder.append("select countQuery.* from (select rownum rowidx, indexQuery.* from (")
+			.append(queryStatemet).append(") indexQuery) countQuery where countQuery.rowidx between ").append(offset + 1).append(" and ").append(offset + 1 + rowsByPage);
 		}
 		if(DBUtil.getCurrentDBMS() == DBMS.POSTGRES){
 			respBuilder.append(queryStatemet).append(" offset ").append(offset).append(" limit ").append(rowsByPage);
