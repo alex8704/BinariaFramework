@@ -9,6 +9,7 @@
 		<reflections.version>0.9.10</reflections.version>
 		<project.source.version>1.7</project.source.version>
 		<project.target.version>1.7</project.target.version>
+		<atmosphere.version>2.2.7</atmosphere.version>
 	</properties>
 	
 	<dependencyManagement>
@@ -68,23 +69,18 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-web</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.aspectj</groupId>
+			<artifactId>aspectjweaver</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
 			<groupId>com.vaadin</groupId>
 			<artifactId>vaadin-server</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.vaadin</groupId>
-			<artifactId>vaadin-push</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.vaadin</groupId>
-			<artifactId>vaadin-client</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.vaadin</groupId>
-			<artifactId>vaadin-themes</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
@@ -113,17 +109,6 @@
 			<version>${reflections.version}</version>
 			<scope>provided</scope>
 		</dependency>
-		<!-- Web application development utilities applicable to both Servlet and Portlet Environments (depends on spring-core, spring-beans, spring-context) Define this if you use Spring MVC, or wish to use Struts, JSF, or another web framework with Spring (org.springframework.web.*) -->
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-web</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.aspectj</groupId>
-			<artifactId>aspectjweaver</artifactId>
-			<scope>provided</scope>
-		</dependency>
 		<dependency>
 			<groupId>org.apache.shiro</groupId>
 			<artifactId>shiro-web</artifactId>
@@ -131,16 +116,11 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-  	 	<groupId>org.apache.velocity</groupId>
-  	 	<artifactId>velocity</artifactId>
-  	 	<scope>provided</scope>
-  	 </dependency>
-  	 
-  	 <dependency>
-  	 	<groupId>org.apache.velocity</groupId>
-  	 	<artifactId>velocity-tools</artifactId>
-  	 	<scope>provided</scope>
-  	 </dependency>
+			<groupId>org.atmosphere</groupId>
+			<artifactId>atmosphere-runtime</artifactId>
+			<version>${atmosphere.version}</version>
+			<scope>provided</scope>
+		</dependency>
 		
 	</dependencies>
 	<parent>
