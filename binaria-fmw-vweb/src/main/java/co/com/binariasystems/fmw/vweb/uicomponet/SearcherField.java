@@ -23,6 +23,7 @@ import co.com.binariasystems.fmw.vweb.uicomponet.searcher.VRangeCriteria;
 import co.com.binariasystems.fmw.vweb.uicomponet.searcher.VSimpleCriteria;
 
 import com.vaadin.data.Property;
+import com.vaadin.data.util.AbstractProperty;
 import com.vaadin.data.util.ObjectProperty;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.Button;
@@ -52,6 +53,7 @@ public class SearcherField<T> extends CustomField<T> implements SearchSelectionC
 	
 	private Criteria conditions;
 	private ValueChangeListener conditionsChangeListener;
+	private ValueChangeListener valueChangeListener;
 	
 	private boolean omitSearchCall;
 	
@@ -63,11 +65,6 @@ public class SearcherField<T> extends CustomField<T> implements SearchSelectionC
 		this.entityClazz = entityClazz;
 		this.returnType = returnType;
 		setCaption(caption);
-		conditionsChangeListener = new ValueChangeListener() {
-			@Override public void valueChange(Property.ValueChangeEvent event) {
-				onConditionsChange();
-			}
-		};
 	}
 
 	@SuppressWarnings("unchecked")
@@ -112,13 +109,19 @@ public class SearcherField<T> extends CustomField<T> implements SearchSelectionC
 	}
 	
 	private void bindEvents(){
-		ValueChangeListener valueChangeListener = new ValueChangeListener() {
+		valueChangeListener = new ValueChangeListener() {
 			@Override
 			public void valueChange(Property.ValueChangeEvent event) {
 				if(textfield.getPropertyDataSource().equals(event.getProperty()))
 					onTextfieldValueChange(event);
 				else if(event.getProperty().equals(SearcherField.this.getPropertyDataSource()))
 					onInternalValueChange(event);
+			}
+		};
+		
+		conditionsChangeListener = new ValueChangeListener() {
+			@Override public void valueChange(Property.ValueChangeEvent event) {
+				onConditionsChange();
 			}
 		};
 		
@@ -176,7 +179,7 @@ public class SearcherField<T> extends CustomField<T> implements SearchSelectionC
 		String description = "";
 		Object newValue = event.getNewValue();
 		try{
-			if(event.getSearchType().equals(SearchType.PK) && event.getNewValue() != null)
+			if(event.getSearchType().equals(SearchType.PK))
 				textfieldProperty.setValue(event.isReset() ? null : extractFieldValue(event.getNewValue(), masterConfigData.getSearchFieldData()));
 			else {
 				newValue = event.getNewValue() != null ? event.getNewValue() : event.getOldValue();
@@ -192,6 +195,12 @@ public class SearcherField<T> extends CustomField<T> implements SearchSelectionC
 		}
 	}
 	
+	@Override
+	public void setPropertyDataSource(Property newDataSource) {
+		super.setPropertyDataSource(newDataSource);
+		if(newDataSource instanceof AbstractProperty)
+			((AbstractProperty)newDataSource).addValueChangeListener(valueChangeListener);
+	}
 	
 	
 	public SearcherField<T> setCriteria(Criteria newConditios){

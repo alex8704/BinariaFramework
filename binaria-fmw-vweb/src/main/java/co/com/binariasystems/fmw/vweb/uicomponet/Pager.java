@@ -29,9 +29,9 @@ public class Pager<FILTER_TYPE, RESULT_TYPE> extends HorizontalLayout implements
 	public static final Integer[] ROWS_BY_PAGE_ITEMS = {10, 15, 20};
 	public static enum PagerMode {PAGE, ITEM}
 	
-	private ObjectProperty<Integer> pageCountProperty = new ObjectProperty<Integer>(0);
-	private ObjectProperty<Integer> currentPageProperty = new ObjectProperty<Integer>(0);
-	private ObjectProperty<Integer> rowsByPageProperty = new ObjectProperty<Integer>(ROWS_BY_PAGE_ITEMS[0]);
+	private ObjectProperty<Integer> pageCountProperty = new ObjectProperty<Integer>(0, Integer.class);
+	private ObjectProperty<Integer> currentPageProperty = new ObjectProperty<Integer>(0, Integer.class);
+	private ObjectProperty<Integer> rowsByPageProperty = new ObjectProperty<Integer>(0, Integer.class);
 	private IntegerRangeValidator rangeValidator;
 	private Label foundItemsLbl;
 	private Label rowsByPageConfLbl;
@@ -65,7 +65,6 @@ public class Pager<FILTER_TYPE, RESULT_TYPE> extends HorizontalLayout implements
 	
 	public Pager(PagerMode pMode, int rowsByPage){
 		this.pagerMode = (pMode != null) ? pMode : PagerMode.PAGE;
-		rowsByPageProperty.setValue(pagerMode.equals(PagerMode.ITEM) ? 1 : ROWS_BY_PAGE_ITEMS[0]);
 		//Se invoca dentro del constructor ya que hay ocasiones en que se hacen operaciones
 		//Con el componente antes de ser atado al componente padre, lo cual desemboca en errores NullPointer
 		//Por ejemplo el SercherResultWindow
@@ -98,6 +97,7 @@ public class Pager<FILTER_TYPE, RESULT_TYPE> extends HorizontalLayout implements
 		rowsByPageConfCmb.addItems(pagerMode.equals(PagerMode.ITEM) ? Arrays.asList(1) : Arrays.asList(ROWS_BY_PAGE_ITEMS));
 		rowsByPageConfCmb.setNullSelectionAllowed(false);
 		rowsByPageConfCmb.setPropertyDataSource(rowsByPageProperty);
+		rowsByPageProperty.setValue(pagerMode.equals(PagerMode.ITEM) ? 1 : ROWS_BY_PAGE_ITEMS[0]);
 		currentPageTxt.setWidth(50, Unit.PIXELS);
 		filler.setWidth(25, Unit.PIXELS);
 		
@@ -320,4 +320,5 @@ public class Pager<FILTER_TYPE, RESULT_TYPE> extends HorizontalLayout implements
 	public int getRowsByPage(){
 		return rowsByPage();
 	}
+	
 }
