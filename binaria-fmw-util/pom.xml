@@ -15,18 +15,15 @@
 			<groupId>co.com.binariasystems</groupId>
 			<artifactId>binaria-fmw</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
-			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-context</artifactId>
-			
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-tx</artifactId>
-			
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
@@ -74,7 +71,7 @@
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-web</artifactId>
-			
+			<scope>provided</scope>
 		</dependency>
 
 	</dependencies>

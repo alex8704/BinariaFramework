@@ -4,6 +4,9 @@
         <wb-resource deploy-path="/" source-path="/src/main/webapp" tag="defaultRootSource"/>
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/java"/>
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/resources"/>
+        <dependent-module archiveName="binaria-fmw-vweb-0.0.1-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/binaria-fmw-vweb/binaria-fmw-vweb">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
         <dependent-module archiveName="binaria-fmw-0.0.1-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/binaria-fmw/binaria-fmw">
             <dependency-type>uses</dependency-type>
         </dependent-module>
@@ -13,13 +16,10 @@
         <dependent-module archiveName="binaria-fmw-business-0.0.1-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/binaria-fmw-business/binaria-fmw-business">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module archiveName="binaria-fmw-entity-0.0.1-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/binaria-fmw-entity/binaria-fmw-entity">
-            <dependency-type>uses</dependency-type>
-        </dependent-module>
-        <dependent-module archiveName="binaria-fmw-vweb-0.0.1-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/binaria-fmw-vweb/binaria-fmw-vweb">
-            <dependency-type>uses</dependency-type>
-        </dependent-module>
         <dependent-module archiveName="binaria-fmw-security-0.0.1-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/binaria-fmw-security/binaria-fmw-security">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="binaria-fmw-entity-0.0.1-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/binaria-fmw-entity/binaria-fmw-entity">
             <dependency-type>uses</dependency-type>
         </dependent-module>
         <property name="context-root" value="binaria_webtestapp"/>

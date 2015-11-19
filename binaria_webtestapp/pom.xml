@@ -70,32 +70,7 @@
 	<dependencies>
 		<dependency>
 			<groupId>co.com.binariasystems</groupId>
-			<artifactId>binaria-fmw</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>co.com.binariasystems</groupId>
-			<artifactId>binaria-fmw-util</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>co.com.binariasystems</groupId>
-			<artifactId>binaria-fmw-business</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>co.com.binariasystems</groupId>
-			<artifactId>binaria-fmw-entity</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>co.com.binariasystems</groupId>
 			<artifactId>binaria-fmw-vweb</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>co.com.binariasystems</groupId>
-			<artifactId>binaria-fmw-security</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 		<dependency>

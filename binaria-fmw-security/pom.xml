@@ -16,19 +16,16 @@
 			<groupId>co.com.binariasystems</groupId>
 			<artifactId>binaria-fmw</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
-			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>co.com.binariasystems</groupId>
 			<artifactId>binaria-fmw-util</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
-			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>co.com.binariasystems</groupId>
 			<artifactId>binaria-fmw-business</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
-			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>javax.servlet</groupId>
@@ -52,7 +49,6 @@
 			<version>${atmosphere.version}</version>
 			<scope>provided</scope>
 		</dependency>
-
 	</dependencies>
 
 	<parent>

@@ -46,25 +46,21 @@
 			<groupId>co.com.binariasystems</groupId>
 			<artifactId>binaria-fmw</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
-			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>co.com.binariasystems</groupId>
 			<artifactId>binaria-fmw-util</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
-			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>co.com.binariasystems</groupId>
 			<artifactId>binaria-fmw-business</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
-			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>co.com.binariasystems</groupId>
 			<artifactId>binaria-fmw-security</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
-			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>javax.servlet</groupId>
@@ -105,7 +101,6 @@
 			<groupId>co.com.binariasystems</groupId>
 			<artifactId>binaria-fmw-entity</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
-			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>commons-beanutils</groupId>
@@ -122,7 +117,7 @@
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-web</artifactId>
-			
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.aspectj</groupId>
