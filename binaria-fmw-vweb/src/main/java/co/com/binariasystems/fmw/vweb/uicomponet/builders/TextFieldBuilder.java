@@ -2,6 +2,7 @@ package co.com.binariasystems.fmw.vweb.uicomponet.builders;
 
 import org.apache.commons.lang3.StringUtils;
 
+import co.com.binariasystems.fmw.vweb.constants.UIConstants;
 import co.com.binariasystems.fmw.vweb.constants.VWebCommonConstants;
 import co.com.binariasystems.fmw.vweb.util.VWebUtils;
 import co.com.binariasystems.fmw.vweb.util.ValidationUtils;
@@ -279,6 +280,11 @@ public class TextFieldBuilder extends TextField{
 	
 	public TextFieldBuilder withStringLengRangeValidator(Integer minLength, Integer maxLength){
 		addValidator(ValidationUtils.stringLengthRangeValidator(getCaption(), minLength, maxLength));
+		return this;
+	}
+	
+	public TextFieldBuilder withUpperTransform(){
+		addStyleName(UIConstants.UPPER_TRANSFORM_STYLENAME);
 		return this;
 	}
 }

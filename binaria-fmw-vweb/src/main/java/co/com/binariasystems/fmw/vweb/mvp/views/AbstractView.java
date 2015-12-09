@@ -6,7 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
 import co.com.binariasystems.fmw.util.messagebundle.MessageBundleManager;
-import co.com.binariasystems.fmw.vweb.constants.UIConstants;
+import co.com.binariasystems.fmw.vweb.constants.VWebCommonConstants;
 import co.com.binariasystems.fmw.vweb.mvp.event.UIEvent;
 import co.com.binariasystems.fmw.vweb.mvp.eventbus.EventBus;
 import co.com.binariasystems.fmw.vweb.uicomponet.MessageDialog;
@@ -40,33 +40,27 @@ public abstract class AbstractView {
 		return resp;
 	}
 	
-	public String conventionCaption(String fieldName){
+	private static MessageFormat uiConventionMsgFmt(){
 		if(UI_CONVENTION_MF == null){
-			synchronized (this) {
-				UI_CONVENTION_MF = new MessageFormat(UIConstants.UI_CONVENTION_STRINGS_TEMPLATE);
+			synchronized (LocaleMessagesUtil.class) {
+				UI_CONVENTION_MF = new MessageFormat(VWebCommonConstants.UI_CONVENTION_STRINGS_TEMPLATE);
 			}
 		}
-		String key = UI_CONVENTION_MF.format(new Object[]{getClass().getSimpleName(), fieldName, UIConstants.CONVENTION_PROPERTY_CAPTION});
+		return UI_CONVENTION_MF;
+	}
+	
+	public String conventionCaption(String fieldName){
+		String key = uiConventionMsgFmt().format(new Object[]{getClass().getSimpleName(), fieldName, VWebCommonConstants.CONVENTION_PROPERTY_CAPTION});
 		return getText(key);
 	}
 	
 	public String conventionDescription(String fieldName){
-		if(UI_CONVENTION_MF == null){
-			synchronized (this) {
-				UI_CONVENTION_MF = new MessageFormat(UIConstants.UI_CONVENTION_STRINGS_TEMPLATE);
-			}
-		}
-		String key = UI_CONVENTION_MF.format(new Object[]{getClass().getSimpleName(), fieldName, UIConstants.CONVENTION_PROPERTY_DESCRIPTION});
+		String key = uiConventionMsgFmt().format(new Object[]{getClass().getSimpleName(), fieldName, VWebCommonConstants.CONVENTION_PROPERTY_DESCRIPTION});
 		return getText(key);
 	}
 	
 	public String conventionTitle(){
-		if(UI_CONVENTION_MF == null){
-			synchronized (this) {
-				UI_CONVENTION_MF = new MessageFormat(UIConstants.UI_CONVENTION_STRINGS_TEMPLATE);
-			}
-		}
-		String key = UI_CONVENTION_MF.format(new Object[]{getClass().getSimpleName(), "form", UIConstants.CONVENTION_PROPERTY_TITLE});
+		String key = uiConventionMsgFmt().format(new Object[]{getClass().getSimpleName(), "form", VWebCommonConstants.CONVENTION_PROPERTY_TITLE});
 		return getText(key);
 	}
 	

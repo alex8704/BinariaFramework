@@ -7,6 +7,7 @@ import co.com.binariasystems.fmw.vweb.mvp.annotation.View;
 import co.com.binariasystems.fmw.vweb.mvp.annotation.View.Root;
 import co.com.binariasystems.fmw.vweb.mvp.annotation.ViewBuild;
 import co.com.binariasystems.fmw.vweb.mvp.views.AbstractView;
+import co.com.binariasystems.fmw.vweb.uicomponet.AddressEditorField;
 import co.com.binariasystems.fmw.vweb.uicomponet.LinkLabel;
 import co.com.binariasystems.fmw.vweb.uicomponet.Pager;
 import co.com.binariasystems.fmw.vweb.uicomponet.SearcherField;
@@ -43,12 +44,12 @@ public class DashboarView extends AbstractView{
 	private TreeMenu menuContainer;
 	private Label welcomeLabel;
 	private LinkLabel linkLabel;
+	private AddressEditorField addressField;
 	private Pager<Medidor, Medidor> pager;
 	private Grid grid;
 	private BeanItemContainer<Medidor> gridDs;
 	private GeneratedPropertyContainer container;
 	private MessageFormat doChooseFmt = new MessageFormat("javascript:doChoose({0})");
-	private SearcherField<Long> gatewayTxt;
 	
 	@ViewBuild
 	public Component init(){
@@ -56,7 +57,7 @@ public class DashboarView extends AbstractView{
 		rightPanel = new VerticalLayout();
 		welcomeLabel = new Label("Welcome My People");
 		linkLabel = new LinkLabel("Este es mi LinkLabel");
-		gatewayTxt = new SearcherField<Long>(Gateway.class, Long.TYPE, "Gateway");
+		addressField = new AddressEditorField("Direcci\u00f3n de Residencia");
 
 		gridDs = new BeanItemContainer<Medidor>(Medidor.class);
 		container = new GeneratedPropertyContainer(gridDs);
@@ -102,7 +103,7 @@ public class DashboarView extends AbstractView{
 		rightPanel.addComponent(linkLabel);
 		rightPanel.addComponent(grid);
 		rightPanel.addComponent(pager);
-		rightPanel.addComponent(gatewayTxt);
+		rightPanel.addComponent(addressField);
 		
 		splitPanel.setFirstComponent(menuContainer);
 		splitPanel.setSecondComponent(rightPanel);

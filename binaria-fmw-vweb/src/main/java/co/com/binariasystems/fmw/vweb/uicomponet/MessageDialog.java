@@ -4,7 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
 import co.com.binariasystems.fmw.util.exception.FMWExceptionUtils;
-import co.com.binariasystems.fmw.vweb.constants.UIConstants;
+import co.com.binariasystems.fmw.vweb.constants.VWebCommonConstants;
 import co.com.binariasystems.fmw.vweb.util.VWebUtils;
 import co.com.binariasystems.fmw.vweb.util.ValidationUtils;
 
@@ -107,7 +107,7 @@ public class MessageDialog extends Window implements ClickListener{
 		
 		if(type != Type.PLANE){
 			
-			iconResource = new ClassResource(MessageDialog.class, UIConstants.FMW_IMAGE_RESOURCES_DIRECTORY + type.getIconPath());
+			iconResource = new ClassResource(MessageDialog.class, VWebCommonConstants.FMW_IMAGE_RESOURCES_DIRECTORY + type.getIconPath());
 			iconImg = new Image(null, iconResource);
 			iconImg.setWidth(50, Unit.PIXELS);
 			iconImg.setHeight(50, Unit.PIXELS);

@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import co.com.binariasystems.fmw.util.pagination.ListPage;
+import co.com.binariasystems.fmw.vweb.constants.UIConstants;
 import co.com.binariasystems.fmw.vweb.constants.VWebCommonConstants;
 import co.com.binariasystems.fmw.vweb.uicomponet.LinkLabel.ClickHandler;
 import co.com.binariasystems.fmw.vweb.uicomponet.LinkLabel.LinkClickEvent;
@@ -108,13 +109,13 @@ public class Pager<FILTER_TYPE, RESULT_TYPE> extends HorizontalLayout implements
 		currentPagePanel.setSpacing(true);
 		
 		//Estilos
-		firstPLink.addStyleName(VWebCommonConstants.PAGER_FIRSTP_CLASS);
+		firstPLink.addStyleName(UIConstants.PAGER_FIRSTP_STYLENAME);
 		firstPLink.addStyleName(ValoTheme.LABEL_SMALL);
-		backPLink.addStyleName(VWebCommonConstants.PAGER_FIRSTP_CLASS);
+		backPLink.addStyleName(UIConstants.PAGER_FIRSTP_STYLENAME);
 		backPLink.addStyleName(ValoTheme.LABEL_SMALL);
-		nextPLink.addStyleName(VWebCommonConstants.PAGER_FIRSTP_CLASS);
+		nextPLink.addStyleName(UIConstants.PAGER_FIRSTP_STYLENAME);
 		nextPLink.addStyleName(ValoTheme.LABEL_SMALL);
-		lastPLink.addStyleName(VWebCommonConstants.PAGER_FIRSTP_CLASS);
+		lastPLink.addStyleName(UIConstants.PAGER_FIRSTP_STYLENAME);
 		lastPLink.addStyleName(ValoTheme.LABEL_SMALL);
 		
 		foundItemsLbl.addStyleName(ValoTheme.LABEL_SMALL);
@@ -135,7 +136,7 @@ public class Pager<FILTER_TYPE, RESULT_TYPE> extends HorizontalLayout implements
 		addComponents(foundItemsLbl, pageSizePanel, filler, currentPagePanel);
 		setSpacing(true);
 		setExpandRatio(foundItemsLbl, 1.0f);
-		addStyleName(VWebCommonConstants.PAGER_CLASS);
+		addStyleName(UIConstants.PAGER_STYLENAME);
 		
 		setComponentAlignment(foundItemsLbl, Alignment.MIDDLE_LEFT);
 		

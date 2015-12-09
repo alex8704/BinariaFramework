@@ -7,7 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 import co.com.binariasystems.fmw.constants.FMWConstants;
 import co.com.binariasystems.fmw.ioc.IOCHelper;
 import co.com.binariasystems.fmw.util.messagebundle.MessageBundleManager;
-import co.com.binariasystems.fmw.vweb.constants.UIConstants;
+import co.com.binariasystems.fmw.vweb.constants.VWebCommonConstants;
 
 public class LocaleMessagesUtil {
 	private static MessageFormat UI_CONVENTION_MF;
@@ -26,7 +26,7 @@ public class LocaleMessagesUtil {
 	private static MessageFormat uiConventionMsgFmt(){
 		if(UI_CONVENTION_MF == null){
 			synchronized (LocaleMessagesUtil.class) {
-				UI_CONVENTION_MF = new MessageFormat(UIConstants.UI_CONVENTION_STRINGS_TEMPLATE);
+				UI_CONVENTION_MF = new MessageFormat(VWebCommonConstants.UI_CONVENTION_STRINGS_TEMPLATE);
 			}
 		}
 		return UI_CONVENTION_MF;
@@ -39,18 +39,18 @@ public class LocaleMessagesUtil {
 	 * Ej: AuthenticationView.usernameField.caption
 	 */
 	public static String conventionCaption(Class<?> viewClass, MessageBundleManager messages, String fieldName){
-		String key = uiConventionMsgFmt().format(new Object[]{viewClass.getSimpleName(), fieldName, UIConstants.CONVENTION_PROPERTY_CAPTION});
+		String key = uiConventionMsgFmt().format(new Object[]{viewClass.getSimpleName(), fieldName, VWebCommonConstants.CONVENTION_PROPERTY_CAPTION});
 		return getLocalizedMessage(messages, key);
 	}
 	
 	public static String conventionDescription(Class<?> viewClass, MessageBundleManager messages, String fieldName){
-		String key = uiConventionMsgFmt().format(new Object[]{viewClass.getSimpleName(), fieldName, UIConstants.CONVENTION_PROPERTY_DESCRIPTION});
+		String key = uiConventionMsgFmt().format(new Object[]{viewClass.getSimpleName(), fieldName, VWebCommonConstants.CONVENTION_PROPERTY_DESCRIPTION});
 		String resp = getLocalizedMessage(messages, key);
 		return StringUtils.defaultString(resp).equals(key) ? "" : resp;
 	}
 	
 	public static String conventionTitle(Class<?> viewClass, MessageBundleManager messages){
-		String key = uiConventionMsgFmt().format(new Object[]{viewClass.getSimpleName(), "form", UIConstants.CONVENTION_PROPERTY_TITLE});
+		String key = uiConventionMsgFmt().format(new Object[]{viewClass.getSimpleName(), "form", VWebCommonConstants.CONVENTION_PROPERTY_TITLE});
 		return getLocalizedMessage(messages, key);
 	}
 }

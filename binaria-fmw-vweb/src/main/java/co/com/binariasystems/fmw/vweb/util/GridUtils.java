@@ -18,7 +18,6 @@ import co.com.binariasystems.fmw.entity.util.FMWEntityUtils;
 import co.com.binariasystems.fmw.exception.FMWException;
 import co.com.binariasystems.fmw.exception.FMWUncheckedException;
 import co.com.binariasystems.fmw.reflec.TypeHelper;
-import co.com.binariasystems.fmw.vweb.constants.UIConstants;
 import co.com.binariasystems.fmw.vweb.constants.VWebCommonConstants;
 import co.com.binariasystems.fmw.vweb.resources.images.images;
 
@@ -331,8 +330,8 @@ public class GridUtils {
 		private String noIconPath;
 		
 		public YesNoPropertyValueGenerator() {
-			this(new ClassResource(images.class, UIConstants.FMW_IMAGE_RESOURCES_DIRECTORY + "yes.png").getFilename(),
-					new ClassResource(images.class, UIConstants.FMW_IMAGE_RESOURCES_DIRECTORY + "no.png").getFilename()
+			this(new ClassResource(images.class, VWebCommonConstants.FMW_IMAGE_RESOURCES_DIRECTORY + "yes.png").getFilename(),
+					new ClassResource(images.class, VWebCommonConstants.FMW_IMAGE_RESOURCES_DIRECTORY + "no.png").getFilename()
 					);
 		}
 		
