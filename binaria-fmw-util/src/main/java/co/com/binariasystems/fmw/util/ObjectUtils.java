@@ -1,9 +1,15 @@
 package co.com.binariasystems.fmw.util;
 
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
+import org.apache.commons.beanutils.BeanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import co.com.binariasystems.fmw.exception.FMWUncheckedException;
 
 public class ObjectUtils {
 private static final Logger LOGGER = LoggerFactory.getLogger(ObjectUtils.class);
@@ -116,5 +122,33 @@ private static final Logger LOGGER = LoggerFactory.getLogger(ObjectUtils.class);
 	 */
 	public static boolean isEmpty(Object[] array) {
 		return (array == null || array.length == 0);
+	}
+	
+	
+	public static <F, T> T transferProperties(F sourceObject, T targetObject) throws FMWUncheckedException{
+		try {
+			BeanUtils.copyProperties(targetObject, sourceObject);
+		} catch (IllegalAccessException e) {
+			throw new FMWUncheckedException(e.getMessage(), e);
+		} catch (InvocationTargetException e) {
+			throw new FMWUncheckedException(e.getMessage(), e);
+		}
+		return targetObject;
+	}
+	
+	
+	public static <F, T> List<T> transferPropertiesList(List<F> sourceList, Class<T> targetType) throws FMWUncheckedException{
+		try {
+			List<T> operationResult = new ArrayList<T>();
+			for(F item : sourceList){
+				operationResult.add(transferProperties(item, targetType.newInstance()));
+			}
+			return operationResult;
+		
+		} catch (InstantiationException e) {
+			throw new FMWUncheckedException(e.getMessage(), e);
+		}catch(IllegalAccessException e){
+			throw new FMWUncheckedException(e.getMessage(), e);
+		}
 	}
 }

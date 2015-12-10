@@ -1,10 +1,26 @@
 package co.com.binariasystems.fmw.vweb.uicomponet;
 
+import java.util.List;
+
+import org.apache.commons.beanutils.PropertyUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import co.com.binariasystems.fmw.constants.FMWConstants;
+import co.com.binariasystems.fmw.dto.Listable;
+import co.com.binariasystems.fmw.util.ObjectUtils;
 import co.com.binariasystems.fmw.vweb.constants.UIConstants;
 import co.com.binariasystems.fmw.vweb.constants.VWebCommonConstants;
 import co.com.binariasystems.fmw.vweb.uicomponet.AddressEditorField.Address;
+import co.com.binariasystems.fmw.vweb.uicomponet.addresseditor.AddressEditorParametersProvider;
+import co.com.binariasystems.fmw.vweb.uicomponet.addresseditor.BuiltInAddressEditorParametersProvider;
 import co.com.binariasystems.fmw.vweb.util.VWebUtils;
 
+import com.vaadin.data.Property;
+import com.vaadin.data.util.AbstractProperty;
+import com.vaadin.data.util.BeanItem;
+import com.vaadin.data.util.ObjectProperty;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Component;
@@ -16,7 +32,13 @@ import com.vaadin.ui.NativeSelect;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.themes.ValoTheme;
 
-public class AddressEditorField extends CustomField<Address> implements UIConstants, VWebCommonConstants{
+public class AddressEditorField<T extends Address> extends CustomField<T> implements UIConstants, VWebCommonConstants{
+	private static final Logger LOGGER = LoggerFactory.getLogger(AddressEditorField.class);
+	private static final String[] ADDRESS_PROPERTYIDS = {
+		"mainViaType", "mainViaNum", "mainViaLetter", "mainViaBis", "mainViaBisLetter", "mainViaQuadrant",
+		"mainViaComplement", "mainViaComplementDetail", "secondaryViaNum", "secondaryViaLetter",
+		"complementaryViaNum", "complementaryViaQuadrant", "complementaryViaComplement", "complementaryViaComplementDetail"
+	};
 	private GridLayout content;
 	private HorizontalLayout generatorPanel;
 	private Label mainViaLbl;
@@ -41,9 +63,16 @@ public class AddressEditorField extends CustomField<Address> implements UIConsta
 	
 	private TextField generatedAddressTxt;
 	
+	private AddressEditorParametersProvider parametersProvider;
+	private Class<T> valueType;
+	
+	private BeanItem<InternalAddress> beanItem = new BeanItem<InternalAddress>(new InternalAddress(), InternalAddress.class);
+	private ObjectProperty<String> generatedAddressProperty = new ObjectProperty<String>("", String.class);
+	private ValueChangeListener valueChangeListener;
 	
 	public AddressEditorField() {
 		super();
+		this.addStyleName(ADDRESS_EDITOR_STYLENAME);
 	}
 	
 	public AddressEditorField(String caption) {
@@ -102,6 +131,9 @@ public class AddressEditorField extends CustomField<Address> implements UIConsta
 		content.setColumnExpandRatio(2, 1.0f);
 		content.setSpacing(true);
 		content.addStyleName(ADDRESS_EDITOR_CONTENT_STYLENAME);
+		
+		loadParameters();
+		bindEvents();
 		
 		return content;
 	}
@@ -215,14 +247,297 @@ public class AddressEditorField extends CustomField<Address> implements UIConsta
 		
 		generatorPanel.addComponent(layout);
 	}
-
-	@Override
-	public Class<Address> getType() {
-		return Address.class;
+	
+	private void loadParameters(){
+		if(parametersProvider == null)
+			setParametersProvider(new BuiltInAddressEditorParametersProvider());
+		mainViaTypeCmb.setNullSelectionItemId("");
+		mainViaBisCmb.setNullSelectionItemId("");
+		mainViaQuadrantCmb.setNullSelectionItemId("");
+		complementaryViaQuadrantCmb.setNullSelectionItemId("");
+		mainViaComplementCmb.setNullSelectionItemId("");
+		complementaryViaComplementCmb.setNullSelectionItemId("");
+		
+		setComboBoxItems(mainViaTypeCmb, parametersProvider.getViaTypes(VWebUtils.getCurrentUserLocale()));
+		setComboBoxItems(mainViaBisCmb, parametersProvider.getBis(VWebUtils.getCurrentUserLocale()));
+		setComboBoxItems(mainViaQuadrantCmb, parametersProvider.getQuadrants(VWebUtils.getCurrentUserLocale()));
+		setComboBoxItems(complementaryViaQuadrantCmb, parametersProvider.getQuadrants(VWebUtils.getCurrentUserLocale()));
+		setComboBoxItems(mainViaComplementCmb, parametersProvider.getNomenclatureComplements(VWebUtils.getCurrentUserLocale()));
+		setComboBoxItems(complementaryViaComplementCmb, parametersProvider.getNomenclatureComplements(VWebUtils.getCurrentUserLocale()));
 	}
 	
-	public static class Address{
+	private void setComboBoxItems(NativeSelect comboBox, List<? extends Listable> items){
+		comboBox.setItemCaption("", VWebUtils.getComboBoxNoSelectionShortDescription());
+		for(Listable item : items){
+			comboBox.addItem(item.getPK());
+			comboBox.setItemCaption(item.getPK(), item.getDescription());
+		}
+	}
+	
+	private void bindEvents(){
+		valueChangeListener = new Property.ValueChangeListener() {
+			@Override public void valueChange(Property.ValueChangeEvent event) {
+				if(event.getProperty().equals(AddressEditorField.this.getPropertyDataSource()))
+					handleAdrressEditorPropertyValueChange(event);
+				else
+					handleControlsPropertyValueChange(event);
+			}
+		};
 		
+		mainViaTypeCmb.setImmediate(true);
+		mainViaNumTxt.setImmediate(true);
+		mainViaLetterTxt.setImmediate(true);
+		mainViaBisCmb.setImmediate(true);
+		mainViaBisLetterTxt.setImmediate(true);
+		mainViaQuadrantCmb.setImmediate(true);
+		mainViaComplementCmb.setImmediate(true);
+		mainViaComplementTxt.setImmediate(true);
+		secondaryViaNumTxt.setImmediate(true);
+		secondaryViaLetterTxt.setImmediate(true);
+		complementaryViaNumTxt.setImmediate(true);
+		complementaryViaQuadrantCmb.setImmediate(true);
+		complementaryViaComplementCmb.setImmediate(true);
+		complementaryViaComplementTxt.setImmediate(true);
+		
+		mainViaTypeCmb.setPropertyDataSource(beanItem.getItemProperty("mainViaType"));
+		mainViaNumTxt.setPropertyDataSource(beanItem.getItemProperty("mainViaNum"));
+		mainViaLetterTxt.setPropertyDataSource(beanItem.getItemProperty("mainViaLetter"));
+		mainViaBisCmb.setPropertyDataSource(beanItem.getItemProperty("mainViaBis"));
+		mainViaBisLetterTxt.setPropertyDataSource(beanItem.getItemProperty("mainViaBisLetter"));
+		mainViaQuadrantCmb.setPropertyDataSource(beanItem.getItemProperty("mainViaQuadrant"));
+		mainViaComplementCmb.setPropertyDataSource(beanItem.getItemProperty("mainViaComplement"));
+		mainViaComplementTxt.setPropertyDataSource(beanItem.getItemProperty("mainViaComplementDetail"));
+		secondaryViaNumTxt.setPropertyDataSource(beanItem.getItemProperty("secondaryViaNum"));
+		secondaryViaLetterTxt.setPropertyDataSource(beanItem.getItemProperty("secondaryViaLetter"));
+		complementaryViaNumTxt.setPropertyDataSource(beanItem.getItemProperty("complementaryViaNum"));
+		complementaryViaQuadrantCmb.setPropertyDataSource(beanItem.getItemProperty("complementaryViaQuadrant"));
+		complementaryViaComplementCmb.setPropertyDataSource(beanItem.getItemProperty("complementaryViaComplement"));
+		complementaryViaComplementTxt.setPropertyDataSource(beanItem.getItemProperty("complementaryViaComplementDetail"));
+		generatedAddressTxt.setPropertyDataSource(generatedAddressProperty);
+		
+		mainViaNumTxt.setNullRepresentation("");
+		mainViaLetterTxt.setNullRepresentation("");
+		mainViaBisLetterTxt.setNullRepresentation("");
+		mainViaComplementTxt.setNullRepresentation("");
+		secondaryViaNumTxt.setNullRepresentation("");
+		secondaryViaLetterTxt.setNullRepresentation("");
+		complementaryViaNumTxt.setNullRepresentation("");
+		complementaryViaComplementTxt.setNullRepresentation("");
+		
+		for(String propertyId : ADDRESS_PROPERTYIDS){
+			if(beanItem.getItemProperty(propertyId) instanceof AbstractProperty)
+				((AbstractProperty)beanItem.getItemProperty(propertyId)).addValueChangeListener(valueChangeListener);
+		}
+		addValueChangeListener(valueChangeListener);
+	}
+	
+	
+	private void handleAdrressEditorPropertyValueChange(Property.ValueChangeEvent event){
+		if(event.getProperty().getValue() == null)
+			beanItem.getBean().clean();
+		for(String propertyId : ADDRESS_PROPERTYIDS){
+			try {
+				beanItem.getItemProperty(propertyId).setValue(PropertyUtils.getProperty(event.getProperty().getValue(), propertyId));
+			} catch (ReflectiveOperationException e) {
+				LOGGER.error("Cannot handle value change on AddressEditor: "+e.getMessage());
+			}
+		}
+	}
+	
+	private void handleControlsPropertyValueChange(Property.ValueChangeEvent event){
+		generatedAddressProperty.setValue(beanItem.getBean().toString());
+		if(this.getPropertyDataSource() != null){
+			if(this.getPropertyDataSource().getValue() != null)
+				ObjectUtils.transferProperties(beanItem.getBean(), this.getPropertyDataSource().getValue());
+			else
+				this.getPropertyDataSource().setValue(beanItem.getBean());
+		}
+	}
+
+	@Override
+	public Class<T> getType() {
+		return valueType;
+	}
+	
+	public AddressEditorParametersProvider getParametersProvider() {
+		return parametersProvider;
+	}
+
+	public void setParametersProvider(AddressEditorParametersProvider parametersProvider) {
+		this.parametersProvider = parametersProvider;
+	}
+	
+	public abstract class Address{
+		public abstract String getMainViaType();
+		public abstract void setMainViaType(String mainViaType);
+		public abstract Integer getMainViaNum();
+		public abstract void setMainViaNum(Integer mainViaNum);
+		public abstract String getMainViaLetter();
+		public abstract void setMainViaLetter(String mainViaLetter);
+		public abstract String getMainViaBis();
+		public abstract void setMainViaBis(String mainViaBis);
+		public abstract String getMainViaBisLetter();
+		public abstract void setMainViaBisLetter(String mainViaBisLetter);
+		public abstract String getMainViaQuadrant();
+		public abstract void setMainViaQuadrant(String mainViaQuadrant);
+		public abstract String getMainViaComplement();
+		public abstract void setMainViaComplement(String mainViaComplement);
+		public abstract String getMainViaComplementDetail();
+		public abstract void setMainViaComplementDetail(String mainViaComplementDetail);
+		public abstract Integer getSecondaryViaNum();
+		public abstract void setSecondaryViaNum(Integer secondaryViaNum);
+		public abstract String getSecondaryViaLetter();
+		public abstract void setSecondaryViaLetter(String secondaryViaLetter);
+		public abstract Integer getComplementaryViaNum();
+		public abstract void setComplementaryViaNum(Integer complementaryViaNum);
+		public abstract String getComplementaryViaQuadrant();
+		public abstract void setComplementaryViaQuadrant(String complementaryViaQuadrant);
+		public abstract String getComplementaryViaComplement();
+		public abstract void setComplementaryViaComplement(String complementaryViaComplement);
+		public abstract String getComplementaryViaComplementDetail();
+		public abstract void setComplementaryViaComplementDetail(String complementaryViaComplementDetail);
+		
+		public void clean(){
+			setMainViaType(null);
+			setMainViaNum(null);
+			setMainViaLetter(null);
+			setMainViaBis(null);
+			setMainViaBisLetter(null);
+			setMainViaQuadrant(null);
+			setMainViaComplement(null);
+			setMainViaComplementDetail(null);
+			setSecondaryViaNum(null);
+			setSecondaryViaLetter(null);
+			setComplementaryViaNum(null);
+			setComplementaryViaQuadrant(null);
+			setComplementaryViaComplement(null);
+			setComplementaryViaComplementDetail(null);
+		}
+		
+		@Override
+		public String toString() {
+			StringBuilder stringBuilder = new StringBuilder();
+			stringBuilder.append(StringUtils.isNotBlank( getMainViaType()) ?  getMainViaType() : "")
+			.append(getMainViaNum() != null ? FMWConstants.WHITE_SPACE : "").append(getMainViaNum() != null ? getMainViaNum() : "")
+			.append(StringUtils.isNotBlank(getMainViaLetter()) ? FMWConstants.WHITE_SPACE : "").append(StringUtils.isNotBlank(getMainViaLetter()) ? getMainViaLetter() : "")
+			.append(StringUtils.isNotBlank(getMainViaBis()) ? FMWConstants.WHITE_SPACE : "").append(StringUtils.isNotBlank(getMainViaBis()) ? getMainViaBis() : "")
+			.append(StringUtils.isNotBlank(getMainViaBisLetter()) ? FMWConstants.WHITE_SPACE : "").append(StringUtils.isNotBlank(getMainViaBisLetter()) ? getMainViaBisLetter() : "")
+			.append(StringUtils.isNotBlank(getMainViaQuadrant()) ? FMWConstants.WHITE_SPACE : "").append(StringUtils.isNotBlank(getMainViaQuadrant()) ? getMainViaQuadrant() : "")
+			.append(StringUtils.isNotBlank(getMainViaComplement()) ? FMWConstants.WHITE_SPACE : "").append(StringUtils.isNotBlank(getMainViaComplement()) ? getMainViaComplement() : "")
+			.append(StringUtils.isNotBlank(getMainViaComplementDetail()) ? FMWConstants.WHITE_SPACE : "").append(StringUtils.isNotBlank(getMainViaComplementDetail()) ? getMainViaComplementDetail() : "")
+			.append(getSecondaryViaNum() != null ? FMWConstants.WHITE_SPACE : "").append(getSecondaryViaNum() != null ? getSecondaryViaNum() : "")
+			.append(StringUtils.isNotBlank(getSecondaryViaLetter()) ? FMWConstants.WHITE_SPACE : "").append(StringUtils.isNotBlank(getSecondaryViaLetter()) ? getSecondaryViaLetter() : "")
+			.append(getComplementaryViaNum() != null ? FMWConstants.WHITE_SPACE : "").append(getComplementaryViaNum() != null ? getComplementaryViaNum() : "")
+			.append(StringUtils.isNotBlank(getComplementaryViaQuadrant()) ? FMWConstants.WHITE_SPACE : "").append(StringUtils.isNotBlank(getComplementaryViaQuadrant()) ? getComplementaryViaQuadrant() : "")
+			.append(StringUtils.isNotBlank(getComplementaryViaComplement()) ? FMWConstants.WHITE_SPACE : "").append(StringUtils.isNotBlank(getComplementaryViaComplement()) ? getComplementaryViaComplement() : "")
+			.append(StringUtils.isNotBlank(getComplementaryViaComplementDetail()) ? FMWConstants.WHITE_SPACE : "").append(StringUtils.isNotBlank(getComplementaryViaComplementDetail()) ? getComplementaryViaComplementDetail() : "");
+			return stringBuilder.toString().trim();
+		}
+	}
+
+	private class InternalAddress extends Address{
+		private String mainViaType;
+		private Integer mainViaNum;
+		private String mainViaLetter;
+		private String mainViaBis;
+		private String mainViaBisLetter;
+		private String mainViaQuadrant;
+		private String mainViaComplement;
+		private String mainViaComplementDetail;
+		
+		private Integer secondaryViaNum;
+		private String secondaryViaLetter;
+		
+		private Integer complementaryViaNum;
+		private String complementaryViaQuadrant;
+		private String complementaryViaComplement;
+		private String complementaryViaComplementDetail;
+
+		public String getMainViaType() {
+			return mainViaType;
+		}
+		public void setMainViaType(String mainViaType) {
+			this.mainViaType = mainViaType;
+		}
+		public Integer getMainViaNum() {
+			return mainViaNum;
+		}
+		public void setMainViaNum(Integer mainViaNum) {
+			this.mainViaNum = mainViaNum;
+		}
+		public String getMainViaLetter() {
+			return mainViaLetter;
+		}
+		public void setMainViaLetter(String mainViaLetter) {
+			this.mainViaLetter = StringUtils.upperCase(mainViaLetter);
+		}
+		public String getMainViaBis() {
+			return mainViaBis;
+		}
+		public void setMainViaBis(String mainViaBis) {
+			this.mainViaBis = mainViaBis;
+		}
+		public String getMainViaBisLetter() {
+			return mainViaBisLetter;
+		}
+		public void setMainViaBisLetter(String mainViaBisLetter) {
+			this.mainViaBisLetter = StringUtils.upperCase(mainViaBisLetter);
+		}
+		public String getMainViaQuadrant() {
+			return mainViaQuadrant;
+		}
+		public void setMainViaQuadrant(String mainViaQuadrant) {
+			this.mainViaQuadrant = mainViaQuadrant;
+		}
+		public String getMainViaComplement() {
+			return mainViaComplement;
+		}
+		public void setMainViaComplement(String mainViaComplement) {
+			this.mainViaComplement = mainViaComplement;
+		}
+		public String getMainViaComplementDetail() {
+			return mainViaComplementDetail;
+		}
+		public void setMainViaComplementDetail(String mainViaComplementDetail) {
+			this.mainViaComplementDetail = StringUtils.upperCase(mainViaComplementDetail);
+		}
+		public Integer getSecondaryViaNum() {
+			return secondaryViaNum;
+		}
+		public void setSecondaryViaNum(Integer secondaryViaNum) {
+			this.secondaryViaNum = secondaryViaNum;
+		}
+		public String getSecondaryViaLetter() {
+			return secondaryViaLetter;
+		}
+		public void setSecondaryViaLetter(String secondaryViaLetter) {
+			this.secondaryViaLetter = StringUtils.upperCase(secondaryViaLetter);
+		}
+		public Integer getComplementaryViaNum() {
+			return complementaryViaNum;
+		}
+		public void setComplementaryViaNum(Integer complementaryViaNum) {
+			this.complementaryViaNum = complementaryViaNum;
+		}
+		public String getComplementaryViaQuadrant() {
+			return complementaryViaQuadrant;
+		}
+		public void setComplementaryViaQuadrant(String complementaryViaQuadrant) {
+			this.complementaryViaQuadrant = complementaryViaQuadrant;
+		}
+		public String getComplementaryViaComplement() {
+			return complementaryViaComplement;
+		}
+		public void setComplementaryViaComplement(String complementaryViaComplement) {
+			this.complementaryViaComplement = complementaryViaComplement;
+		}
+		public String getComplementaryViaComplementDetail() {
+			return complementaryViaComplementDetail;
+		}
+		public void setComplementaryViaComplementDetail(
+				String complementaryViaComplementDetail) {
+			this.complementaryViaComplementDetail = StringUtils.upperCase(complementaryViaComplementDetail);
+		}
 	}
 }
 

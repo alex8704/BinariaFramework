@@ -99,4 +99,7 @@ public interface VWebCommonConstants {
 	final String ADDRESS_QUADRANT_KEY = "adressEditor.label.quadrant";
 	final String ADDRESS_COMPLEMENT_KEY = "adressEditor.label.complement";
 	final String ADDRESS_GENERATED_KEY = "adressEditor.label.generated_address";
+	
+	final String COMBOBOX_NOSELEC_SHORT_DESCRIPTION = "comboBox.noSelection.short_description";
+	final String COMBOBOX_NOSELEC_DESCRIPTION = "comboBox.noSelection.description";
 }

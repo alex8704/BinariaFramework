@@ -8,19 +8,20 @@ import co.com.binariasystems.fmw.vweb.mvp.annotation.View.Root;
 import co.com.binariasystems.fmw.vweb.mvp.annotation.ViewBuild;
 import co.com.binariasystems.fmw.vweb.mvp.views.AbstractView;
 import co.com.binariasystems.fmw.vweb.uicomponet.AddressEditorField;
+import co.com.binariasystems.fmw.vweb.uicomponet.AddressEditorField.Address;
 import co.com.binariasystems.fmw.vweb.uicomponet.LinkLabel;
 import co.com.binariasystems.fmw.vweb.uicomponet.Pager;
-import co.com.binariasystems.fmw.vweb.uicomponet.SearcherField;
 import co.com.binariasystems.fmw.vweb.uicomponet.TreeMenu;
-import co.com.binariasystems.webtestapp.dto.Gateway;
 import co.com.binariasystems.webtestapp.dto.Medidor;
 
 import com.vaadin.data.Item;
 import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.data.util.GeneratedPropertyContainer;
+import com.vaadin.data.util.ObjectProperty;
 import com.vaadin.data.util.PropertyValueGenerator;
 import com.vaadin.server.Sizeable.Unit;
+import com.vaadin.ui.Button;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.Grid.SelectionMode;
@@ -50,6 +51,8 @@ public class DashboarView extends AbstractView{
 	private BeanItemContainer<Medidor> gridDs;
 	private GeneratedPropertyContainer container;
 	private MessageFormat doChooseFmt = new MessageFormat("javascript:doChoose({0})");
+	private Button botonPruebas;
+	private ObjectProperty<Address> addressFieldProperty = new ObjectProperty<AddressEditorField.Address>(new Address(), Address.class);
 	
 	@ViewBuild
 	public Component init(){
@@ -58,6 +61,7 @@ public class DashboarView extends AbstractView{
 		welcomeLabel = new Label("Welcome My People");
 		linkLabel = new LinkLabel("Este es mi LinkLabel");
 		addressField = new AddressEditorField("Direcci\u00f3n de Residencia");
+		botonPruebas = new Button("Probar");
 
 		gridDs = new BeanItemContainer<Medidor>(Medidor.class);
 		container = new GeneratedPropertyContainer(gridDs);
@@ -104,11 +108,15 @@ public class DashboarView extends AbstractView{
 		rightPanel.addComponent(grid);
 		rightPanel.addComponent(pager);
 		rightPanel.addComponent(addressField);
+		rightPanel.addComponent(botonPruebas);
 		
 		splitPanel.setFirstComponent(menuContainer);
 		splitPanel.setSecondComponent(rightPanel);
 		splitPanel.setSplitPosition(200, Unit.PIXELS);
 		splitPanel.setSizeFull();
+		
+		
+		addressField.setPropertyDataSource(addressFieldProperty);
 		
 		JavaScript.getCurrent().addFunction("doChoose", new JavaScriptFunction() {
 			@Override

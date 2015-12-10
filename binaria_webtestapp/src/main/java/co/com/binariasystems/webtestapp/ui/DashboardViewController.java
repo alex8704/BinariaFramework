@@ -15,6 +15,8 @@ import co.com.binariasystems.fmw.vweb.mvp.annotation.ViewController;
 import co.com.binariasystems.fmw.vweb.mvp.annotation.ViewController.OnLoad;
 import co.com.binariasystems.fmw.vweb.mvp.annotation.ViewField;
 import co.com.binariasystems.fmw.vweb.mvp.controller.AbstractViewController;
+import co.com.binariasystems.fmw.vweb.uicomponet.AddressEditorField;
+import co.com.binariasystems.fmw.vweb.uicomponet.AddressEditorField.Address;
 import co.com.binariasystems.fmw.vweb.uicomponet.LinkLabel;
 import co.com.binariasystems.fmw.vweb.uicomponet.LinkLabel.ClickHandler;
 import co.com.binariasystems.fmw.vweb.uicomponet.LinkLabel.LinkClickEvent;
@@ -31,7 +33,10 @@ import co.com.binariasystems.webtestapp.dto.MenuOptionDTO;
 
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
+import com.vaadin.data.util.ObjectProperty;
 import com.vaadin.server.Page;
+import com.vaadin.ui.Button;
+import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.HorizontalSplitPanel;
 import com.vaadin.ui.Label;
@@ -49,6 +54,9 @@ public class DashboardViewController extends AbstractViewController {
 	@ViewField private LinkLabel linkLabel;
 	private List<Medidor> items = new ArrayList<Medidor>();
 	@ViewField private Grid grid;
+	@ViewField private Button botonPruebas;
+	@ViewField private AddressEditorField addressField;
+	@ViewField private ObjectProperty<Address> addressFieldProperty;
 	
 	@Init
 	public void inicializar(){
@@ -92,6 +100,13 @@ public class DashboardViewController extends AbstractViewController {
 			@Override
 			public ListPage<Medidor> loadPage(PageChangeEvent<Medidor> event) throws FMWUncheckedException {
 				return new ListPage<Medidor>(items.subList(event.getInitialRow(), event.getFinalRow() > items.size() ? items.size() : event.getFinalRow()), items.size());
+			}
+		});
+		
+		botonPruebas.addClickListener(new Button.ClickListener() {
+			@Override
+			public void buttonClick(ClickEvent event) {
+				System.out.println(addressFieldProperty.getValue().toString());
 			}
 		});
 	}

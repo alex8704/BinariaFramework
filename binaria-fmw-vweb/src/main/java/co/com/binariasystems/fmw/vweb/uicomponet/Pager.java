@@ -153,6 +153,7 @@ public class Pager<FILTER_TYPE, RESULT_TYPE> extends HorizontalLayout implements
 		rowsByPageConfLbl.setVisible(pagerMode == PagerMode.PAGE);
 		rowsByPageConfCmb.setVisible(pagerMode == PagerMode.PAGE);
 		
+		currentPageTxt.setNullRepresentation("");
 		currentPageTxt.setImmediate(true);
 		rowsByPageConfCmb.setImmediate(true);
 		

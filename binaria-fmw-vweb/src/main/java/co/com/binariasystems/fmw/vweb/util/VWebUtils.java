@@ -66,7 +66,15 @@ public final class VWebUtils {
 	}
 	
 	public static Locale getCurrentUserLocale(){
-		return UI.getCurrent().getPage().getWebBrowser().getLocale();
+		return UI.getCurrent().getLocale();
+	}
+	
+	public static String getComboBoxNoSelectionShortDescription(){
+		return getCommonString(VWebCommonConstants.COMBOBOX_NOSELEC_SHORT_DESCRIPTION);
+	}
+	
+	public static String getComboBoxNoSelectionDescription(){
+		return getCommonString(VWebCommonConstants.COMBOBOX_NOSELEC_DESCRIPTION);
 	}
 	
 	public static boolean isVField(Class<?> clazz){

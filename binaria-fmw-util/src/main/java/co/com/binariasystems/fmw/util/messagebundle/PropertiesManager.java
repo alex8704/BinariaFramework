@@ -2,9 +2,9 @@ package co.com.binariasystems.fmw.util.messagebundle;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -14,7 +14,7 @@ public abstract class PropertiesManager {
 	private String resourcePath;
 	private boolean returnKeyWhenNotFound;
 	private Properties props;
-	private static final Map<String, PropertiesManager> managersContext = new HashMap<String, PropertiesManager>();
+	private static final ConcurrentMap<String, PropertiesManager> managersContext = new ConcurrentHashMap<String, PropertiesManager>();
 
 	private PropertiesManager(){}	
 	
@@ -41,7 +41,7 @@ public abstract class PropertiesManager {
 				resp.resourcePath = resourceFormatPath;
 				resp.returnKeyWhenNotFound = returnKeyWhenNotFound;
 				resp.init(loaderClass != null ? loaderClass : PropertiesManager.class);
-				managersContext.put(resourceFormatPath, resp);
+				managersContext.putIfAbsent(resourceFormatPath, resp);
 			}
 		}
 		return resp;

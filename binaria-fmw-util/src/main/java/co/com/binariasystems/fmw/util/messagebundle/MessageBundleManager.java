@@ -1,10 +1,10 @@
 package co.com.binariasystems.fmw.util.messagebundle;
 
-import java.util.HashMap;
 import java.util.Locale;
-import java.util.Map;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -16,9 +16,9 @@ public abstract class MessageBundleManager {
     private Locale initialLocale;
     private boolean returnKeyWhenNotFound;
     private Class loaderClass;
-    private final Map<Locale, ResourceBundle> bundlesContext = new HashMap<Locale, ResourceBundle>();
-    private final Map<Locale, Locale> localeMapping = new HashMap<Locale, Locale>();
-    private static final Map<String, MessageBundleManager> managersContext = new HashMap<String, MessageBundleManager>();
+    private final ConcurrentMap<Locale, ResourceBundle> bundlesContext = new ConcurrentHashMap<Locale, ResourceBundle>();
+    private final ConcurrentMap<Locale, Locale> localeMapping = new ConcurrentHashMap<Locale, Locale>();
+    private static final ConcurrentMap<String, MessageBundleManager> managersContext = new ConcurrentHashMap<String, MessageBundleManager>();
     
     private MessageBundleManager(){}
 
@@ -50,7 +50,7 @@ public abstract class MessageBundleManager {
                 messageManager.resourcePath = resourcePath;
                 messageManager.returnKeyWhenNotFound = returnKeyWhenNotFound;
                 messageManager.init(loaderClass != null ? loaderClass : MessageBundleManager.class);
-                managersContext.put(resourcePath, messageManager);
+                managersContext.putIfAbsent(resourcePath, messageManager);
 			}
         }
         return messageManager;
@@ -80,9 +80,9 @@ public abstract class MessageBundleManager {
         this.loaderClass = loaderClass;
         try {
             initialBundle = ResourceBundle.getBundle(resourcePath, initialLocale, loaderClass.getClassLoader());
-            localeMapping.put(initialLocale, initialBundle.getLocale());
+            localeMapping.putIfAbsent(initialLocale, initialBundle.getLocale());
             this.initialLocale = initialBundle.getLocale();
-            bundlesContext.put(initialLocale, initialBundle);
+            bundlesContext.putIfAbsent(initialLocale, initialBundle);
         } catch (NullPointerException | MissingResourceException | IllegalArgumentException ex) {
             throw new FMWUncheckedException("Cannot create message manager", ex);
         }
@@ -95,10 +95,10 @@ public abstract class MessageBundleManager {
             targetLocale = locale;
             try {
                 targetResource = ResourceBundle.getBundle(resourcePath, targetLocale, loaderClass.getClassLoader());
-                bundlesContext.put(targetResource.getLocale(), targetResource);
+                bundlesContext.putIfAbsent(targetResource.getLocale(), targetResource);
             } catch (Exception ex) {
             }
-            localeMapping.put(locale, targetResource.getLocale());
+            localeMapping.putIfAbsent(locale, targetResource.getLocale());
         } else {
             targetResource = bundlesContext.get(targetLocale);
         }
