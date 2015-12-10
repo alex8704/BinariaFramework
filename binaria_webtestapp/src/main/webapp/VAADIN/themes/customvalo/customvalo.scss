@@ -126,12 +126,31 @@ $v-unit-size: round(2.1 * $v-font-size);
 	/************************************************************************************************************************************************
    * Editor de direcciones
   *************************************************************************************************************************************************/
-	.address-editor{
+	.address-editor {
 	  font-size: 9pt;
 	  .v-select-select {
 	    height: $v-unit-size;
 	  }
+	  
+	  hr {
+      width: 80%;
+      height: 1px;
+      border-color: #3D94F6 -moz-use-text-color -moz-use-text-color;
+      margin: 0 auto;
+    }
+    
+    .address-editor-maincontent{
+      border-radius: 4px;
+      border: 1px solid #d5d5d5;
+      -webkit-box-shadow: 0 2px 3px rgba(0, 0, 0, 0.05);
+      box-shadow: 0 2px 3px rgba(0, 0, 0, 0.05);
+      padding-left:   0px;
+      padding-right:  0px;
+      padding-top:    10px;
+      padding-bottom: 10px;
+    }
+    
+	  
 	}
-	
 	
 }

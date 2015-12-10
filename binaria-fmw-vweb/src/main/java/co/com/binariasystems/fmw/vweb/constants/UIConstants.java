@@ -14,4 +14,7 @@ public interface UIConstants {
 	final String PAGER_NEXTP_STYLENAME = "pager-next-link";
 	final String PAGER_BACKP_STYLENAME = "pager-back-link";
 	final String UPPER_TRANSFORM_STYLENAME = "upper-field";
+	final String ADDRESS_EDITOR_STYLENAME = "address-editor";
+	final String ADDRESS_EDITOR_CONTENT_STYLENAME = "address-editor-maincontent";
+	
 }

@@ -1,20 +1,24 @@
 package co.com.binariasystems.fmw.vweb.uicomponet;
 
 import co.com.binariasystems.fmw.vweb.constants.UIConstants;
+import co.com.binariasystems.fmw.vweb.constants.VWebCommonConstants;
 import co.com.binariasystems.fmw.vweb.uicomponet.AddressEditorField.Address;
+import co.com.binariasystems.fmw.vweb.util.VWebUtils;
 
+import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.CustomField;
+import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.NativeSelect;
 import com.vaadin.ui.TextField;
-import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
-public class AddressEditorField extends CustomField<Address>{
-	private HorizontalLayout content;
+public class AddressEditorField extends CustomField<Address> implements UIConstants, VWebCommonConstants{
+	private GridLayout content;
+	private HorizontalLayout generatorPanel;
 	private Label mainViaLbl;
 	private NativeSelect mainViaTypeCmb;
 	private TextField mainViaNumTxt;
@@ -35,6 +39,8 @@ public class AddressEditorField extends CustomField<Address>{
 	private NativeSelect complementaryViaComplementCmb;
 	private TextField complementaryViaComplementTxt;
 	
+	private TextField generatedAddressTxt;
+	
 	
 	public AddressEditorField() {
 		super();
@@ -43,13 +49,16 @@ public class AddressEditorField extends CustomField<Address>{
 	public AddressEditorField(String caption) {
 		super();
 		this.setCaption(caption);
-		this.addStyleName("address-editor");
+		this.addStyleName(ADDRESS_EDITOR_STYLENAME);
 	}
 
 
 	@Override
 	protected Component initContent() {
-		content = new HorizontalLayout();
+		content = new  GridLayout(3,2);
+		generatorPanel = new HorizontalLayout();
+		generatedAddressTxt = new TextField(VWebUtils.getCommonString(ADDRESS_GENERATED_KEY));
+		
 		buildMainViaPanel();
 		buildSecondaryAndComplementaryPanel();
 		
@@ -69,50 +78,63 @@ public class AddressEditorField extends CustomField<Address>{
 		secondaryViaLetterTxt.addStyleName(ValoTheme.TEXTFIELD_ALIGN_CENTER);
 		complementaryViaNumTxt.addStyleName(ValoTheme.TEXTFIELD_ALIGN_CENTER);
 		
-		mainViaLetterTxt.addStyleName(UIConstants.UPPER_TRANSFORM_STYLENAME);
-		mainViaBisLetterTxt.addStyleName(UIConstants.UPPER_TRANSFORM_STYLENAME);
-		secondaryViaLetterTxt.addStyleName(UIConstants.UPPER_TRANSFORM_STYLENAME);
-		mainViaComplementTxt.addStyleName(UIConstants.UPPER_TRANSFORM_STYLENAME);
-		complementaryViaComplementTxt.addStyleName(UIConstants.UPPER_TRANSFORM_STYLENAME);
+		mainViaLetterTxt.addStyleName(UPPER_TRANSFORM_STYLENAME);
+		mainViaBisLetterTxt.addStyleName(UPPER_TRANSFORM_STYLENAME);
+		secondaryViaLetterTxt.addStyleName(UPPER_TRANSFORM_STYLENAME);
+		mainViaComplementTxt.addStyleName(UPPER_TRANSFORM_STYLENAME);
+		complementaryViaComplementTxt.addStyleName(UPPER_TRANSFORM_STYLENAME);
 		
 		mainViaLbl.addStyleName(ValoTheme.LABEL_BOLD);
 		secondaryViaLbl.addStyleName(ValoTheme.LABEL_BOLD);
 		complementaryViaLbl.addStyleName(ValoTheme.LABEL_BOLD);
 		
+		generatedAddressTxt.setReadOnly(true);
+		generatedAddressTxt.setWidth(100, Unit.PERCENTAGE);
+		
+		content.setWidth(100, Unit.PERCENTAGE);
+		
+		content.addComponent(new Label("<span>&nbsp;</span>", ContentMode.HTML), 0, 0, 0, 1);
+		content.addComponent(generatorPanel, 1, 0, 1, 0);
+		content.addComponent(generatedAddressTxt, 1, 1, 1, 1);
+		content.addComponent(new Label("<span>&nbsp;</span>", ContentMode.HTML), 2, 0, 2, 1);
+		
+		content.setColumnExpandRatio(0, 1.0f);
+		content.setColumnExpandRatio(2, 1.0f);
 		content.setSpacing(true);
+		content.addStyleName(ADDRESS_EDITOR_CONTENT_STYLENAME);
 		
 		return content;
 	}
 	
 	
 	private void buildMainViaPanel(){
-		VerticalLayout mainViaPanel = new VerticalLayout();
+		GridLayout mainViaPanel = new GridLayout(2,4);
 		HorizontalLayout horizontalRow1 = new HorizontalLayout();
 		HorizontalLayout horizontalRow2 = new HorizontalLayout();
-		mainViaLbl = new Label("Via Principal");
-		mainViaTypeCmb = new NativeSelect("Tipo Via");
-		mainViaNumTxt = new TextField("Num.");
-		mainViaLetterTxt = new TextField("Letra(s)");
-		mainViaBisCmb = new NativeSelect("Bis");
-		mainViaBisLetterTxt = new TextField("Letra(s)");
-		mainViaQuadrantCmb = new NativeSelect("Cuadrante");
-		mainViaComplementCmb = new NativeSelect("Complemento");
+		mainViaLbl = new Label(VWebUtils.getCommonString(ADDRESS_MAIN_VIA_KEY));
+		mainViaTypeCmb = new NativeSelect(VWebUtils.getCommonString(ADDRESS_VIA_TYPE_KEY));
+		mainViaNumTxt = new TextField(VWebUtils.getCommonString(ADDRESS_NUMBER_KEY));
+		mainViaLetterTxt = new TextField(VWebUtils.getCommonString(ADDRESS_LETTERS_KEY));
+		mainViaBisCmb = new NativeSelect(VWebUtils.getCommonString(ADDRESS_BIS_KEY));
+		mainViaBisLetterTxt = new TextField(VWebUtils.getCommonString(ADDRESS_LETTERS_KEY));
+		mainViaQuadrantCmb = new NativeSelect(VWebUtils.getCommonString(ADDRESS_QUADRANT_KEY));
+		mainViaComplementCmb = new NativeSelect(VWebUtils.getCommonString(ADDRESS_COMPLEMENT_KEY));
 		mainViaComplementTxt = new TextField("");
-		Label numberSymbolSeparatorLbl = new Label("#");
+		Label filler1 = new Label("<span>&nbsp;</span>",ContentMode.HTML);
+		Label numberSymbolSeparatorLbl = new Label("<span>#</span>",ContentMode.HTML);
 		
 		horizontalRow1.addComponents(mainViaTypeCmb, 
 				mainViaNumTxt,
 				mainViaLetterTxt,
 				mainViaBisCmb,
 				mainViaBisLetterTxt,
-				mainViaQuadrantCmb,
-				numberSymbolSeparatorLbl);
+				mainViaQuadrantCmb);
 		
 		horizontalRow2.addComponents(mainViaComplementCmb,
 				mainViaComplementTxt);
 		
 		mainViaLbl.setWidth(100, Unit.PERCENTAGE);
-		mainViaLbl.addStyleName(UIConstants.CENTER_ALIGN_STYLE);
+		mainViaLbl.addStyleName(CENTER_ALIGN_STYLE);
 		
 		mainViaTypeCmb.setWidth(100, Unit.PIXELS);
 		mainViaNumTxt.setWidth(50, Unit.PIXELS);
@@ -122,56 +144,61 @@ public class AddressEditorField extends CustomField<Address>{
 		mainViaQuadrantCmb.setWidth(100, Unit.PIXELS);
 		mainViaComplementCmb.setWidth(100, Unit.PIXELS);
 		mainViaComplementTxt.setWidth(100, Unit.PERCENTAGE);
+		filler1.setWidth(20, Unit.PIXELS);
+		numberSymbolSeparatorLbl.setWidth(20, Unit.PIXELS);
+		numberSymbolSeparatorLbl.addStyleName(CENTER_ALIGN_STYLE);
 		
-		mainViaPanel.addComponents(mainViaLbl,
-				horizontalRow1,
-				horizontalRow2);
+		
+		mainViaPanel.addComponents(mainViaLbl, filler1);
+		mainViaPanel.addComponents(new Label("<hr/>", ContentMode.HTML), new Label("<span>&nbsp</span>", ContentMode.HTML));
+		mainViaPanel.addComponents(horizontalRow1, numberSymbolSeparatorLbl);
+		mainViaPanel.addComponent(horizontalRow2, 0, 3, 1, 3);
 		mainViaPanel.setComponentAlignment(mainViaLbl, Alignment.TOP_CENTER);
-		
-		horizontalRow1.setComponentAlignment(numberSymbolSeparatorLbl, Alignment.BOTTOM_CENTER);
+		mainViaPanel.setComponentAlignment(numberSymbolSeparatorLbl, Alignment.BOTTOM_CENTER);
 		
 		horizontalRow1.setSpacing(true);
 		horizontalRow2.setSpacing(true);
 		
-		content.addComponent(mainViaPanel);
+		generatorPanel.addComponent(mainViaPanel);
 	}
 	
 	private void buildSecondaryAndComplementaryPanel(){
-		VerticalLayout layout = new VerticalLayout();
-		HorizontalLayout hLayout = new HorizontalLayout();
-		VerticalLayout secoundViaPanel = new VerticalLayout();
-		VerticalLayout compleViaPanel = new VerticalLayout();
+		GridLayout layout = new GridLayout(3,4);
 		HorizontalLayout auxHLayout1 = new HorizontalLayout();
 		HorizontalLayout auxHLayout2 = new HorizontalLayout();
 		HorizontalLayout auxHLayout3 = new HorizontalLayout();
 		
-		secondaryViaLbl = new Label("Via Seucundaria");
-		secondaryViaNumTxt = new TextField("Num.");
-		secondaryViaLetterTxt = new TextField("Letra(s)");
+		secondaryViaLbl = new Label(VWebUtils.getCommonString(ADDRESS_SECONDARY_VIA_KEY));
+		secondaryViaNumTxt = new TextField(VWebUtils.getCommonString(ADDRESS_NUMBER_KEY));
+		secondaryViaLetterTxt = new TextField(VWebUtils.getCommonString(ADDRESS_LETTERS_KEY));
 		
-		complementaryViaLbl = new Label("Via Complementaria");
-		complementaryViaNumTxt = new TextField("Num.");
-		complementaryViaQuadrantCmb = new NativeSelect("Cuadrante");
-		complementaryViaComplementCmb = new NativeSelect("Complemento");
+		complementaryViaLbl = new Label(VWebUtils.getCommonString(ADDRESS_COMPLEMENTARY_VIA_KEY));
+		complementaryViaNumTxt = new TextField(VWebUtils.getCommonString(ADDRESS_NUMBER_KEY));
+		complementaryViaQuadrantCmb = new NativeSelect(VWebUtils.getCommonString(ADDRESS_QUADRANT_KEY));
+		complementaryViaComplementCmb = new NativeSelect(VWebUtils.getCommonString(ADDRESS_COMPLEMENT_KEY));
 		complementaryViaComplementTxt = new TextField("");
-		Label dashSymbolSeparatorLbl = new Label("-");
+		Label filler1 = new Label("<span>&nbsp;</span>", ContentMode.HTML);
+		Label dashSymbolSeparatorLbl = new Label("<span>-</span>", ContentMode.HTML);
 		
-		auxHLayout1.addComponents(secondaryViaNumTxt, secondaryViaLetterTxt, dashSymbolSeparatorLbl);
-		secoundViaPanel.addComponents(secondaryViaLbl, auxHLayout1);
+		auxHLayout1.addComponents(secondaryViaNumTxt, secondaryViaLetterTxt);
 		auxHLayout2.addComponents(complementaryViaNumTxt, complementaryViaQuadrantCmb);
-		compleViaPanel.addComponents(complementaryViaLbl, auxHLayout2);
 		auxHLayout3.addComponents(complementaryViaComplementCmb, complementaryViaComplementTxt);
-		hLayout.addComponents(secoundViaPanel, compleViaPanel);
-		layout.addComponents(hLayout, auxHLayout3);
 		
+		layout.addComponents(secondaryViaLbl, filler1, complementaryViaLbl);
+		layout.addComponents(new Label("<hr/>", ContentMode.HTML), new Label("<span>&nbsp;</span>", ContentMode.HTML), new Label("<hr/>", ContentMode.HTML) );
+		layout.addComponents(auxHLayout1, dashSymbolSeparatorLbl, auxHLayout2);
+		layout.addComponent(auxHLayout3, 0, 3, 2, 3);
 		
 		secondaryViaLbl.setWidth(100, Unit.PERCENTAGE);
 		complementaryViaLbl.setWidth(100, Unit.PERCENTAGE);
-		secondaryViaLbl.addStyleName(UIConstants.CENTER_ALIGN_STYLE);
-		complementaryViaLbl.addStyleName(UIConstants.CENTER_ALIGN_STYLE);
+		secondaryViaLbl.addStyleName(CENTER_ALIGN_STYLE);
+		complementaryViaLbl.addStyleName(CENTER_ALIGN_STYLE);
+		filler1.setWidth(20, Unit.PIXELS);
+		dashSymbolSeparatorLbl.setWidth(20, Unit.PIXELS);
+		dashSymbolSeparatorLbl.addStyleName(CENTER_ALIGN_STYLE);
 		
-		secoundViaPanel.setComponentAlignment(secondaryViaLbl, Alignment.TOP_CENTER);
-		compleViaPanel.setComponentAlignment(complementaryViaLbl, Alignment.TOP_CENTER);
+		layout.setComponentAlignment(secondaryViaLbl, Alignment.TOP_CENTER);
+		layout.setComponentAlignment(complementaryViaLbl, Alignment.TOP_CENTER);
 		
 		secondaryViaNumTxt.setWidth(50, Unit.PIXELS);
 		secondaryViaLetterTxt.setWidth(50, Unit.PIXELS);
@@ -180,14 +207,13 @@ public class AddressEditorField extends CustomField<Address>{
 		complementaryViaComplementCmb.setWidth(100, Unit.PIXELS);
 		complementaryViaComplementTxt.setWidth(100, Unit.PERCENTAGE);
 		
-		auxHLayout1.setComponentAlignment(dashSymbolSeparatorLbl, Alignment.BOTTOM_CENTER);
+		layout.setComponentAlignment(dashSymbolSeparatorLbl, Alignment.BOTTOM_CENTER);
 		 
-		hLayout.setSpacing(true);
 		auxHLayout1.setSpacing(true);
 		auxHLayout2.setSpacing(true);
 		auxHLayout3.setSpacing(true);
 		
-		content.addComponent(layout);
+		generatorPanel.addComponent(layout);
 	}
 
 	@Override

@@ -88,4 +88,15 @@ public interface VWebCommonConstants {
 	
 	final String VALIDATION_ERRORLIST_TEMPLATE = "form.validationErrors.listTemplate";
 	final String VALIDATION_ERRORITEM_TEMPLATE = "form.validationErrors.item";
+	
+	final String ADDRESS_MAIN_VIA_KEY = "adressEditor.label.main_via";
+	final String ADDRESS_SECONDARY_VIA_KEY = "adressEditor.label.secondary_via";
+	final String ADDRESS_COMPLEMENTARY_VIA_KEY = "adressEditor.label.complementary_via";
+	final String ADDRESS_VIA_TYPE_KEY = "adressEditor.label.via_type";
+	final String ADDRESS_NUMBER_KEY = "adressEditor.label.number";
+	final String ADDRESS_LETTERS_KEY = "adressEditor.label.letters";
+	final String ADDRESS_BIS_KEY = "adressEditor.label.bis";
+	final String ADDRESS_QUADRANT_KEY = "adressEditor.label.quadrant";
+	final String ADDRESS_COMPLEMENT_KEY = "adressEditor.label.complement";
+	final String ADDRESS_GENERATED_KEY = "adressEditor.label.generated_address";
 }
