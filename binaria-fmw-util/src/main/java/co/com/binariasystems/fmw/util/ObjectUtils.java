@@ -136,6 +136,15 @@ private static final Logger LOGGER = LoggerFactory.getLogger(ObjectUtils.class);
 		return targetObject;
 	}
 	
+	public static <F, T> T transferProperties(F sourceObject, Class<T> targetType) throws FMWUncheckedException{
+		T resp = null;
+		try {
+			resp = transferProperties(sourceObject, targetType.newInstance());
+		} catch (ReflectiveOperationException e) {
+			throw new FMWUncheckedException(e.getMessage(), e);
+		}
+		return resp;
+	}
 	
 	public static <F, T> List<T> transferPropertiesList(List<F> sourceList, Class<T> targetType) throws FMWUncheckedException{
 		try {
@@ -145,9 +154,7 @@ private static final Logger LOGGER = LoggerFactory.getLogger(ObjectUtils.class);
 			}
 			return operationResult;
 		
-		} catch (InstantiationException e) {
-			throw new FMWUncheckedException(e.getMessage(), e);
-		}catch(IllegalAccessException e){
+		} catch (ReflectiveOperationException e) {
 			throw new FMWUncheckedException(e.getMessage(), e);
 		}
 	}

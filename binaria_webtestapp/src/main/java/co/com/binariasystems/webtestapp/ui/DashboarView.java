@@ -8,10 +8,10 @@ import co.com.binariasystems.fmw.vweb.mvp.annotation.View.Root;
 import co.com.binariasystems.fmw.vweb.mvp.annotation.ViewBuild;
 import co.com.binariasystems.fmw.vweb.mvp.views.AbstractView;
 import co.com.binariasystems.fmw.vweb.uicomponet.AddressEditorField;
-import co.com.binariasystems.fmw.vweb.uicomponet.AddressEditorField.Address;
 import co.com.binariasystems.fmw.vweb.uicomponet.LinkLabel;
 import co.com.binariasystems.fmw.vweb.uicomponet.Pager;
 import co.com.binariasystems.fmw.vweb.uicomponet.TreeMenu;
+import co.com.binariasystems.webtestapp.dto.DireccionDTO;
 import co.com.binariasystems.webtestapp.dto.Medidor;
 
 import com.vaadin.data.Item;
@@ -45,23 +45,30 @@ public class DashboarView extends AbstractView{
 	private TreeMenu menuContainer;
 	private Label welcomeLabel;
 	private LinkLabel linkLabel;
-	private AddressEditorField addressField;
+	private AddressEditorField<DireccionDTO> addressField;
 	private Pager<Medidor, Medidor> pager;
 	private Grid grid;
 	private BeanItemContainer<Medidor> gridDs;
 	private GeneratedPropertyContainer container;
 	private MessageFormat doChooseFmt = new MessageFormat("javascript:doChoose({0})");
 	private Button botonPruebas;
-	private ObjectProperty<Address> addressFieldProperty = new ObjectProperty<AddressEditorField.Address>(new Address(), Address.class);
+	private Button boton2;
+	private ObjectProperty<DireccionDTO> addressFieldProperty;
 	
 	@ViewBuild
 	public Component init(){
+		DireccionDTO direccion = new DireccionDTO();
+		direccion.setMainViaType("AUT");
+		direccion.setMainViaNum(12);
+		direccion.setMainViaLetter("ABC");
+		addressFieldProperty = new ObjectProperty<DireccionDTO>(direccion, DireccionDTO.class);
 		splitPanel = new HorizontalSplitPanel();
 		rightPanel = new VerticalLayout();
 		welcomeLabel = new Label("Welcome My People");
 		linkLabel = new LinkLabel("Este es mi LinkLabel");
-		addressField = new AddressEditorField("Direcci\u00f3n de Residencia");
+		addressField = new AddressEditorField<DireccionDTO>("Direcci\u00f3n de Residencia", DireccionDTO.class);
 		botonPruebas = new Button("Probar");
+		boton2 = new Button("Asignar Direccion");
 
 		gridDs = new BeanItemContainer<Medidor>(Medidor.class);
 		container = new GeneratedPropertyContainer(gridDs);
@@ -109,6 +116,7 @@ public class DashboarView extends AbstractView{
 		rightPanel.addComponent(pager);
 		rightPanel.addComponent(addressField);
 		rightPanel.addComponent(botonPruebas);
+		rightPanel.addComponent(boton2);
 		
 		splitPanel.setFirstComponent(menuContainer);
 		splitPanel.setSecondComponent(rightPanel);

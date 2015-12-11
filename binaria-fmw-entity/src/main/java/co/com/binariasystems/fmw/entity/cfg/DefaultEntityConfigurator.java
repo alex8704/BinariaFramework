@@ -125,7 +125,8 @@ public class DefaultEntityConfigurator<T> implements EntityConfigurator<T>{
 		Field[] declaredFields = clazz.getDeclaredFields();
 		for(Field field : declaredFields){
 			FieldConfigData fieldCfg = null;
-			if(field.isAnnotationPresent(Ignore.class) || TypeHelper.isCollectionType(field.getType()) || Modifier.isStatic(field.getModifiers()) || 
+			if(field.isAnnotationPresent(Ignore.class) || TypeHelper.isCollectionType(field.getType()) || 
+					Modifier.isStatic(field.getModifiers()) || Modifier.isTransient(field.getModifiers()) ||
 					(!field.getType().isEnum() && !TypeHelper.isBasicType(field.getType()) && !field.isAnnotationPresent(ForeignKey.class)
 							&& !field.isAnnotationPresent(Relation.class) && !field.isAnnotationPresent(FieldValues.class)))
 				continue;

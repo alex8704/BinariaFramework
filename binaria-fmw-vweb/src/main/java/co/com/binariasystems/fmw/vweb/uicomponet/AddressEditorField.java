@@ -1,6 +1,8 @@
 package co.com.binariasystems.fmw.vweb.uicomponet;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -69,21 +71,30 @@ public class AddressEditorField<T extends Address> extends CustomField<T> implem
 	private BeanItem<InternalAddress> beanItem = new BeanItem<InternalAddress>(new InternalAddress(), InternalAddress.class);
 	private ObjectProperty<String> generatedAddressProperty = new ObjectProperty<String>("", String.class);
 	private ValueChangeListener valueChangeListener;
+	private boolean ommitDsUpdate;
+	private Map<Property, String> propertiesAndIds = new HashMap<Property, String>();
 	
-	public AddressEditorField() {
-		super();
-		this.addStyleName(ADDRESS_EDITOR_STYLENAME);
+	public AddressEditorField(Class<T> valueType) {
+		this(null, valueType);
 	}
 	
-	public AddressEditorField(String caption) {
+	public AddressEditorField(String caption, Class<T> valueType) {
 		super();
 		this.setCaption(caption);
 		this.addStyleName(ADDRESS_EDITOR_STYLENAME);
+		this.valueType = valueType;
+		initComponents();
 	}
 
 
 	@Override
 	protected Component initContent() {
+		loadParameters();
+		bindEvents();
+		return content;
+	}
+	
+	private void initComponents(){
 		content = new  GridLayout(3,2);
 		generatorPanel = new HorizontalLayout();
 		generatedAddressTxt = new TextField(VWebUtils.getCommonString(ADDRESS_GENERATED_KEY));
@@ -131,11 +142,6 @@ public class AddressEditorField<T extends Address> extends CustomField<T> implem
 		content.setColumnExpandRatio(2, 1.0f);
 		content.setSpacing(true);
 		content.addStyleName(ADDRESS_EDITOR_CONTENT_STYLENAME);
-		
-		loadParameters();
-		bindEvents();
-		
-		return content;
 	}
 	
 	
@@ -251,38 +257,6 @@ public class AddressEditorField<T extends Address> extends CustomField<T> implem
 	private void loadParameters(){
 		if(parametersProvider == null)
 			setParametersProvider(new BuiltInAddressEditorParametersProvider());
-		mainViaTypeCmb.setNullSelectionItemId("");
-		mainViaBisCmb.setNullSelectionItemId("");
-		mainViaQuadrantCmb.setNullSelectionItemId("");
-		complementaryViaQuadrantCmb.setNullSelectionItemId("");
-		mainViaComplementCmb.setNullSelectionItemId("");
-		complementaryViaComplementCmb.setNullSelectionItemId("");
-		
-		setComboBoxItems(mainViaTypeCmb, parametersProvider.getViaTypes(VWebUtils.getCurrentUserLocale()));
-		setComboBoxItems(mainViaBisCmb, parametersProvider.getBis(VWebUtils.getCurrentUserLocale()));
-		setComboBoxItems(mainViaQuadrantCmb, parametersProvider.getQuadrants(VWebUtils.getCurrentUserLocale()));
-		setComboBoxItems(complementaryViaQuadrantCmb, parametersProvider.getQuadrants(VWebUtils.getCurrentUserLocale()));
-		setComboBoxItems(mainViaComplementCmb, parametersProvider.getNomenclatureComplements(VWebUtils.getCurrentUserLocale()));
-		setComboBoxItems(complementaryViaComplementCmb, parametersProvider.getNomenclatureComplements(VWebUtils.getCurrentUserLocale()));
-	}
-	
-	private void setComboBoxItems(NativeSelect comboBox, List<? extends Listable> items){
-		comboBox.setItemCaption("", VWebUtils.getComboBoxNoSelectionShortDescription());
-		for(Listable item : items){
-			comboBox.addItem(item.getPK());
-			comboBox.setItemCaption(item.getPK(), item.getDescription());
-		}
-	}
-	
-	private void bindEvents(){
-		valueChangeListener = new Property.ValueChangeListener() {
-			@Override public void valueChange(Property.ValueChangeEvent event) {
-				if(event.getProperty().equals(AddressEditorField.this.getPropertyDataSource()))
-					handleAdrressEditorPropertyValueChange(event);
-				else
-					handleControlsPropertyValueChange(event);
-			}
-		};
 		
 		mainViaTypeCmb.setImmediate(true);
 		mainViaNumTxt.setImmediate(true);
@@ -324,33 +298,68 @@ public class AddressEditorField<T extends Address> extends CustomField<T> implem
 		complementaryViaNumTxt.setNullRepresentation("");
 		complementaryViaComplementTxt.setNullRepresentation("");
 		
+		setComboBoxItems(mainViaTypeCmb, parametersProvider.getViaTypes(VWebUtils.getCurrentUserLocale()));
+		setComboBoxItems(mainViaBisCmb, parametersProvider.getBis(VWebUtils.getCurrentUserLocale()));
+		setComboBoxItems(mainViaQuadrantCmb, parametersProvider.getQuadrants(VWebUtils.getCurrentUserLocale()));
+		setComboBoxItems(complementaryViaQuadrantCmb, parametersProvider.getQuadrants(VWebUtils.getCurrentUserLocale()));
+		setComboBoxItems(mainViaComplementCmb, parametersProvider.getNomenclatureComplements(VWebUtils.getCurrentUserLocale()));
+		setComboBoxItems(complementaryViaComplementCmb, parametersProvider.getNomenclatureComplements(VWebUtils.getCurrentUserLocale()));
+	}
+	
+	private void setComboBoxItems(NativeSelect comboBox, List<? extends Listable> items){
+		comboBox.setItemCaption("", VWebUtils.getComboBoxNoSelectionShortDescription());
+		for(Listable item : items){
+			comboBox.addItem(item.getPK());
+			comboBox.setItemCaption(item.getPK(), item.getDescription());
+		}
+	}
+	
+	@SuppressWarnings("rawtypes")
+	private void bindEvents(){
+		valueChangeListener = new Property.ValueChangeListener() {
+			@Override public void valueChange(Property.ValueChangeEvent event) {
+				if(event.getProperty().equals(AddressEditorField.this.getPropertyDataSource()) || event.getProperty().equals(AddressEditorField.this))
+					handleAdrressEditorPropertyValueChange(event);
+				else
+					handleControlsPropertyValueChange(event);
+			}
+		};
+		
+		
 		for(String propertyId : ADDRESS_PROPERTYIDS){
 			if(beanItem.getItemProperty(propertyId) instanceof AbstractProperty)
 				((AbstractProperty)beanItem.getItemProperty(propertyId)).addValueChangeListener(valueChangeListener);
+			propertiesAndIds.put(beanItem.getItemProperty(propertyId), propertyId);
 		}
 		addValueChangeListener(valueChangeListener);
 	}
 	
 	
+	@SuppressWarnings("unchecked")
 	private void handleAdrressEditorPropertyValueChange(Property.ValueChangeEvent event){
-		if(event.getProperty().getValue() == null)
-			beanItem.getBean().clean();
-		for(String propertyId : ADDRESS_PROPERTYIDS){
-			try {
-				beanItem.getItemProperty(propertyId).setValue(PropertyUtils.getProperty(event.getProperty().getValue(), propertyId));
-			} catch (ReflectiveOperationException e) {
-				LOGGER.error("Cannot handle value change on AddressEditor: "+e.getMessage());
+		beanItem.getBean().clean();
+		Object sourceBean = (event.getProperty().getValue() == null) ? beanItem.getBean() : event.getProperty().getValue();
+		try {
+			ommitDsUpdate = true;
+			for(String propertyId : ADDRESS_PROPERTYIDS){
+				beanItem.getItemProperty(propertyId).setValue(PropertyUtils.getProperty(sourceBean, propertyId));
 			}
+		} catch (ReflectiveOperationException e) {
+			LOGGER.error("Cannot handle value change on AddressEditor: "+e.getMessage());
+		}finally{
+			ommitDsUpdate = false;
 		}
 	}
 	
+	@SuppressWarnings("unchecked")
 	private void handleControlsPropertyValueChange(Property.ValueChangeEvent event){
 		generatedAddressProperty.setValue(beanItem.getBean().toString());
-		if(this.getPropertyDataSource() != null){
+		System.out.println(ommitDsUpdate);
+		if(!ommitDsUpdate && this.getPropertyDataSource() != null){
 			if(this.getPropertyDataSource().getValue() != null)
 				ObjectUtils.transferProperties(beanItem.getBean(), this.getPropertyDataSource().getValue());
 			else
-				this.getPropertyDataSource().setValue(beanItem.getBean());
+				this.getPropertyDataSource().setValue(ObjectUtils.transferProperties(beanItem.getBean(), valueType));
 		}
 	}
 
@@ -367,7 +376,7 @@ public class AddressEditorField<T extends Address> extends CustomField<T> implem
 		this.parametersProvider = parametersProvider;
 	}
 	
-	public abstract class Address{
+	public static abstract class Address{
 		public abstract String getMainViaType();
 		public abstract void setMainViaType(String mainViaType);
 		public abstract Integer getMainViaNum();
@@ -435,7 +444,7 @@ public class AddressEditorField<T extends Address> extends CustomField<T> implem
 		}
 	}
 
-	private class InternalAddress extends Address{
+	public static class InternalAddress extends Address{
 		private String mainViaType;
 		private Integer mainViaNum;
 		private String mainViaLetter;

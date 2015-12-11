@@ -1,4 +1,3 @@
-
 package co.com.binariasystems.webtestapp.ui;
 
 import java.sql.Timestamp;
@@ -16,7 +15,6 @@ import co.com.binariasystems.fmw.vweb.mvp.annotation.ViewController.OnLoad;
 import co.com.binariasystems.fmw.vweb.mvp.annotation.ViewField;
 import co.com.binariasystems.fmw.vweb.mvp.controller.AbstractViewController;
 import co.com.binariasystems.fmw.vweb.uicomponet.AddressEditorField;
-import co.com.binariasystems.fmw.vweb.uicomponet.AddressEditorField.Address;
 import co.com.binariasystems.fmw.vweb.uicomponet.LinkLabel;
 import co.com.binariasystems.fmw.vweb.uicomponet.LinkLabel.ClickHandler;
 import co.com.binariasystems.fmw.vweb.uicomponet.LinkLabel.LinkClickEvent;
@@ -26,6 +24,7 @@ import co.com.binariasystems.fmw.vweb.uicomponet.pager.PageChangeEvent;
 import co.com.binariasystems.fmw.vweb.uicomponet.pager.PageChangeHandler;
 import co.com.binariasystems.fmw.vweb.uicomponet.treemenu.MenuElement;
 import co.com.binariasystems.webtestapp.business.AuthenticationBusiness;
+import co.com.binariasystems.webtestapp.dto.DireccionDTO;
 import co.com.binariasystems.webtestapp.dto.Gateway;
 import co.com.binariasystems.webtestapp.dto.Medidor;
 import co.com.binariasystems.webtestapp.dto.MenuModuleDTO;
@@ -55,8 +54,9 @@ public class DashboardViewController extends AbstractViewController {
 	private List<Medidor> items = new ArrayList<Medidor>();
 	@ViewField private Grid grid;
 	@ViewField private Button botonPruebas;
-	@ViewField private AddressEditorField addressField;
-	@ViewField private ObjectProperty<Address> addressFieldProperty;
+	@ViewField private Button boton2;
+	@ViewField private AddressEditorField<DireccionDTO> addressField;
+	@ViewField private ObjectProperty<DireccionDTO> addressFieldProperty;
 	
 	@Init
 	public void inicializar(){
@@ -106,6 +106,17 @@ public class DashboardViewController extends AbstractViewController {
 		botonPruebas.addClickListener(new Button.ClickListener() {
 			@Override
 			public void buttonClick(ClickEvent event) {
+				System.out.println(addressFieldProperty.getValue().toString());
+			}
+		});
+		boton2.addClickListener(new Button.ClickListener() {
+			@Override
+			public void buttonClick(ClickEvent event) {
+				DireccionDTO direccion = new DireccionDTO();
+				direccion.setMainViaType("AUT");
+				direccion.setMainViaNum(12);
+				direccion.setMainViaLetter("ABC");
+				addressFieldProperty.setValue(direccion);
 				System.out.println(addressFieldProperty.getValue().toString());
 			}
 		});
