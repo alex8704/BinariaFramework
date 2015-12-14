@@ -145,7 +145,10 @@ public class EntityCRUDOperationsManager<T> {
 				if (fieldValue != null) {
 					colNamesBuilder.append(first ? "" : ", ").append(fieldCfg.getColumnName());
 					namedParamsBuilder.append(first ? "" : ", ").append(":").append(fieldName);
-					paramSource.addValue(fieldName, fieldValue);
+					if(CharSequence.class.isAssignableFrom(fieldValue.getClass()) && !fieldCfg.isOmmitUpperTransform())
+						paramSource.addValue(fieldName, StringUtils.upperCase(fieldValue.toString()));
+					else
+						paramSource.addValue(fieldName, fieldValue);
 					first = false;
 				}
 			}
@@ -190,8 +193,11 @@ public class EntityCRUDOperationsManager<T> {
 				fieldValue = PropertyUtils.getNestedProperty(entityBean, propertyName);
 			}else if(Listable.class.isAssignableFrom(fieldCfg.getFieldType()) && fieldValue != null)
 				fieldValue = ((Listable)fieldValue).getPK();
-
-			paramSource.addValue(fieldCfg.getFieldName(), fieldValue);
+			
+			if(fieldValue != null && CharSequence.class.isAssignableFrom(fieldValue.getClass()) && !fieldCfg.isOmmitUpperTransform())
+				paramSource.addValue(fieldCfg.getFieldName(), StringUtils.upperCase(fieldValue.toString()));
+			else
+				paramSource.addValue(fieldCfg.getFieldName(), fieldValue);
 			first = false;
 		}
 		FieldConfigData pkField = entityConfigData.getFieldsData().get(entityConfigData.getPkFieldName());
@@ -293,7 +299,7 @@ public class EntityCRUDOperationsManager<T> {
 		for (String fieldName : entityConfigData.getFieldsData().keySet()) {
 			FieldConfigData fieldCfg = entityConfigData.getFieldsData().get(fieldName);
 
-			if (skipPkFilter && fieldName.equals(entityConfigData.getPkFieldName()))
+			if ((skipPkFilter && fieldName.equals(entityConfigData.getPkFieldName())) || fieldCfg.isAuditoryField())
 				continue;
 
 			if (fieldCfg instanceof RelationFieldConfigData && !TypeHelper.isBasicType(fieldCfg.getFieldType())) {
@@ -328,7 +334,7 @@ public class EntityCRUDOperationsManager<T> {
 				whereBuilder.append(FMWEntityConstants.ENTITY_DYNASQL_MAIN_ALIAS).append(".").append(fieldCfg.getColumnName()).append(comparingOperator).append(":").append(fieldCfg.getFieldName());
 
 				if (CharSequence.class.isAssignableFrom(fieldValue.getClass()))
-					paramSource.addValue(fieldCfg.getFieldName(), fieldValue.toString().replace(FMWEntityConstants.LIKE_SQLCOMPARING_COMIDIN_CHAR, "%"));
+					paramSource.addValue(fieldCfg.getFieldName(), (fieldCfg.isOmmitUpperTransform() ? fieldValue.toString() : StringUtils.upperCase(fieldValue.toString())).replace(FMWEntityConstants.LIKE_SQLCOMPARING_COMIDIN_CHAR, "%"));
 				else
 					paramSource.addValue(fieldCfg.getFieldName(), fieldValue);
 			}

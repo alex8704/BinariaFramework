@@ -4,6 +4,16 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 public class AuthorizationRequest {
+	
+	
+	public AuthorizationRequest() {
+	}
+	public AuthorizationRequest(String resourceURL, HttpServletRequest httpRequest, HttpSession httpSession) {
+		super();
+		this.resourceURL = resourceURL;
+		this.httpRequest = httpRequest;
+		this.httpSession = httpSession;
+	}
 	private String resourceURL;
 	private HttpServletRequest httpRequest;
 	private HttpSession httpSession;

@@ -84,13 +84,13 @@ public class AddressEditorField<T extends Address> extends CustomField<T> implem
 		this.addStyleName(ADDRESS_EDITOR_STYLENAME);
 		this.valueType = valueType;
 		initComponents();
+		
 	}
 
 
 	@Override
 	protected Component initContent() {
 		loadParameters();
-		bindEvents();
 		return content;
 	}
 	
@@ -142,6 +142,15 @@ public class AddressEditorField<T extends Address> extends CustomField<T> implem
 		content.setColumnExpandRatio(2, 1.0f);
 		content.setSpacing(true);
 		content.addStyleName(ADDRESS_EDITOR_CONTENT_STYLENAME);
+		mainViaNumTxt.setNullRepresentation("");
+		mainViaLetterTxt.setNullRepresentation("");
+		mainViaBisLetterTxt.setNullRepresentation("");
+		mainViaComplementTxt.setNullRepresentation("");
+		secondaryViaNumTxt.setNullRepresentation("");
+		secondaryViaLetterTxt.setNullRepresentation("");
+		complementaryViaNumTxt.setNullRepresentation("");
+		complementaryViaComplementTxt.setNullRepresentation("");
+		bindEvents();
 	}
 	
 	
@@ -258,6 +267,25 @@ public class AddressEditorField<T extends Address> extends CustomField<T> implem
 		if(parametersProvider == null)
 			setParametersProvider(new BuiltInAddressEditorParametersProvider());
 		
+		setComboBoxItems(mainViaTypeCmb, parametersProvider.getViaTypes(VWebUtils.getCurrentUserLocale()));
+		setComboBoxItems(mainViaBisCmb, parametersProvider.getBis(VWebUtils.getCurrentUserLocale()));
+		setComboBoxItems(mainViaQuadrantCmb, parametersProvider.getQuadrants(VWebUtils.getCurrentUserLocale()));
+		setComboBoxItems(complementaryViaQuadrantCmb, parametersProvider.getQuadrants(VWebUtils.getCurrentUserLocale()));
+		setComboBoxItems(mainViaComplementCmb, parametersProvider.getNomenclatureComplements(VWebUtils.getCurrentUserLocale()));
+		setComboBoxItems(complementaryViaComplementCmb, parametersProvider.getNomenclatureComplements(VWebUtils.getCurrentUserLocale()));
+	}
+	
+	private void setComboBoxItems(NativeSelect comboBox, List<? extends Listable> items){
+		comboBox.setNullSelectionItemId("");
+		comboBox.setItemCaption("", VWebUtils.getComboBoxNoSelectionShortDescription());
+		for(Listable item : items){
+			comboBox.addItem(item.getPK());
+			comboBox.setItemCaption(item.getPK(), item.getDescription());
+		}
+	}
+	
+	@SuppressWarnings("rawtypes")
+	private void bindEvents(){
 		mainViaTypeCmb.setImmediate(true);
 		mainViaNumTxt.setImmediate(true);
 		mainViaLetterTxt.setImmediate(true);
@@ -289,33 +317,6 @@ public class AddressEditorField<T extends Address> extends CustomField<T> implem
 		complementaryViaComplementTxt.setPropertyDataSource(beanItem.getItemProperty("complementaryViaComplementDetail"));
 		generatedAddressTxt.setPropertyDataSource(generatedAddressProperty);
 		
-		mainViaNumTxt.setNullRepresentation("");
-		mainViaLetterTxt.setNullRepresentation("");
-		mainViaBisLetterTxt.setNullRepresentation("");
-		mainViaComplementTxt.setNullRepresentation("");
-		secondaryViaNumTxt.setNullRepresentation("");
-		secondaryViaLetterTxt.setNullRepresentation("");
-		complementaryViaNumTxt.setNullRepresentation("");
-		complementaryViaComplementTxt.setNullRepresentation("");
-		
-		setComboBoxItems(mainViaTypeCmb, parametersProvider.getViaTypes(VWebUtils.getCurrentUserLocale()));
-		setComboBoxItems(mainViaBisCmb, parametersProvider.getBis(VWebUtils.getCurrentUserLocale()));
-		setComboBoxItems(mainViaQuadrantCmb, parametersProvider.getQuadrants(VWebUtils.getCurrentUserLocale()));
-		setComboBoxItems(complementaryViaQuadrantCmb, parametersProvider.getQuadrants(VWebUtils.getCurrentUserLocale()));
-		setComboBoxItems(mainViaComplementCmb, parametersProvider.getNomenclatureComplements(VWebUtils.getCurrentUserLocale()));
-		setComboBoxItems(complementaryViaComplementCmb, parametersProvider.getNomenclatureComplements(VWebUtils.getCurrentUserLocale()));
-	}
-	
-	private void setComboBoxItems(NativeSelect comboBox, List<? extends Listable> items){
-		comboBox.setItemCaption("", VWebUtils.getComboBoxNoSelectionShortDescription());
-		for(Listable item : items){
-			comboBox.addItem(item.getPK());
-			comboBox.setItemCaption(item.getPK(), item.getDescription());
-		}
-	}
-	
-	@SuppressWarnings("rawtypes")
-	private void bindEvents(){
 		valueChangeListener = new Property.ValueChangeListener() {
 			@Override public void valueChange(Property.ValueChangeEvent event) {
 				if(event.getProperty().equals(AddressEditorField.this.getPropertyDataSource()) || event.getProperty().equals(AddressEditorField.this))
@@ -354,7 +355,6 @@ public class AddressEditorField<T extends Address> extends CustomField<T> implem
 	@SuppressWarnings("unchecked")
 	private void handleControlsPropertyValueChange(Property.ValueChangeEvent event){
 		generatedAddressProperty.setValue(beanItem.getBean().toString());
-		System.out.println(ommitDsUpdate);
 		if(!ommitDsUpdate && this.getPropertyDataSource() != null){
 			if(this.getPropertyDataSource().getValue() != null)
 				ObjectUtils.transferProperties(beanItem.getBean(), this.getPropertyDataSource().getValue());

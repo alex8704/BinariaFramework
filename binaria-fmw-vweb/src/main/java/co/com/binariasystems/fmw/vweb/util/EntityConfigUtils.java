@@ -17,6 +17,7 @@ import co.com.binariasystems.fmw.entity.util.FMWEntityUtils;
 import co.com.binariasystems.fmw.exception.FMWException;
 import co.com.binariasystems.fmw.reflec.TypeHelper;
 import co.com.binariasystems.fmw.util.messagebundle.MessageBundleManager;
+import co.com.binariasystems.fmw.vweb.constants.UIConstants;
 import co.com.binariasystems.fmw.vweb.uicomponet.SearcherField;
 import co.com.binariasystems.fmw.vweb.util.converter.DateToTimestampConverter;
 
@@ -58,6 +59,8 @@ public class EntityConfigUtils {
 				widget.setNullRepresentation("");
 				if(TypeHelper.isNumericType(fieldInfo.getFieldType()))
 					widget.setConverter(fieldInfo.getFieldType());
+				if(!fieldInfo.isOmmitUpperTransform())
+					widget.addStyleName(UIConstants.UPPER_TRANSFORM_STYLENAME);
 				
 				resp = widget;
 			}
@@ -157,6 +160,8 @@ public class EntityConfigUtils {
 				widget.setNullRepresentation("");
 				if(TypeHelper.isNumericType(fieldInfo.getFieldType()))
 					widget.setConverter(fieldInfo.getFieldType());
+				if(!fieldInfo.isOmmitUpperTransform())
+					widget.addStyleName(UIConstants.UPPER_TRANSFORM_STYLENAME);
 				
 				resp = widget;
 			}

@@ -1,5 +1,6 @@
 package co.com.binariasystems.fmw.vweb.util;
 
+import java.lang.annotation.Annotation;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -156,5 +157,16 @@ public class ValidationUtils {
 	
 	public static Validator addressValidator(String fieldCaption){
 		return new AddressFieldValidator(new MessageFormat(VWebUtils.getCommonString(ADDRESS_MESSAGE_TEMPLATE_KEY)).format(new Object[]{fieldCaption}));
+	}
+	
+	public static boolean isValidatorAnnotation(Annotation annot){
+		return annot instanceof co.com.binariasystems.fmw.vweb.mvp.annotation.validation.AddressValidator ||
+				annot instanceof co.com.binariasystems.fmw.vweb.mvp.annotation.validation.DateRangeValidator ||
+				annot instanceof co.com.binariasystems.fmw.vweb.mvp.annotation.validation.DoubleRangeValidator ||
+				annot instanceof co.com.binariasystems.fmw.vweb.mvp.annotation.validation.EmailValidator ||
+				annot instanceof co.com.binariasystems.fmw.vweb.mvp.annotation.validation.IntRangeValidator ||
+				annot instanceof co.com.binariasystems.fmw.vweb.mvp.annotation.validation.NullValidator ||
+				annot instanceof co.com.binariasystems.fmw.vweb.mvp.annotation.validation.RegExpValidator ||
+				annot instanceof co.com.binariasystems.fmw.vweb.mvp.annotation.validation.StringLengthValidator;
 	}
 }

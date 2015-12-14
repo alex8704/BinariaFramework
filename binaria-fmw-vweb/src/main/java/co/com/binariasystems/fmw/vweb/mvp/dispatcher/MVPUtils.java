@@ -2,7 +2,6 @@ package co.com.binariasystems.fmw.vweb.mvp.dispatcher;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -23,6 +22,7 @@ import co.com.binariasystems.fmw.exception.FMWException;
 import co.com.binariasystems.fmw.ioc.IOCHelper;
 import co.com.binariasystems.fmw.util.messagebundle.MessageBundleManager;
 import co.com.binariasystems.fmw.vweb.mvp.annotation.ViewField;
+import co.com.binariasystems.fmw.vweb.mvp.annotation.validation.AddressValidator;
 import co.com.binariasystems.fmw.vweb.mvp.annotation.validation.DateRangeValidator;
 import co.com.binariasystems.fmw.vweb.mvp.annotation.validation.DoubleRangeValidator;
 import co.com.binariasystems.fmw.vweb.mvp.annotation.validation.EmailValidator;
@@ -172,6 +172,8 @@ public class MVPUtils {
 						else if (annotation instanceof RegExpValidator)
 							((Validatable) fieldValue).addValidator(ValidationUtils.regexpValidator(
 									StringUtils.defaultIfEmpty(((RegExpValidator) annotation).fieldCaption(), localizedCaption), ((RegExpValidator) annotation).expression(), ((RegExpValidator) annotation).example()));
+						else if (annotation instanceof AddressValidator)
+							((Validatable) fieldValue).addValidator(ValidationUtils.addressValidator(StringUtils.defaultIfEmpty(((AddressValidator) annotation).fieldCaption(), localizedCaption)));
 					}
 				}
 			}
@@ -200,7 +202,7 @@ public class MVPUtils {
 
 					MethodUtils.getAccessibleMethod(method).invoke(targetObject, IOCHelper.getBean(paramTypes[0]));
 				}
-			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+			} catch (IllegalArgumentException | ReflectiveOperationException ex) {
 				throw new FMWException(ex);
 			}
 		}

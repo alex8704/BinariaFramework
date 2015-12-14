@@ -5,44 +5,35 @@ import java.util.List;
 
 import co.com.binariasystems.fmw.vweb.uicomponet.treemenu.MenuElement;
 
-public class MenuOptionDTO extends MenuElement{
+public class MenuActionDTO extends MenuElement {
+	private Object actionId;
+	public MenuActionDTO() {}
 	
-	public MenuOptionDTO() {}
-	
-	public MenuOptionDTO(String caption) {
+	public MenuActionDTO(String caption) {
 		super(caption);
 	}
 	
-	public MenuOptionDTO(String caption, String description) {
+	public MenuActionDTO(String caption, String description) {
 		super(caption, description);
-	}
-
-	public MenuOptionDTO(String caption, String description, String path) {
-		super(caption, description);
-		this.path = path;
-	}
-
-
-
-	private String path;
-
-	public String getPath() {
-		return path;
-	}
-
-	public void setPath(String path) {
-		this.path = path;
 	}
 	
-	public static void main(String[] args) {
-		Class clazz = Gateway.class;
+	public MenuActionDTO(String caption, String description, Object actionId) {
+		super(caption, description);
+		this.actionId = actionId;
+	}
+	
+	public Object getActionId() {
+		return actionId;
+	}
+
+	public void setActionId(Object actionId) {
+		this.actionId = actionId;
 	}
 	
 	@Override
 	public MenuElement addChild(MenuElement child){
 		throw new UnsupportedOperationException(getClass().getName()+" not allow childs");
 	}
-	
 	@Override
 	public MenuElement addChilds(MenuElement... child){
 		throw new UnsupportedOperationException(getClass().getName()+" not allow childs");

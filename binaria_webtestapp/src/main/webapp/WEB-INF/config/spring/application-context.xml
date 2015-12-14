@@ -106,6 +106,12 @@
 		<property name="defaultEncoding" value="UTF-8" />
 		<property name="javaMailProperties">
 			<props>
+				<prop key="mail.smtp.host">${mail.smtp.host}</prop>
+				<prop key="mail.smtp.port">${mail.smtp.port}</prop>
+				<prop key="mail.transport.protocol">${mail.transport.protocol}</prop>
+				<prop key="mail.smtp.user">${mail.smtp.user}</prop>
+				<prop key="mail.smtp.password">${mail.smtp.password}</prop>
+				<prop key="mail.debug">${mail.debug}</prop>
 				<prop key="mail.smtp.auth">${mail.smtp.auth}</prop>
 				<prop key="mail.smtp.starttls.enable">${mail.smtp.starttls.enable}</prop>
 				<prop key="mail.smtp.EnableSSL.enable">${mail.smtp.EnableSSL.enable}</prop>

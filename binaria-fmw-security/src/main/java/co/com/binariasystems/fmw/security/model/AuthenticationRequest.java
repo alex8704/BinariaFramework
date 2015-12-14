@@ -6,6 +6,18 @@ public class AuthenticationRequest {
 	private String username;
 	private String password;
 	private HttpServletRequest httpRequest;
+	
+	
+	public AuthenticationRequest() {
+	}
+	
+	
+	public AuthenticationRequest(String username, String password, HttpServletRequest httpRequest) {
+		this.username = username;
+		this.password = password;
+		this.httpRequest = httpRequest;
+	}
+
 	public String getUsername() {
 		return username;
 	}

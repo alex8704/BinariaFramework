@@ -11,6 +11,8 @@ import co.com.binariasystems.fmw.vweb.uicomponet.AddressEditorField;
 import co.com.binariasystems.fmw.vweb.uicomponet.LinkLabel;
 import co.com.binariasystems.fmw.vweb.uicomponet.Pager;
 import co.com.binariasystems.fmw.vweb.uicomponet.TreeMenu;
+import co.com.binariasystems.fmw.vweb.util.AddressFieldValidator;
+import co.com.binariasystems.fmw.vweb.util.ValidationUtils;
 import co.com.binariasystems.webtestapp.dto.DireccionDTO;
 import co.com.binariasystems.webtestapp.dto.Medidor;
 
@@ -61,12 +63,14 @@ public class DashboarView extends AbstractView{
 		direccion.setMainViaType("AUT");
 		direccion.setMainViaNum(12);
 		direccion.setMainViaLetter("ABC");
-		addressFieldProperty = new ObjectProperty<DireccionDTO>(direccion, DireccionDTO.class);
+		addressFieldProperty = new ObjectProperty<DireccionDTO>(null, DireccionDTO.class);
 		splitPanel = new HorizontalSplitPanel();
 		rightPanel = new VerticalLayout();
 		welcomeLabel = new Label("Welcome My People");
 		linkLabel = new LinkLabel("Este es mi LinkLabel");
 		addressField = new AddressEditorField<DireccionDTO>("Direcci\u00f3n de Residencia", DireccionDTO.class);
+		addressField.addValidator(ValidationUtils.addressValidator("Direcci\u00f3n de Residencia"));
+		addressField.setImmediate(true);
 		botonPruebas = new Button("Probar");
 		boton2 = new Button("Asignar Direccion");
 
@@ -125,6 +129,7 @@ public class DashboarView extends AbstractView{
 		
 		
 		addressField.setPropertyDataSource(addressFieldProperty);
+		addressField.setValue(direccion);
 		
 		JavaScript.getCurrent().addFunction("doChoose", new JavaScriptFunction() {
 			@Override

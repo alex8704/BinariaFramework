@@ -47,6 +47,7 @@ public class TextFieldBuilder extends TextField{
 	private void setDefaults(){
 		setNullRepresentation("");
 		setConversionError(VWebUtils.getCommonString(VWebCommonConstants.FIELD_CONVERSION_ERROR_DEFAULT_MSG));
+		addStyleName(UIConstants.UPPER_TRANSFORM_STYLENAME);
 		//setInvalidAllowed(invalidAllowed);
 		//setValidationVisible(validateAutomatically);
 	}
@@ -283,8 +284,8 @@ public class TextFieldBuilder extends TextField{
 		return this;
 	}
 	
-	public TextFieldBuilder withUpperTransform(){
-		addStyleName(UIConstants.UPPER_TRANSFORM_STYLENAME);
+	public TextFieldBuilder withoutUpperTransform(){
+		removeStyleName(UIConstants.UPPER_TRANSFORM_STYLENAME);
 		return this;
 	}
 }

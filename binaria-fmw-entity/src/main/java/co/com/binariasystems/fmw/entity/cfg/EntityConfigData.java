@@ -1,6 +1,7 @@
 package co.com.binariasystems.fmw.entity.cfg;
 
 import java.io.Serializable;
+import java.lang.annotation.Annotation;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -198,6 +199,7 @@ public class EntityConfigData<T> implements Serializable {
 		private boolean auditoryField;
 		private Listable[] fixedValues;
 		private EntityConfigUIControl fieldUIControl;
+		private boolean ommitUpperTransform;
 
 		public Class<?> getFieldType() {
 			return fieldType;
@@ -283,6 +285,16 @@ public class EntityConfigData<T> implements Serializable {
 			this.auditoryField = auditoryField;
 		}
 
+		public boolean isOmmitUpperTransform() {
+			return ommitUpperTransform;
+		}
+
+		public void setOmmitUpperTransform(boolean ommitUpperTransform) {
+			this.ommitUpperTransform = ommitUpperTransform;
+		}
+
+		
+		
 	}
 
 	public static class RelationFieldConfigData extends FieldConfigData {

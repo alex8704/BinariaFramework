@@ -46,7 +46,7 @@ public class AuthenticationView extends AbstractFormView{
 		item.addItemProperty("usernameField", new ObjectProperty<String>(null, String.class));
 		item.addItemProperty("passwordField", new ObjectProperty<String>(null, String.class));
 		
-		usernameField = textField().withProperty(item.getItemProperty("usernameField"));
+		usernameField = textField().withProperty(item.getItemProperty("usernameField")).withoutUpperTransform();
 		
 		passwordField = passwordField().withProperty(item.getItemProperty("passwordField"));
 		

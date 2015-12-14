@@ -20,6 +20,7 @@ import co.com.binariasystems.fmw.entity.ForeignKey;
 import co.com.binariasystems.fmw.entity.Ignore;
 import co.com.binariasystems.fmw.entity.Key;
 import co.com.binariasystems.fmw.entity.Nullable;
+import co.com.binariasystems.fmw.entity.OmmitUpperTransform;
 import co.com.binariasystems.fmw.entity.Relation;
 import co.com.binariasystems.fmw.entity.SearchField;
 import co.com.binariasystems.fmw.entity.SearchTarget;
@@ -137,7 +138,8 @@ public class DefaultEntityConfigurator<T> implements EntityConfigurator<T>{
 			
 			fieldCfg.setAuditoryField((entityConfigData instanceof AuditableEntityConfigData) && 
 					(AuditableEntityConfigData.isAuditField(field.getName(), (Auditable)clazz.getAnnotation(Auditable.class))));
-			
+			fieldCfg.setOmmitUpperTransform(field.isAnnotationPresent(OmmitUpperTransform.class));
+			fieldCfg.setMandatory(!field.isAnnotationPresent(Nullable.class));
 			for(Annotation annot : field.getAnnotations()){
 				//Manejo informacion para campos que representan claves foraneas (hacen referencias a otras entidades)
 				if(annot instanceof ForeignKey){
@@ -188,13 +190,13 @@ public class DefaultEntityConfigurator<T> implements EntityConfigurator<T>{
 					searchKeyCount += 1;
 				}
 				
-				fieldCfg.setMandatory(!(annot instanceof Nullable));
-				
 				//Se valida si el campo tiene la anotacion @Column para los casos en que la columna
 				//mapeada se llame diferente al campo de la clase Java
 				if(annot instanceof Column){
 					fieldCfg.setColumnName(StringUtils.defaultIfEmpty(((Column)annot).name(), field.getName()));
 				}
+				
+				
 			}
 			
 			//Configura automaticamente campos tipo enumeracion

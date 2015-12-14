@@ -53,7 +53,7 @@ public class AuthenticationViewController extends AbstractViewController{
 	@Init
 	public void initController(){
 		
-		mailProperties = PropertiesManager.forPath("javamail.properties", AuthenticationViewController.class);
+		mailProperties = PropertiesManager.forPath("/javamail.properties", AuthenticationViewController.class);
 		
 		logInBtn.addClickListener(new ClickListener() {
 			@Override
@@ -69,7 +69,7 @@ public class AuthenticationViewController extends AbstractViewController{
 					
 					securityManager.authenticate(authRequest);
 					System.out.println(authBusiness.dato());
-					//sendAuthenticationMail();
+					sendAuthenticationMail();
 					new MessageDialog("Bienvenido", "La validaci\u00f3n de las credenciales de autenticaci\u00f3n ha sida satisfactoria", Type.INFORMATION)
 					.addYesClickListener(new ClickListener() {
 						@Override
@@ -116,6 +116,8 @@ public class AuthenticationViewController extends AbstractViewController{
 	@OnUnLoad
 	public void onUnloadController(){
 		log.info("On Unload "+getClass().getSimpleName());
+		for(Object propertyId : item.getItemPropertyIds())
+			item.getItemProperty(propertyId).setValue(null);
 	}
 	
 }

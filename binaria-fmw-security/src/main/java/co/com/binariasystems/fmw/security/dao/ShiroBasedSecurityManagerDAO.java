@@ -1,5 +1,7 @@
 package co.com.binariasystems.fmw.security.dao;
 
+import java.text.MessageFormat;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.shiro.SecurityUtils;
@@ -10,6 +12,8 @@ import org.apache.shiro.authc.LockedAccountException;
 import org.apache.shiro.authc.UnknownAccountException;
 import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.subject.Subject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import co.com.binariasystems.fmw.security.FMWSecurityException;
 import co.com.binariasystems.fmw.security.model.AuthenticationRequest;
@@ -19,12 +23,15 @@ import co.com.binariasystems.fmw.security.util.SecConstants;
 import co.com.binariasystems.fmw.util.messagebundle.MessageBundleManager;
 
 public class ShiroBasedSecurityManagerDAO implements SecurityManagerDAO {
+	private static final Logger LOGGER  =  LoggerFactory.getLogger(ShiroBasedSecurityManagerDAO.class);
 	
 	private MessageBundleManager messageManager;
 	private boolean supportAtmosphereWebSockets;
+	private MessageFormat authExceptionFmt;
 	
 	public ShiroBasedSecurityManagerDAO() {
 		messageManager = MessageBundleManager.forPath(SecConstants.DEFAULT_AUTH_MESSAGES_PATH, resources.class);
+		authExceptionFmt = new MessageFormat("{0}: {1}");
 	}
 
 	@Override
@@ -46,9 +53,12 @@ public class ShiroBasedSecurityManagerDAO implements SecurityManagerDAO {
 		try{
 			currentUser.login(authToken);
 		}catch(UnknownAccountException | IncorrectCredentialsException | LockedAccountException | ExcessiveAttemptsException ex){
+			LOGGER.error(ex.toString(), ex);
 			throw new FMWSecurityException(messageManager.getString(ex.getClass().getSimpleName()+".localizedMessage"), ex);
 		}catch(AuthenticationException ex){
-			throw new FMWSecurityException("Has ocurred an unexpected exception while authenticate user", ex);
+			LOGGER.error(ex.toString(), ex);
+			String message = authExceptionFmt.format(new String[]{messageManager.getString(ex.getClass().getSimpleName()+".localizedMessage"), ex.getMessage()});
+			throw new FMWSecurityException(message, ex);
 		}
 	}
 

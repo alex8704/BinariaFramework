@@ -33,7 +33,7 @@ public class BinariaSecurityPrincipalConverter implements SecurityPrincipalConve
 		try {
 			searchResult = getManager().searchWithoutPaging(usuarioDTO);
 			if(searchResult.isEmpty())
-				throw new FMWSecurityException(LocaleMessagesUtil.getLocalizedMessage(messageManager, "org.apache.shiro.authc.UnknownAccountException"+".localizedMessage"));
+				throw new FMWSecurityException(LocaleMessagesUtil.getLocalizedMessage(messageManager, "UnknownAccountException"+".localizedMessage"));
 		} catch (FMWException | ReflectiveOperationException e) {
 			throw new FMWSecurityException(e.getMessage());
 		}

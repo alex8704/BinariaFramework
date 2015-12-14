@@ -307,7 +307,7 @@ public class CriteriaUtils {
 		else if(TypeHelper.isDateOrTimeType(value.getClass()))
 			resp = value instanceof Timestamp ? DBUtil.dateToSqlDateFormat((Date)value) : DBUtil.dateToSqlTimestampFormat((Date)value);
 		else if(CharSequence.class.isAssignableFrom(value.getClass()) || Character.class.isAssignableFrom(value.getClass()))
-			resp = DBUtil.sqlQuotedValue(value.toString());
+			resp = DBUtil.sqlQuotedValue(StringUtils.upperCase(value.toString()));
 		else if(Boolean.class.isAssignableFrom(value.getClass()))
 			resp = ((Boolean)value).booleanValue() ? "1" : "0";
 		else

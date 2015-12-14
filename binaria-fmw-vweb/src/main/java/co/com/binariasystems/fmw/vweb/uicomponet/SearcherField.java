@@ -14,6 +14,7 @@ import co.com.binariasystems.fmw.entity.criteria.Criteria;
 import co.com.binariasystems.fmw.entity.criteria.MultipleGroupedCriteria;
 import co.com.binariasystems.fmw.entity.util.FMWEntityUtils;
 import co.com.binariasystems.fmw.exception.FMWException;
+import co.com.binariasystems.fmw.vweb.constants.UIConstants;
 import co.com.binariasystems.fmw.vweb.uicomponet.SearcherResultWindow.SearchSelectionChangeEvent;
 import co.com.binariasystems.fmw.vweb.uicomponet.SearcherResultWindow.SearchSelectionChangeListener;
 import co.com.binariasystems.fmw.vweb.uicomponet.SearcherResultWindow.SearchType;
@@ -65,11 +66,17 @@ public class SearcherField<T> extends CustomField<T> implements SearchSelectionC
 		this.entityClazz = entityClazz;
 		this.returnType = returnType;
 		setCaption(caption);
+		initComponents();
 	}
 
-	@SuppressWarnings("unchecked")
+	
 	@Override
 	protected Component initContent() {
+		return content;
+	}
+	
+	@SuppressWarnings("unchecked")
+	private void initComponents(){
 		try{
 			initEntityConfig();
 			textfieldProperty = new ObjectProperty<Object>(null, (Class<Object>)masterConfigData.getSearchFieldData().getFieldType());
@@ -77,9 +84,11 @@ public class SearcherField<T> extends CustomField<T> implements SearchSelectionC
 			textfield = new TextField(textfieldProperty);
 			descriptionTxt = new TextField(descriptionProperty);
 			button = new Button();
+			textfield.addStyleName(UIConstants.UPPER_TRANSFORM_STYLENAME);
 			textfield.setNullRepresentation("");
 			textfield.setValidationVisible(false);
 			textfield.setImmediate(true);
+			descriptionTxt.addStyleName(UIConstants.UPPER_TRANSFORM_STYLENAME);
 			descriptionTxt.setNullRepresentation("");
 			descriptionTxt.setValidationVisible(false);
 			
@@ -100,7 +109,6 @@ public class SearcherField<T> extends CustomField<T> implements SearchSelectionC
 		}catch(FMWException ex){
 			MessageDialog.showExceptions(ex, LOGGER);
 		}
-		return content;
 	}
 	
 	
