@@ -11,19 +11,16 @@ import org.apache.commons.lang3.StringUtils;
 
 import co.com.binariasystems.fmw.dto.BasicListableDTO;
 import co.com.binariasystems.fmw.dto.Listable;
-import co.com.binariasystems.fmw.entity.Auditable;
+import co.com.binariasystems.fmw.entity.CRUDViewConfig;
 import co.com.binariasystems.fmw.entity.Column;
 import co.com.binariasystems.fmw.entity.Entity;
 import co.com.binariasystems.fmw.entity.FieldValue;
-import co.com.binariasystems.fmw.entity.FieldValues;
 import co.com.binariasystems.fmw.entity.ForeignKey;
 import co.com.binariasystems.fmw.entity.Ignore;
 import co.com.binariasystems.fmw.entity.Key;
 import co.com.binariasystems.fmw.entity.Nullable;
-import co.com.binariasystems.fmw.entity.OmmitUpperTransform;
 import co.com.binariasystems.fmw.entity.Relation;
-import co.com.binariasystems.fmw.entity.SearchField;
-import co.com.binariasystems.fmw.entity.SearchTarget;
+import co.com.binariasystems.fmw.entity.SearcherConfig;
 import co.com.binariasystems.fmw.entity.cfg.EntityConfigData.AuditableEntityConfigData;
 import co.com.binariasystems.fmw.entity.cfg.EntityConfigData.FieldConfigData;
 import co.com.binariasystems.fmw.entity.cfg.EntityConfigData.RelationFieldConfigData;
@@ -76,8 +73,8 @@ public class DefaultEntityConfigurator<T> implements EntityConfigurator<T>{
 		searchKeyCount = 0;
 		if(entityConfigData != null) 
 			return entityConfigData;
-		
-		entityConfigData = entityClazz.isAnnotationPresent(Auditable.class) ? new AuditableEntityConfigData<T>(entityClazz.getAnnotation(Auditable.class)) : new EntityConfigData<T>();
+		String searchField = null;
+		entityConfigData = isAuditableEntity() ? new AuditableEntityConfigData<T>(entityClazz.getAnnotation(Auditable.class)) : new EntityConfigData<T>();
 		entityConfigData.setEntityClass(entityClazz);
 		entityConfigData.setTable(entityClazz.getSimpleName().toLowerCase());
 		for(Annotation annot : entityClazz.getAnnotations()){
@@ -87,12 +84,19 @@ public class DefaultEntityConfigurator<T> implements EntityConfigurator<T>{
 				setPKGenerationStrategy(((Entity)annot).pkGenerationStrategy());
 				if(!((Entity)annot).validationClass().equals(EntityValidator.class))
 					entityConfigData.setValidationClass(((Entity)annot).validationClass());
-			}if(annot instanceof SearchTarget){
-				for(String descriptionField : ((SearchTarget)annot).descriptionFields())
+			}if(annot instanceof SearcherConfig){
+				for(String descriptionField : ((SearcherConfig)annot).descriptionFields())
 					entityConfigData.getSearchDescriptionFields().add(descriptionField);
-				for(String gridField : ((SearchTarget)annot).gridColumnFields())
+				for(String gridField : ((SearcherConfig)annot).gridColumnFields())
 					entityConfigData.getGridColumnFields().add(gridField);
-				
+				searchField = ((SearcherConfig)annot).searchField();
+			}
+			if(annot instanceof CRUDViewConfig){
+				for(String descriptionField : ((CRUDViewConfig)annot).searcherConfig().descriptionFields())
+					entityConfigData.getSearchDescriptionFields().add(descriptionField);
+				for(String gridField : ((CRUDViewConfig)annot).searcherConfig().gridColumnFields())
+					entityConfigData.getGridColumnFields().add(gridField);
+				searchField = ((CRUDViewConfig)annot).searcherConfig().searchField();
 			}
 		}
 		
@@ -316,6 +320,10 @@ public class DefaultEntityConfigurator<T> implements EntityConfigurator<T>{
 	
 	public Class<T> getEntityClass() {
 		return entityClazz;
+	}
+	
+	private boolean isAuditableEntity(){
+		return entityClazz.isAnnotationPresent(CRUDViewConfig.class) && entityClazz.getAnnotation(CRUDViewConfig.class).isAuditable();
 	}
 	
 	private String generateRelationFieldQueryAlias(FieldConfigData fieldCfg){

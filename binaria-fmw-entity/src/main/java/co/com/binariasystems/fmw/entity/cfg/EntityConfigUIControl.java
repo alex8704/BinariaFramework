@@ -5,7 +5,7 @@ package co.com.binariasystems.fmw.entity.cfg;
  */
 
 public enum EntityConfigUIControl {
-	TEXTFIELD(1), PASSWORDFIELD(1), DATEFIELD(1), SEARCHBOX(1), COMBOBOX(1), RADIO(2), CHECKBOX(2), TEXTAREA(3);
+	TEXTFIELD(1), PASSWORDFIELD(1), DATEFIELD(1), SEARCHBOX(1), COMBOBOX(1), RADIO(2), CHECKBOX(2), TEXTAREA(3), DEFAULT(0);
 	
 	private int priority;
 	

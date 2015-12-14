@@ -6,10 +6,10 @@ import co.com.binariasystems.fmw.entity.Column;
 import co.com.binariasystems.fmw.entity.Entity;
 import co.com.binariasystems.fmw.entity.Key;
 import co.com.binariasystems.fmw.entity.OmmitUpperTransform;
-import co.com.binariasystems.fmw.entity.SearchTarget;
+import co.com.binariasystems.fmw.entity.SearcherConfig;
 
 @Entity(table="usuarios")
-@SearchTarget(descriptionFields={"alias"})
+@SearcherConfig(descriptionFields={"alias"})
 public class UsuarioDTO implements Serializable{
 	@Key(column="id_usuario")
 	private Long id;

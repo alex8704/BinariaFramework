@@ -9,10 +9,10 @@ import co.com.binariasystems.fmw.entity.Entity;
 import co.com.binariasystems.fmw.entity.Key;
 import co.com.binariasystems.fmw.entity.Relation;
 import co.com.binariasystems.fmw.entity.SearchField;
-import co.com.binariasystems.fmw.entity.SearchTarget;
+import co.com.binariasystems.fmw.entity.SearcherConfig;
 
 @Entity(table="gateways")
-@SearchTarget(
+@SearcherConfig(
 		descriptionFields = {"ip","descripcion"},
 		gridColumnFields = {"ip","descripcion", "creationUser", "modificationDate"}
 )

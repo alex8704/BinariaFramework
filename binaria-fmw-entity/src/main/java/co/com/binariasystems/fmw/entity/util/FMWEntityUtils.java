@@ -34,7 +34,7 @@ public class FMWEntityUtils {
 	
 	/**
 	 * Genera un String basandose en la confiuracion de una entidad, tomando los valores
-	 * de los campos definidos con la propiedad {@link co.com.binariasystems.fmw.entity.SearchTarget#descriptionFields()}  
+	 * de los campos definidos con la propiedad {@link co.com.binariasystems.fmw.entity.SearcherConfig#descriptionFields()}  
 	 * 
 	 * @param fieldValue
 	 * @param fieldCfg

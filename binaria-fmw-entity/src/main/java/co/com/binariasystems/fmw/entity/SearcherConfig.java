@@ -9,7 +9,10 @@ import java.lang.annotation.Target;
  * @author Alexander Castro O.
  */
 
-@Target(value = ElementType.FIELD)
+@Target(value = ElementType.TYPE)
 @Retention(value = RetentionPolicy.RUNTIME)
-public @interface OmmitUpperTransform {
+public @interface SearcherConfig {
+	public abstract String[] descriptionFields() default {};
+	public abstract String[] gridColumnFields() default {};
+	public abstract String searchField() default "";
 }

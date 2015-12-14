@@ -19,5 +19,4 @@ public @interface Entity {
 	public abstract String table() default "";
 	public abstract PKGenerationStrategy pkGenerationStrategy() default PKGenerationStrategy.MAX_QUERY;
 	public abstract EnumKeyProperty enumKeyProperty() default EnumKeyProperty.NAME;
-	public abstract Class<? extends EntityValidator> validationClass() default EntityValidator.class;
 }

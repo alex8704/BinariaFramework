@@ -8,10 +8,10 @@ import co.com.binariasystems.fmw.entity.Entity;
 import co.com.binariasystems.fmw.entity.ForeignKey;
 import co.com.binariasystems.fmw.entity.Key;
 import co.com.binariasystems.fmw.entity.Relation;
-import co.com.binariasystems.fmw.entity.SearchTarget;
+import co.com.binariasystems.fmw.entity.SearcherConfig;
 
 @Entity(table="medidores")
-@SearchTarget(descriptionFields={"id", "serial"})
+@SearcherConfig(descriptionFields={"id", "serial"})
 public class Medidor extends AbstractDTO{
 	@Key(column="id_medidor")
 	private Long id;
