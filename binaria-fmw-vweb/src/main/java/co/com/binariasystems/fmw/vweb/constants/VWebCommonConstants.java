@@ -1,15 +1,11 @@
 package co.com.binariasystems.fmw.vweb.constants;
 
-import co.com.binariasystems.fmw.vweb.resources.images.images;
-import co.com.binariasystems.fmw.vweb.resources.messages.messages;
+import co.com.binariasystems.fmw.vweb.resources.resources;
 
 public interface VWebCommonConstants {
-	final String FMW_IMAGE_RESOURCES_DIRECTORY = new StringBuilder("/")
-	.append(images.class.getPackage().getName().replace(".", "/"))
-	.append("/").toString();
-	final String COMMON_MESSAGES_PROPERTIES_FILENAME = messages.class.getPackage().getName() + ".common_messages";
-	final String DEFAULT_AUTH_MESSAGES_PATH = messages.class.getPackage().getName() + ".auth_messages";
-	final String ENTITY_STRINGS_PROPERTIES_FILENAME = messages.class.getPackage().getName() + ".entities_strings";
+	final String COMMON_MESSAGES_PROPERTIES_FILENAME = resources.messagesPackage() + ".common_messages";
+	final String DEFAULT_AUTH_MESSAGES_PATH = resources.messagesPackage() + ".auth_messages";
+	final String ENTITY_STRINGS_PROPERTIES_FILENAME = resources.messagesPackage() + ".entities_strings";
 	final String APP_MVP_VIEWPROVIDER_VIEWS_PACKAGES_IOC_KEY = "application.mvp.viewProvider.viewsPackages";
 	final String ENTITYCRUD_VIEWCREATOR_URLPATTERN = "((/)[a-zA-Z_0-9]+)*((/_masterentity/)([a-zA-Z_0-9]*))";
 	final String DEFAULT_VIEWCREATOR_URLPATTERN = "((/)[a-z\\-\\$\\|_0-9]+)+";

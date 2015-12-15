@@ -13,7 +13,7 @@ import com.vaadin.ui.themes.ValoTheme;
 @ResourceNotFound
 @View(
 	url="/",
-	messages="co.com.binariasystems.fmw.vweb.mvp.views.default_views_strings"
+	messages="co.com.binariasystems.fmw.vweb.resources.properties.default_views_strings"
 )
 public class DefaultResourceNotFoundView extends AbstractView{
 	public static final String VIEW_BUILD_METHOD = "buildView";

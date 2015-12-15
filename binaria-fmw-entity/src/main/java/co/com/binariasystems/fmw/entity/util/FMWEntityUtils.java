@@ -11,7 +11,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import co.com.binariasystems.fmw.constants.FMWConstants;
 import co.com.binariasystems.fmw.dto.Listable;
-import co.com.binariasystems.fmw.entity.Entity;
+import co.com.binariasystems.fmw.entity.annot.Entity;
 import co.com.binariasystems.fmw.entity.cfg.EntityConfigData;
 import co.com.binariasystems.fmw.entity.cfg.EntityConfigData.FieldConfigData;
 import co.com.binariasystems.fmw.entity.cfg.EntityConfigData.RelationFieldConfigData;
@@ -34,7 +34,7 @@ public class FMWEntityUtils {
 	
 	/**
 	 * Genera un String basandose en la confiuracion de una entidad, tomando los valores
-	 * de los campos definidos con la propiedad {@link co.com.binariasystems.fmw.entity.SearcherConfig#descriptionFields()}  
+	 * de los campos definidos con la propiedad {@link co.com.binariasystems.fmw.entity.annot.SearcherConfig#descriptionFields()}  
 	 * 
 	 * @param fieldValue
 	 * @param fieldCfg

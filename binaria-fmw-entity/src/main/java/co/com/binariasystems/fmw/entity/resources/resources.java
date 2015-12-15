@@ -1,4 +1,4 @@
-package co.com.binariasystems.fmw.security.resources;
+package co.com.binariasystems.fmw.entity.resources;
 
 public final class resources {
 	public static String resourcesPackage(){

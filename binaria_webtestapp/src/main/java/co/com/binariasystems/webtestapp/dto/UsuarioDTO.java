@@ -2,12 +2,12 @@ package co.com.binariasystems.webtestapp.dto;
 
 import java.io.Serializable;
 
-import co.com.binariasystems.fmw.entity.CRUDViewConfig;
-import co.com.binariasystems.fmw.entity.Column;
-import co.com.binariasystems.fmw.entity.Entity;
-import co.com.binariasystems.fmw.entity.Key;
-import co.com.binariasystems.fmw.entity.SearcherConfig;
-import co.com.binariasystems.fmw.entity.ViewFieldConfig;
+import co.com.binariasystems.fmw.entity.annot.CRUDViewConfig;
+import co.com.binariasystems.fmw.entity.annot.Column;
+import co.com.binariasystems.fmw.entity.annot.Entity;
+import co.com.binariasystems.fmw.entity.annot.Key;
+import co.com.binariasystems.fmw.entity.annot.SearcherConfig;
+import co.com.binariasystems.fmw.entity.annot.ViewFieldConfig;
 
 @Entity(table="usuarios")
 @SearcherConfig()

@@ -9,7 +9,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import co.com.binariasystems.fmw.util.messagebundle.MessageBundleManager;
 import co.com.binariasystems.fmw.vweb.constants.VWebCommonConstants;
-import co.com.binariasystems.fmw.vweb.resources.messages.messages;
+import co.com.binariasystems.fmw.vweb.resources.resources;
 import co.com.binariasystems.fmw.vweb.uicomponet.FormPanel;
 import co.com.binariasystems.fmw.vweb.uicomponet.TreeMenu;
 
@@ -45,7 +45,7 @@ public final class VWebUtils {
 	private static MessageBundleManager commonStringsManager = null;
 	
 	static{
-		commonStringsManager = MessageBundleManager.forPath(VWebCommonConstants.COMMON_MESSAGES_PROPERTIES_FILENAME, messages.class);
+		commonStringsManager = MessageBundleManager.forPath(VWebCommonConstants.COMMON_MESSAGES_PROPERTIES_FILENAME, resources.class);
 	}
 	
 	public static HttpServletRequest getCurrentHttpRequest(){

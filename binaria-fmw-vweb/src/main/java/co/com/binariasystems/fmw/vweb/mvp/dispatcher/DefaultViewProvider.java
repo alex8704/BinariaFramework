@@ -21,8 +21,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.context.ServletContextAware;
 
-import com.vaadin.ui.Component;
-
 import co.com.binariasystems.fmw.exception.FMWException;
 import co.com.binariasystems.fmw.util.messagebundle.PropertiesManager;
 import co.com.binariasystems.fmw.vweb.mvp.annotation.AuthenticationForm;
@@ -45,6 +43,9 @@ import co.com.binariasystems.fmw.vweb.mvp.dispatcher.data.ViewAndController;
 import co.com.binariasystems.fmw.vweb.mvp.dispatcher.data.ViewInfo;
 import co.com.binariasystems.fmw.vweb.mvp.views.DefaultForbiddenView;
 import co.com.binariasystems.fmw.vweb.mvp.views.DefaultResourceNotFoundView;
+import co.com.binariasystems.fmw.vweb.resources.resources;
+
+import com.vaadin.ui.Component;
 
 public class DefaultViewProvider implements ViewProvider, ServletContextAware {
 	private static final Logger LOGGER = LoggerFactory.getLogger(DefaultViewProvider.class);
@@ -359,7 +360,7 @@ public class DefaultViewProvider implements ViewProvider, ServletContextAware {
 	
 	
 	private String[] getScanningExcludedArray(){
-		PropertiesManager messages = PropertiesManager.forPath(DefaultViewProvider.class.getPackage().getName()+".annotation_scanning_excluded.xml", DefaultViewProvider.class);
+		PropertiesManager messages = PropertiesManager.forPath(resources.getPropertyFilePath("annotation_scanning_excluded.xml"), resources.class);
 		String defaultExcludes = messages.getString("excluded");
 		if(StringUtils.isNotEmpty(scanningExcludedPackages))
 			defaultExcludes += ","+scanningExcludedPackages;

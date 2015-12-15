@@ -19,12 +19,11 @@ import co.com.binariasystems.fmw.exception.FMWException;
 import co.com.binariasystems.fmw.exception.FMWUncheckedException;
 import co.com.binariasystems.fmw.reflec.TypeHelper;
 import co.com.binariasystems.fmw.vweb.constants.VWebCommonConstants;
-import co.com.binariasystems.fmw.vweb.resources.images.images;
+import co.com.binariasystems.fmw.vweb.resources.resources;
 
 import com.vaadin.data.Item;
 import com.vaadin.data.Property;
 import com.vaadin.data.util.PropertyValueGenerator;
-import com.vaadin.server.ClassResource;
 import com.vaadin.ui.Grid.CellReference;
 import com.vaadin.ui.Grid.CellStyleGenerator;
 import com.vaadin.ui.JavaScript;
@@ -330,9 +329,7 @@ public class GridUtils {
 		private String noIconPath;
 		
 		public YesNoPropertyValueGenerator() {
-			this(new ClassResource(images.class, VWebCommonConstants.FMW_IMAGE_RESOURCES_DIRECTORY + "yes.png").getFilename(),
-					new ClassResource(images.class, VWebCommonConstants.FMW_IMAGE_RESOURCES_DIRECTORY + "no.png").getFilename()
-					);
+			this(resources.getAbsoluteImageFilePath("yes.png"), resources.getAbsoluteImageFilePath("no.png"));
 		}
 		
 		public YesNoPropertyValueGenerator(String yesIconPath, String noIconPath) {

@@ -1,5 +1,8 @@
 package co.com.binariasystems.fmw.vweb.uicomponet.addresseditor;
 
+
+import static co.com.binariasystems.fmw.vweb.resources.resources.getMessageFilePath;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -8,12 +11,10 @@ import java.util.Locale;
 import co.com.binariasystems.fmw.dto.ComparableListableDTO;
 import co.com.binariasystems.fmw.dto.Listable;
 import co.com.binariasystems.fmw.util.messagebundle.MessageBundleManager;
-import co.com.binariasystems.fmw.vweb.resources.messages.messages;
+import co.com.binariasystems.fmw.vweb.resources.resources;
 
 public class BuiltInAddressEditorParametersProvider implements AddressEditorParametersProvider {
-	private static final String messagesPath = messages.class.getPackage().getName()+"."+"address_editor";
-	
-	private MessageBundleManager messages = MessageBundleManager.forPath(messagesPath, messages.class);
+	private MessageBundleManager messages = MessageBundleManager.forPath(getMessageFilePath("address_editor"), resources.class);
 
 	@Override
 	public List<? extends Listable> getViaTypes(Locale userLocale) {

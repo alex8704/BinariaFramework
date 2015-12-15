@@ -50,7 +50,7 @@ public abstract class PropertiesManager {
 	private static String toResourcePathFormat(String resource){
 		String extension = resource.endsWith(".xml") ? ".xml" : ".properties";
 		int extensionOffset = (resource.lastIndexOf(extension) >= 0) ? resource.lastIndexOf(extension) : resource.length();
-		return "/"+resource.substring(0, extensionOffset).replace(".", "/")+extension;
+		return (resource.startsWith("/") ? "" : "/")+resource.substring(0, extensionOffset).replace(".", "/")+extension;
 	}
 
 	private void init(Class loaderClass) {

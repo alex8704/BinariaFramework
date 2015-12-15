@@ -1,4 +1,4 @@
-package co.com.binariasystems.fmw.entity;
+package co.com.binariasystems.fmw.entity.annot;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -11,7 +11,6 @@ import java.lang.annotation.Target;
 
 @Target(value = ElementType.FIELD)
 @Retention(value = RetentionPolicy.RUNTIME)
-public @interface FieldValue {
-	public abstract String pk() default "";
-	public abstract String description() default "";
+public @interface Relation {
+	public abstract String column() default "";
 }

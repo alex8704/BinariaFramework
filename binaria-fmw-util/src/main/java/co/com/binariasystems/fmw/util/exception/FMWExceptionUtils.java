@@ -43,7 +43,7 @@ import co.com.binariasystems.fmw.util.messagebundle.MessageBundleManager;
 
 public class FMWExceptionUtils {
 	private static Map<Class<? extends Exception>, String> springExceptionMsgMapping = new HashMap<Class<? extends Exception>, String>();
-	private static MessageBundleManager mm = MessageBundleManager.forPath(FMWUtilConstants.BFMW_RESOURCES_PACKAGE+"."+FMWUtilConstants.BFMW_DAOEXCEPTIONS_MESSAGESFILE);
+	private static MessageBundleManager mm = MessageBundleManager.forPath(FMWUtilConstants.BFMW_DAOEXCEPTIONS_MESSAGESFILE);
 	private static final String DEFAUL_DATAACCESERROR_MSG_KEY = DataAccessException.class.getSimpleName().toLowerCase()+".error_message";
 	
 	static{

@@ -8,13 +8,15 @@ import java.net.URL;
 import javax.activation.FileTypeMap;
 import javax.activation.MimetypesFileTypeMap;
 
+import co.com.binariasystems.fmw.util.resources.resources;
+
 public class ConfigurableMimeFileTypeMap extends FileTypeMap {
 
 	/**
 	 * The {@code Resource} to load the mapping file from.
 	 * 
 	 */
-	private URL mappingLocation = getClass().getResource("mime.types");
+	private URL mappingLocation = resources.class.getResource(resources.propertiesPath()+"mime.types");
 
 	/**
 	 * Used to configure additional mappings.

@@ -9,7 +9,7 @@ import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
 import org.reflections.Reflections;
 
-import co.com.binariasystems.fmw.entity.Entity;
+import co.com.binariasystems.fmw.entity.annot.Entity;
 import co.com.binariasystems.fmw.vweb.constants.VWebCommonConstants;
 import co.com.binariasystems.fmw.vweb.mvp.dispatcher.data.RequestData;
 import co.com.binariasystems.fmw.vweb.mvp.dispatcher.data.ViewAndController;

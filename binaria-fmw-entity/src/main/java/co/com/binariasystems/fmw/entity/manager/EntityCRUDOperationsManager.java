@@ -33,6 +33,7 @@ import co.com.binariasystems.fmw.entity.criteria.SingleValueOnSetCriteria;
 import co.com.binariasystems.fmw.entity.criteria.ValueRangeCriteria;
 import co.com.binariasystems.fmw.entity.dao.EntityCRUDDAO;
 import co.com.binariasystems.fmw.entity.exception.EntityCRUDValidationException;
+import co.com.binariasystems.fmw.entity.resources.resources;
 import co.com.binariasystems.fmw.entity.util.EntityRowMapper;
 import co.com.binariasystems.fmw.entity.util.FMWEntityConstants;
 import co.com.binariasystems.fmw.entity.util.FMWEntityUtils;
@@ -54,8 +55,7 @@ import co.com.binariasystems.fmw.util.pagination.ListPage;
 public class EntityCRUDOperationsManager<T> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(EntityCRUDOperationsManager.class);
 	private static Map<Class<?>, EntityCRUDOperationsManager<?>> entityCRUDMgrContext = new HashMap<Class<?>, EntityCRUDOperationsManager<?>>();
-	private static final String SQL_XML_FILE = "entitycruddao.xml";
-	private static final PropertiesManager mm = PropertiesManager.forPath(EntityCRUDDAO.class.getPackage().getName() + "." + SQL_XML_FILE, EntityCRUDDAO.class);
+	private static final PropertiesManager mm = PropertiesManager.forPath(resources.getPropertyFilePath("entitycruddao.xml"), resources.class);
 
 	private EntityCRUDOperationsManager() {
 	}
