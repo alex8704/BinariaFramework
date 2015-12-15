@@ -79,29 +79,29 @@ public class FMWEntityUtils {
 		return TypeHelper.isNotBasicType(clazz) && clazz.getAnnotation(Entity.class) != null;
 	}
 	
-	public static boolean isValidControlForField(EntityConfigUIControl controlType, FieldConfigData fieldInfo){
+	public static boolean isValidControlForField(FieldConfigData fieldInfo){
 		boolean resp = false;
-		if(controlType == EntityConfigUIControl.TEXTFIELD || controlType == EntityConfigUIControl.PASSWORDFIELD){
+		if(fieldInfo.getFieldUIControl() == EntityConfigUIControl.TEXTFIELD || fieldInfo.getFieldUIControl() == EntityConfigUIControl.PASSWORDFIELD){
 			resp = TypeHelper.isNumericType(fieldInfo.getFieldType()) || CharSequence.class.isAssignableFrom(fieldInfo.getFieldType()) ||
 					Character.class.isAssignableFrom(fieldInfo.getFieldType());
 		}
-		if(controlType == EntityConfigUIControl.TEXTAREA){
+		if(fieldInfo.getFieldUIControl() == EntityConfigUIControl.TEXTAREA){
 			resp = CharSequence.class.isAssignableFrom(fieldInfo.getFieldType());
 		}
-		if(controlType == EntityConfigUIControl.DATEFIELD){
+		if(fieldInfo.getFieldUIControl() == EntityConfigUIControl.DATEFIELD){
 			resp = Date.class.isAssignableFrom(fieldInfo.getFieldType());
 		}
-		if(controlType == EntityConfigUIControl.RADIO){
+		if(fieldInfo.getFieldUIControl() == EntityConfigUIControl.RADIO){
 			resp = fieldInfo.isEnumType() || (fieldInfo.getFixedValues() != null && fieldInfo.getFixedValues().length > 0);
 		}
-		if(controlType == EntityConfigUIControl.COMBOBOX){
+		if(fieldInfo.getFieldUIControl() == EntityConfigUIControl.COMBOBOX){
 			resp = fieldInfo.isEnumType() || fieldInfo instanceof RelationFieldConfigData ||
 					(fieldInfo.getFixedValues() != null && fieldInfo.getFixedValues().length > 0);
 		}
-		if(controlType == EntityConfigUIControl.SEARCHBOX){
+		if(fieldInfo.getFieldUIControl() == EntityConfigUIControl.SEARCHBOX){
 			resp = fieldInfo instanceof RelationFieldConfigData;
 		}
-		if(controlType == EntityConfigUIControl.CHECKBOX){
+		if(fieldInfo.getFieldUIControl() == EntityConfigUIControl.CHECKBOX){
 			resp = Boolean.class.isAssignableFrom(fieldInfo.getFieldType());
 		}
 	

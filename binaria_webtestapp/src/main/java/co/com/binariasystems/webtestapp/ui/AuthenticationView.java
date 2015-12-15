@@ -32,13 +32,9 @@ public class AuthenticationView extends AbstractFormView{
 	private Button logInBtn;
 	private PropertysetItem item;
 	
-	
-
 	public AuthenticationView() {
 		super(3);
 	}
-
-
 
 	@Init
 	public void init(){

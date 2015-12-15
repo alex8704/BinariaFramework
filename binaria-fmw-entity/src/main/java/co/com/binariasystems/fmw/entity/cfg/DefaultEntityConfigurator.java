@@ -4,12 +4,10 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 
-import co.com.binariasystems.fmw.dto.BasicListableDTO;
+import co.com.binariasystems.fmw.dto.ComparableListableDTO;
 import co.com.binariasystems.fmw.dto.Listable;
 import co.com.binariasystems.fmw.entity.CRUDViewConfig;
 import co.com.binariasystems.fmw.entity.Column;
@@ -21,6 +19,7 @@ import co.com.binariasystems.fmw.entity.Key;
 import co.com.binariasystems.fmw.entity.Nullable;
 import co.com.binariasystems.fmw.entity.Relation;
 import co.com.binariasystems.fmw.entity.SearcherConfig;
+import co.com.binariasystems.fmw.entity.ViewFieldConfig;
 import co.com.binariasystems.fmw.entity.cfg.EntityConfigData.AuditableEntityConfigData;
 import co.com.binariasystems.fmw.entity.cfg.EntityConfigData.FieldConfigData;
 import co.com.binariasystems.fmw.entity.cfg.EntityConfigData.RelationFieldConfigData;
@@ -40,13 +39,6 @@ import co.com.binariasystems.fmw.reflec.TypeHelper;
 public class DefaultEntityConfigurator<T> implements EntityConfigurator<T>{
 	private Class<T> entityClazz;
 	private int keyCount = 0;
-	private int searchKeyCount = 0;
-	private EnumKeyProperty enumKeyProperty = EnumKeyProperty.NAME;
-	private Map<String, String> fieldLabelMappings = new HashMap<String, String>();
-	private Map<String, EntityConfigUIControl> fieldUIControlMappings = new HashMap<String, EntityConfigUIControl>();
-	private boolean deleteEnabled = true;
-	private PKGenerationStrategy pKGenerationStrategy = PKGenerationStrategy.MAX_QUERY;
-	private String titleKey;
 	private EntityConfigData<T> entityConfigData;
 	
 	
@@ -70,33 +62,39 @@ public class DefaultEntityConfigurator<T> implements EntityConfigurator<T>{
 	
 	public EntityConfigData<T> configure() throws FMWException {
 		keyCount = 0;
-		searchKeyCount = 0;
 		if(entityConfigData != null) 
 			return entityConfigData;
-		String searchField = null;
-		entityConfigData = isAuditableEntity() ? new AuditableEntityConfigData<T>(entityClazz.getAnnotation(Auditable.class)) : new EntityConfigData<T>();
+		entityConfigData = isAuditableEntity() ? 
+				new AuditableEntityConfigData<T>(entityClazz.getAnnotation(CRUDViewConfig.class).creationUserField(),
+				entityClazz.getAnnotation(CRUDViewConfig.class).creationDateField(),
+				entityClazz.getAnnotation(CRUDViewConfig.class).modificationUserField(),
+				entityClazz.getAnnotation(CRUDViewConfig.class).modificationDateField()) 
+				: new EntityConfigData<T>();
 		entityConfigData.setEntityClass(entityClazz);
 		entityConfigData.setTable(entityClazz.getSimpleName().toLowerCase());
 		for(Annotation annot : entityClazz.getAnnotations()){
 			if(annot instanceof Entity){
 				entityConfigData.setTable(StringUtils.defaultIfEmpty(((Entity)annot).table(), entityConfigData.getTable()));
-				setEnumKeyProperty(((Entity)annot).enumKeyProperty());
-				setPKGenerationStrategy(((Entity)annot).pkGenerationStrategy());
-				if(!((Entity)annot).validationClass().equals(EntityValidator.class))
-					entityConfigData.setValidationClass(((Entity)annot).validationClass());
+				entityConfigData.setEnumKeyProperty(((Entity)annot).enumKeyProperty());
+				entityConfigData.setPkGenerationStrategy(((Entity)annot).pkGenerationStrategy());
 			}if(annot instanceof SearcherConfig){
 				for(String descriptionField : ((SearcherConfig)annot).descriptionFields())
 					entityConfigData.getSearchDescriptionFields().add(descriptionField);
 				for(String gridField : ((SearcherConfig)annot).gridColumnFields())
 					entityConfigData.getGridColumnFields().add(gridField);
-				searchField = ((SearcherConfig)annot).searchField();
+				entityConfigData.setSearchFieldName(((SearcherConfig)annot).searchField());
 			}
+			
 			if(annot instanceof CRUDViewConfig){
 				for(String descriptionField : ((CRUDViewConfig)annot).searcherConfig().descriptionFields())
 					entityConfigData.getSearchDescriptionFields().add(descriptionField);
 				for(String gridField : ((CRUDViewConfig)annot).searcherConfig().gridColumnFields())
 					entityConfigData.getGridColumnFields().add(gridField);
-				searchField = ((CRUDViewConfig)annot).searcherConfig().searchField();
+				entityConfigData.setSearchFieldName(((CRUDViewConfig)annot).searcherConfig().searchField());
+				entityConfigData.setTitleKey(((CRUDViewConfig)annot).titleKey());
+				if(!EntityValidator.class.equals(((CRUDViewConfig)annot).validationClass()))
+					entityConfigData.setValidationClass(((CRUDViewConfig)annot).validationClass());
+				entityConfigData.setDeleteEnabled(((CRUDViewConfig)annot).deleteEnabled());
 			}
 		}
 		
@@ -111,17 +109,10 @@ public class DefaultEntityConfigurator<T> implements EntityConfigurator<T>{
 		
 		if(keyCount > 1) 
 			throw new FMWException("Entity class "+entityClazz.getName()+" must have only and only one(1) field annotated with @"+Key.class.getSimpleName());
-		if(searchKeyCount > 1) 
-			throw new FMWException("Entity class "+entityClazz.getName()+" must have only and only one(1) field annotated with @"+SearchField.class.getSimpleName());
 		
 		if(StringUtils.isEmpty(entityConfigData.getSearchFieldName()))
 			entityConfigData.setSearchFieldName(entityConfigData.getPkFieldName());
 		
-		entityConfigData.setTitleKey(getTitleKey());
-		entityConfigData.setEnumKeyProperty(getEnumKeyProperty());
-		entityConfigData.setFieldLabelMappings(getFieldLabelMappings());
-		entityConfigData.setDeleteEnabled(isDeleteEnabled());
-		entityConfigData.setPkGenerationStrategy(getPKGenerationStrategy());
 		return entityConfigData;
 	}
 	
@@ -133,16 +124,14 @@ public class DefaultEntityConfigurator<T> implements EntityConfigurator<T>{
 			if(field.isAnnotationPresent(Ignore.class) || TypeHelper.isCollectionType(field.getType()) || 
 					Modifier.isStatic(field.getModifiers()) || Modifier.isTransient(field.getModifiers()) ||
 					(!field.getType().isEnum() && !TypeHelper.isBasicType(field.getType()) && !field.isAnnotationPresent(ForeignKey.class)
-							&& !field.isAnnotationPresent(Relation.class) && !field.isAnnotationPresent(FieldValues.class)))
+							&& !field.isAnnotationPresent(Relation.class)))
 				continue;
 			if(field.isAnnotationPresent(Relation.class) || field.isAnnotationPresent(ForeignKey.class))
 				fieldCfg = new RelationFieldConfigData();
 			else
 				fieldCfg = new FieldConfigData();
 			
-			fieldCfg.setAuditoryField((entityConfigData instanceof AuditableEntityConfigData) && 
-					(AuditableEntityConfigData.isAuditField(field.getName(), (Auditable)clazz.getAnnotation(Auditable.class))));
-			fieldCfg.setOmmitUpperTransform(field.isAnnotationPresent(OmmitUpperTransform.class));
+			fieldCfg.setAuditoryField((entityConfigData instanceof AuditableEntityConfigData) && (isAuditoryField(field.getName())));
 			fieldCfg.setMandatory(!field.isAnnotationPresent(Nullable.class));
 			for(Annotation annot : field.getAnnotations()){
 				//Manejo informacion para campos que representan claves foraneas (hacen referencias a otras entidades)
@@ -174,30 +163,24 @@ public class DefaultEntityConfigurator<T> implements EntityConfigurator<T>{
 					keyCount += 1;
 				}
 				
-				//Campos con conjunto de valores predefinidos, para campos de seleccion
-				if(annot instanceof FieldValues){
-					if(!Listable.class.isAssignableFrom(field.getType()))
-						throw new FMWException("Only "+Listable.class.getName()+" fields allow @"+FieldValues.class.getSimpleName()+" annotation");
-					fieldCfg.setFixedValues(new BasicListableDTO[((FieldValues)annot).value().length]);
-					for(int i = 0; i < ((FieldValues)annot).value().length; i++){
-						FieldValue val = ((FieldValues)annot).value()[i];
-						BasicListableDTO fixedVal = new BasicListableDTO();
-						fixedVal.setPK(val.pk());
-						fixedVal.setDescription(val.description());
-						fieldCfg.getFixedValues()[i] = fixedVal;
-					}
-				}
-				
-				if(annot instanceof SearchField){
-					entityConfigData.setSearchFieldName(field.getName());
-					fieldCfg.setColumnName(StringUtils.defaultIfEmpty(((SearchField)annot).column(), fieldCfg.getColumnName()));
-					searchKeyCount += 1;
-				}
-				
 				//Se valida si el campo tiene la anotacion @Column para los casos en que la columna
 				//mapeada se llame diferente al campo de la clase Java
 				if(annot instanceof Column){
 					fieldCfg.setColumnName(StringUtils.defaultIfEmpty(((Column)annot).name(), field.getName()));
+				}
+				
+				if(annot instanceof ViewFieldConfig){
+					fieldCfg.setOmmitUpperTransform(((ViewFieldConfig)annot).ommitUpperTransform());
+					fieldCfg.setUiLabel(((ViewFieldConfig)annot).uiLabel());
+					fieldCfg.setFieldUIControl(((ViewFieldConfig)annot).uiControl());
+					if(((ViewFieldConfig)annot).fixedValues().length > 0 && !Listable.class.isAssignableFrom(field.getType()))
+						throw new FMWException("Only "+Listable.class.getName()+" fields allow @"+FieldValue.class.getSimpleName()+" annotation");
+					fieldCfg.setFixedValues(new ComparableListableDTO[((ViewFieldConfig)annot).fixedValues().length]);
+					for(int i = 0; i < ((ViewFieldConfig)annot).fixedValues().length; i++){
+						FieldValue val = ((ViewFieldConfig)annot).fixedValues()[i];
+						ComparableListableDTO fixedVal = new ComparableListableDTO(val.pk(), val.description());
+						fieldCfg.getFixedValues()[i] = fixedVal;
+					}
 				}
 				
 				
@@ -228,88 +211,31 @@ public class DefaultEntityConfigurator<T> implements EntityConfigurator<T>{
 		
 		if(fieldCfg.isAuditoryField())return;
 		
-		EntityConfigUIControl fieldUIControl = getFieldUIControlMappings().get(fieldCfg.getFieldName());
-		if(fieldUIControl != null){
-			if(FMWEntityUtils.isValidControlForField(fieldUIControl, fieldCfg))
-				throw new FMWException("Cannot create UIControl of type "+fieldUIControl.name()+" for "+fieldCfg.getFieldType()+" field "+fieldCfg.getFieldName());
+		if(fieldCfg.getFieldUIControl() != null && fieldCfg.getFieldUIControl() != EntityConfigUIControl.DEFAULT){
+			if(FMWEntityUtils.isValidControlForField(fieldCfg))
+				throw new FMWException("Cannot create UIControl of type "+fieldCfg.getFieldUIControl().name()+" for "+fieldCfg.getFieldType()+" field "+fieldCfg.getFieldName());
 		}else{
 			if(fieldCfg instanceof RelationFieldConfigData){// Buscador Por defecto
-				fieldUIControl = EntityConfigUIControl.SEARCHBOX;
+				fieldCfg.setFieldUIControl(EntityConfigUIControl.SEARCHBOX);
 			}
 			else if(TypeHelper.isNumericType(fieldCfg.getFieldType()) || CharSequence.class.isAssignableFrom(fieldCfg.getFieldType()) ||
 					Character.class.isAssignableFrom(fieldCfg.getFieldType())){//TextField por defecto
-				fieldUIControl = EntityConfigUIControl.TEXTFIELD;
+				fieldCfg.setFieldUIControl(EntityConfigUIControl.TEXTFIELD);
 			}
 			else if(Date.class.isAssignableFrom(fieldCfg.getFieldType())){//DateField por defecto
-				fieldUIControl = EntityConfigUIControl.DATEFIELD;
+				fieldCfg.setFieldUIControl(EntityConfigUIControl.DATEFIELD);
 			}
 			else if(fieldCfg.isEnumType() || (fieldCfg.getFixedValues() != null && fieldCfg.getFixedValues().length > 0)){//ComboBox por defecto
-				fieldUIControl = EntityConfigUIControl.COMBOBOX;
+				fieldCfg.setFieldUIControl(EntityConfigUIControl.COMBOBOX);
 			}
 			else if(Boolean.class.isAssignableFrom(fieldCfg.getFieldType())){//CheckBox siempre
-				fieldUIControl = EntityConfigUIControl.CHECKBOX;
+				fieldCfg.setFieldUIControl(EntityConfigUIControl.CHECKBOX);
 			}
 		}
-		fieldCfg.setFieldUIControl(fieldUIControl);
-	}
-
-	
-	public EnumKeyProperty getEnumKeyProperty() {
-		return enumKeyProperty;
-	}
-
-	
-	public Map<String, String> getFieldLabelMappings() {
-		return fieldLabelMappings;
-	}
-
-	
-	public Map<String, EntityConfigUIControl> getFieldUIControlMappings() {
-		return fieldUIControlMappings;
-	}
-	
-	
-	public PKGenerationStrategy getPKGenerationStrategy() {
-		return pKGenerationStrategy;
-	}
-	
-	
-	public boolean isDeleteEnabled() {
-		return deleteEnabled;
 	}
 	
 	public Class<T> getEntityClazz() {
 		return entityClazz;
-	}
-
-	public void setEnumKeyProperty(EnumKeyProperty enumKeyProperty) {
-		this.enumKeyProperty = enumKeyProperty;
-	}
-
-	public void setFieldLabelMappings(Map<String, String> fieldLabelMappings) {
-		this.fieldLabelMappings = fieldLabelMappings;
-	}
-
-	public void setFieldUIControlMappings(
-			Map<String, EntityConfigUIControl> fieldUIControlMappings) {
-		this.fieldUIControlMappings = fieldUIControlMappings;
-	}
-
-	public void setDeleteEnabled(boolean deleteEnabled) {
-		this.deleteEnabled = deleteEnabled;
-	}
-	
-	public void setPKGenerationStrategy(PKGenerationStrategy pKGenerationStrategy) {
-		this.pKGenerationStrategy = pKGenerationStrategy;
-	}
-	
-	
-	public String getTitleKey() {
-		return titleKey;
-	}
-	
-	public void setTitleKey(String titleKey){
-		this.titleKey = titleKey;
 	}
 	
 	public void setEntityClass(Class<T> entityClazz){
@@ -324,6 +250,16 @@ public class DefaultEntityConfigurator<T> implements EntityConfigurator<T>{
 	
 	private boolean isAuditableEntity(){
 		return entityClazz.isAnnotationPresent(CRUDViewConfig.class) && entityClazz.getAnnotation(CRUDViewConfig.class).isAuditable();
+	}
+	
+	private boolean isAuditoryField(String fieldName){
+		if(!(entityConfigData instanceof AuditableEntityConfigData))
+			return false;
+		CRUDViewConfig config = entityClazz.getAnnotation(CRUDViewConfig.class);
+		return fieldName.equals(config.creationUserField()) ||
+				fieldName.equals(config.creationDateField()) ||
+				fieldName.equals(config.modificationUserField()) ||
+				fieldName.equals(config.modificationDateField());
 	}
 	
 	private String generateRelationFieldQueryAlias(FieldConfigData fieldCfg){

@@ -1,14 +1,12 @@
 package co.com.binariasystems.fmw.entity.cfg;
 
 import java.io.Serializable;
-import java.lang.annotation.Annotation;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
 import co.com.binariasystems.fmw.dto.Listable;
-import co.com.binariasystems.fmw.entity.Auditable;
 import co.com.binariasystems.fmw.entity.validator.EntityValidator;
 
 /**
@@ -26,7 +24,6 @@ public class EntityConfigData<T> implements Serializable {
 	private List<String> gridColumnFields;
 	private String titleKey;
 	private EnumKeyProperty enumKeyProperty;
-	private Map<String, String> fieldLabelMappings;
 	private boolean deleteEnabled;
 	private PKGenerationStrategy pkGenerationStrategy;
 
@@ -111,10 +108,6 @@ public class EntityConfigData<T> implements Serializable {
 		return enumKeyProperty;
 	}
 
-	public Map<String, String> getFieldLabelMappings() {
-		return fieldLabelMappings;
-	}
-
 	public boolean isDeleteEnabled() {
 		return deleteEnabled;
 	}
@@ -135,55 +128,39 @@ public class EntityConfigData<T> implements Serializable {
 		this.enumKeyProperty = enumKeyProperty;
 	}
 
-	public void setFieldLabelMappings(Map<String, String> fieldLabelMappings) {
-		this.fieldLabelMappings = fieldLabelMappings;
-	}
-
 	public void setDeleteEnabled(boolean deleteEnabled) {
 		this.deleteEnabled = deleteEnabled;
 	}
 
 
-
 	public static class AuditableEntityConfigData<T> extends EntityConfigData<T> {
-		private Auditable auditableInfo;
+		private String creationUserField;
+		private String creationDateField;
+		private String modificationUserField;
+		private String modificationDateField;
 		
-		public AuditableEntityConfigData(Auditable auditableInfo){
-			this.auditableInfo = auditableInfo;
-		}
-
-		public static boolean isAuditField(String fieldName,Auditable auditableInfo) {
-			if (fieldName == null || auditableInfo == null)
-				return false;
-			if (auditableInfo.creationUserField() != null
-					&& auditableInfo.creationUserField().equals(fieldName))
-				return true;
-			if (auditableInfo.modificationUserField() != null
-					&& auditableInfo.modificationUserField().equals(fieldName))
-				return true;
-			if (auditableInfo.creationDateField() != null
-					&& auditableInfo.creationDateField().equals(fieldName))
-				return true;
-			if (auditableInfo.modificationDateField() != null
-					&& auditableInfo.modificationDateField().equals(fieldName))
-				return true;
-			return false;
+		
+		public AuditableEntityConfigData(String creationUserField, String creationDateField, String modificationUserField, String modificationDateField) {
+			this.creationUserField = creationUserField;
+			this.creationDateField = creationDateField;
+			this.modificationUserField = modificationUserField;
+			this.modificationDateField = modificationDateField;
 		}
 
 		public FieldConfigData getCreationUserFieldCfg() {
-			return getFieldData(auditableInfo.creationUserField());
+			return getFieldData(creationUserField);
 		}
 
 		public FieldConfigData getModificationUserFieldCfg() {
-			return getFieldData(auditableInfo.modificationUserField());
+			return getFieldData(modificationUserField);
 		}
 
 		public FieldConfigData getCreationDateFieldCfg() {
-			return getFieldData(auditableInfo.creationDateField());
+			return getFieldData(creationDateField);
 		}
 
 		public FieldConfigData getModificationDateFieldCfg() {
-			return getFieldData(auditableInfo.modificationDateField());
+			return getFieldData(modificationDateField);
 		}
 
 	}
@@ -200,6 +177,7 @@ public class EntityConfigData<T> implements Serializable {
 		private Listable[] fixedValues;
 		private EntityConfigUIControl fieldUIControl;
 		private boolean ommitUpperTransform;
+		private String uiLabel;
 
 		public Class<?> getFieldType() {
 			return fieldType;
@@ -293,7 +271,13 @@ public class EntityConfigData<T> implements Serializable {
 			this.ommitUpperTransform = ommitUpperTransform;
 		}
 
-		
+		public String getUiLabel() {
+			return uiLabel;
+		}
+
+		public void setUiLabel(String uiLabel) {
+			this.uiLabel = uiLabel;
+		}
 		
 	}
 

@@ -4,26 +4,25 @@ import java.util.Date;
 
 import co.com.binariasystems.fmw.dto.AbstractDTO;
 import co.com.binariasystems.fmw.dto.Listable;
+import co.com.binariasystems.fmw.entity.CRUDViewConfig;
 import co.com.binariasystems.fmw.entity.Column;
 import co.com.binariasystems.fmw.entity.Entity;
 import co.com.binariasystems.fmw.entity.FieldValue;
-import co.com.binariasystems.fmw.entity.FieldValues;
 import co.com.binariasystems.fmw.entity.Key;
-import co.com.binariasystems.fmw.entity.SearchField;
 import co.com.binariasystems.fmw.entity.SearcherConfig;
+import co.com.binariasystems.fmw.entity.ViewFieldConfig;
 @Entity(table="suscriptores")
-@SearcherConfig(descriptionFields={"id", "identificacion", "nombre"})
+@CRUDViewConfig(searcherConfig=@SearcherConfig(descriptionFields={"id", "identificacion", "nombre"}, searchField="identificacion"))
 public class Suscriptor extends AbstractDTO{
 	@Key(column="id_suscriptor")
 	private Long id;
 	private String nombre;
-	@SearchField
 	private String identificacion;
 	@Column(name="tipo_identificacion")
 	private TipoId tipoId;
 	@Column(name="fecha_nacimiento")
 	private Date fechaNac;
-	@FieldValues(value={@FieldValue(pk="S", description= "Si"), @FieldValue(pk="N", description= "No")})
+	@ViewFieldConfig(fixedValues={@FieldValue(pk="S", description= "Si"), @FieldValue(pk="N", description= "No")})
 	private Listable activo;
 	public Long getId() {
 		return id;

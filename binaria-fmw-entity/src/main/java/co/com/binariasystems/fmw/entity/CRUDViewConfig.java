@@ -14,7 +14,7 @@ public @interface CRUDViewConfig {
 	public abstract Class<? extends EntityValidator> validationClass() default EntityValidator.class;
 	public abstract String titleKey() default "";
 	public abstract boolean deleteEnabled() default true;
-	public abstract boolean isAuditable() default true;
+	public abstract boolean isAuditable() default false;
 	public abstract String creationUserField() default "creationUser";
 	public abstract String modificationUserField() default "modificationUser";
 	public abstract String creationDateField() default "creationDate";

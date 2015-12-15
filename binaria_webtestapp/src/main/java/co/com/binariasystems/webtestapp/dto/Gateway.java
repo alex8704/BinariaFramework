@@ -3,24 +3,25 @@ package co.com.binariasystems.webtestapp.dto;
 import java.util.Date;
 
 import co.com.binariasystems.fmw.dto.AbstractDTO;
-import co.com.binariasystems.fmw.entity.Auditable;
+import co.com.binariasystems.fmw.entity.CRUDViewConfig;
 import co.com.binariasystems.fmw.entity.Column;
 import co.com.binariasystems.fmw.entity.Entity;
 import co.com.binariasystems.fmw.entity.Key;
 import co.com.binariasystems.fmw.entity.Relation;
-import co.com.binariasystems.fmw.entity.SearchField;
 import co.com.binariasystems.fmw.entity.SearcherConfig;
 
 @Entity(table="gateways")
-@SearcherConfig(
-		descriptionFields = {"ip","descripcion"},
-		gridColumnFields = {"ip","descripcion", "creationUser", "modificationDate"}
+@CRUDViewConfig(
+		searcherConfig=@SearcherConfig(
+				descriptionFields = {"ip","descripcion"},
+				gridColumnFields = {"ip","descripcion", "creationUser", "modificationDate"}
+		),
+		isAuditable=true
 )
-@Auditable
 public class Gateway extends AbstractDTO {
 	@Key(column="id_gateway")
 	private long id;
-	@SearchField(column="ip_gateway")
+	@Column(name="ip_gateway")
 	private String ip;
 	private String descripcion;
 	@Column(name="feha_comunicacion")

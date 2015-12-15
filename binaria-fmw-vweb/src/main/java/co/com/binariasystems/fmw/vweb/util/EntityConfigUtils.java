@@ -43,7 +43,7 @@ public class EntityConfigUtils {
 	
 	
 	public static String getFieldCaptionText(FieldConfigData fieldInfo, EntityConfigData<?> entityConfig, MessageFormat labelsFmt, MessageBundleManager messages){
-		String captionKey = StringUtils.defaultString(entityConfig.getFieldLabelMappings().get(fieldInfo.getFieldName()), labelsFmt.format(new String[]{entityConfig.getEntityClass().getSimpleName(), fieldInfo.getFieldName()}));
+		String captionKey = StringUtils.defaultIfEmpty(fieldInfo.getUiLabel(), labelsFmt.format(new String[]{entityConfig.getEntityClass().getSimpleName(), fieldInfo.getFieldName()}));
 		return LocaleMessagesUtil.getLocalizedMessage(messages, captionKey);
 	}
 	

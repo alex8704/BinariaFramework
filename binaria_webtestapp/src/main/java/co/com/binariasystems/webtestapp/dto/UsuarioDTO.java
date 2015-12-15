@@ -2,21 +2,23 @@ package co.com.binariasystems.webtestapp.dto;
 
 import java.io.Serializable;
 
+import co.com.binariasystems.fmw.entity.CRUDViewConfig;
 import co.com.binariasystems.fmw.entity.Column;
 import co.com.binariasystems.fmw.entity.Entity;
 import co.com.binariasystems.fmw.entity.Key;
-import co.com.binariasystems.fmw.entity.OmmitUpperTransform;
 import co.com.binariasystems.fmw.entity.SearcherConfig;
+import co.com.binariasystems.fmw.entity.ViewFieldConfig;
 
 @Entity(table="usuarios")
-@SearcherConfig(descriptionFields={"alias"})
+@SearcherConfig()
+@CRUDViewConfig(searcherConfig=@SearcherConfig(descriptionFields={"alias"}, searchField="alias"))
 public class UsuarioDTO implements Serializable{
 	@Key(column="id_usuario")
 	private Long id;
-	@OmmitUpperTransform
+	@ViewFieldConfig(ommitUpperTransform=true)
 	@Column(name="nombre_usuario")
 	private String alias;
-	@OmmitUpperTransform
+	@ViewFieldConfig(ommitUpperTransform=true)
 	@Column(name="password")
 	private String contrasenia;
 	@Column(name="password_salt")

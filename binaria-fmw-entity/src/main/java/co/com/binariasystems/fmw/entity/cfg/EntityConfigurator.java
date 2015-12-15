@@ -14,12 +14,6 @@ import co.com.binariasystems.fmw.exception.FMWException;
  */
 
 public interface EntityConfigurator<T> {
-	public String getTitleKey();
 	public Class<T> getEntityClass();
 	public EntityConfigData<T> configure() throws FMWException;
-	public EnumKeyProperty getEnumKeyProperty();
-	public Map<String, String> getFieldLabelMappings();
-	public Map<String, EntityConfigUIControl> getFieldUIControlMappings();
-	public boolean isDeleteEnabled();
-	public PKGenerationStrategy getPKGenerationStrategy();
 }
