@@ -72,6 +72,11 @@ $v-unit-size: round(2.1 * $v-font-size);
 	/************************************************************************************************************************************************
 	 * Message Dialog
 	*************************************************************************************************************************************************/
+	.v-window-outerheader{/* Contenedor Completo de Encabezado */}
+	.v-window-header{/*Contenedor Solo texto de encabezado*/}
+	.v-window-contents{/*Contenido completo, inclusive los 2 anteriores*/}
+	.v-window-contents .v-scrollable{/*Contenido debajo del encabezado*/}
+	
 	/* Seccion Titulo */
 	.title-msgd-error, .title-msgd-information, .title-msgd-warning, .title-msgd-plane, .title-msgd-question{
 		font-weight:bold; font-size:12pt; padding:10px;
@@ -149,8 +154,13 @@ $v-unit-size: round(2.1 * $v-font-size);
       padding-top:    10px;
       padding-bottom: 10px;
     }
-    
 	  
 	}
 	
+	/************************************************************************************************************************************************
+   * Formularios 
+  *************************************************************************************************************************************************/
+	.fmw-form-panel .v-panel-caption{
+	  
+	}
 }
