@@ -1,0 +1,15 @@
+/*
+ * Binaria-Fmw Own Component Styles, common framework componets as Pager, FormPanel etc
+ */
+
+@import "../common/common";
+ 
+ /* Public Variabless. Prepend with mixing name to avoid conflicts */
+ $fmwCompPublicVar: 'Value';
+@mixin fmwComponents{
+  /* Private Variabless */
+  $privateVar: 'Value';
+  
+  /* Style declarations */
+ 
+}

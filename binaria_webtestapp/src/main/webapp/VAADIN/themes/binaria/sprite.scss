@@ -1,0 +1,21 @@
+/*File for manage image spritess*/
+
+@mixin sprite($class, $position-x, $position-y, $width, $height) {
+  //IE8 does not support background-size
+  .v-ie8 #{$class} {
+    background: url(location/to/sprite) no-repeat $position-x $position-y;
+    width: $width;
+    height: $height;
+  }
+  //Retina sprites
+  #{$class} {
+    background: url(location/to/retina/sprite) no-repeat $position-x $position-y;
+    background-size: 100px 200px;
+    width: $width;
+    height: $height;
+  }
+}
+ 
+@include sprite('.img-dog', 0px, 0px, 10px, 15px);
+@include sprite('.img-cat', -25px, -10px, 15px, 15px);
+@include sprite('.img-logo', -50px, -10px, 25px, 25px);

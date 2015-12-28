@@ -1,0 +1,5 @@
+/* A place to store all your theme's global variables and mixins. Since this will get imported in every file, do not have any styles outside of mixins otherwise they will get duplicated the number of times this common file is imported.*/
+/* If you want to have access to your base theme's mixins and variables, import it here */
+@import "../../valo/valo.scss";
+@import "variables/variables";
+@import "mixins/mixins";

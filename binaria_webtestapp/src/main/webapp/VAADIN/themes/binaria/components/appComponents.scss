@@ -1,0 +1,15 @@
+/*
+ * Application specifyc styles must be added here, by example adminusers-table-header
+ */
+
+@import "../common/common";
+ 
+ /* Public Variabless. Prepend with mixing name to avoid conflicts */
+ $appCompPublicVar: 'Value';
+@mixin appComponents{
+  /* Private Variabless */
+  $privateVar: 'Value';
+  
+  /* Style declarations */
+ 
+}

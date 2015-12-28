@@ -34,6 +34,16 @@ import com.vaadin.ui.NativeSelect;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.themes.ValoTheme;
 
+
+/**
+ * Generador de direcciones parametrizadas, basadas en la norma establecida por la
+ * Direccion Impuestos y Aduana Nacional (DIAN), permite total parametrizacion e
+ * internacionalizacion en base a la configuracion regional del usuario final, soporte
+ * inicial para ingles (USA) y español latinoamerica
+ * 
+ * @author Alexander Castro O.
+ *
+ */
 public class AddressEditorField<T extends Address> extends CustomField<T> implements UIConstants, VWebCommonConstants{
 	private static final Logger LOGGER = LoggerFactory.getLogger(AddressEditorField.class);
 	private static final String[] ADDRESS_PROPERTYIDS = {

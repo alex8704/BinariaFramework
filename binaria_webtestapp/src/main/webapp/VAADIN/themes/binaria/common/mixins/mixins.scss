@@ -1,0 +1,20 @@
+/* A few examples of common theme mixins and functions*/
+/* Browsers have multiple ways of doing the same thing */
+@mixin border-radius($radius) {
+     -webkit-border-radius: $radius;
+     -moz-border-radius: $radius;
+     -ms-border-radius: $radius;
+     border-radius: $radius;
+}
+       
+/**
+* Strip units off $value
+*
+* Usage:
+*   $units: 16px;
+*   $nounits: strip-unit($units);
+*   $nounits = 16
+*/
+ @function strip-unit($value) {
+     @return $value / ($value * 0 + 1);
+ }
