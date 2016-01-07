@@ -12,6 +12,8 @@ public class MessageDialog2 extends Window{
 		Label topLabel = new Label();
 		
 		setWidth(450.0f, Unit.PIXELS);
+		setModal(true);
+		
 	}
 
 

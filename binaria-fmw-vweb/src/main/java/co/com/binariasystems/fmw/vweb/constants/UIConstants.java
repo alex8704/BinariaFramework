@@ -2,6 +2,7 @@ package co.com.binariasystems.fmw.vweb.constants;
 
 
 public interface UIConstants {
+	final String BINARIA_THEME = "binaria";
 	final String THEME_IMAGES_DIRECTORY = "img/";
 	final String REQUIRED_INDICATOR_STYLENAME = "v-required-field-indicator";
 	

@@ -12,4 +12,137 @@
   
   /* Style declarations */
  
+  /************************************************************************************************************************************************
+   * Mi
+   * scelaneos
+  *************************************************************************************************************************************************/
+  .section-separator{
+    background-color: #c5d6ea;
+    text-align: center;
+    vertical-align:bottom;
+    padding-top: 5px;
+    margin-top: 5px;  
+  }
+  
+  .vweb-center-align{
+    text-align: center;
+  }
+  
+  .vweb-right-align{
+    text-align: right;
+  }
+  
+  .upper-field{
+    text-transform: uppercase;
+  }
+  
+  
+  /************************************************************************************************************************************************
+   * FORM Validation Dialog
+  *************************************************************************************************************************************************/
+  ul.err-msgs-applist{
+    list-style-position:inside;
+    padding:0px 0px 0px 0px;
+  }
+  
+  /************************************************************************************************************************************************
+   * Message Dialog
+  *************************************************************************************************************************************************/
+  .v-window-outerheader{
+      /* Contenedor Completo de Encabezado */
+      
+    
+   }
+  .v-window-header{/*Contenedor Solo texto de encabezado*/}
+  .v-window-contents{/*Contenido completo, inclusive los 2 anteriores*/}
+  .v-window-contents .v-scrollable{/*Contenido debajo del encabezado*/}
+  .v-window-maximizebox{}
+  .v-window-closebox{}
+  
+  /* Seccion Titulo */
+  .title-msgd-error, .title-msgd-information, .title-msgd-warning, .title-msgd-plane, .title-msgd-question{
+    font-weight:bold; font-size:12pt; padding:10px;
+  }
+  .title-msgd-error, .title-msgd-warning{color:#830d01;}
+  .title-msgd-information, .title-msgd-plane, .title-msgd-question{color:#000000;}
+  
+  /* Seccion Mensaje */
+  .msg-msgd-error, .msg-msgd-information, .msg-msgd-warning, .msg-msgd-plane, .msg-msgd-question{
+    font-size:8pt;
+  }
+  .msg-msgd-error, .msg-msgd-warning{color:#833501;}
+  .msg-msgd-information, .msg-msgd-plane, .msg-msgd-question{color:#000000;}
+  
+  /* Icono Descriptivo */
+  .v-image-icon-msgd{margin:10px;}
+  /* Seccion Botones */
+  .v-horizontal-btns-msgd{}
+  
+  
+  /************************************************************************************************************************************************
+   * Paginador del Framewok Binaria
+  *************************************************************************************************************************************************/
+  .fmw-pager{
+    font-size: 9pt;
+  }
+  
+  .pager-firstp-link, .pager-lastp-link, .pager-next-link, .pager-back-link{
+    text-decoration: none;
+    font-weight: bold;
+  }
+  
+  /************************************************************************************************************************************************
+   * Radio Buttons List (Horizontal and Vertical)
+  *************************************************************************************************************************************************/
+  
+  .v-select-optiongroup-horizontal .v-select-option {
+      display: inline-block;
+  }
+  
+  /* Avoid wrapping if the layout is too tight */
+  .v-select-optiongroup-horizontal {
+      white-space: nowrap;
+  }
+  
+  /* Some extra spacing is needed */
+  .v-select-optiongroup-horizontal .v-select-option.v-radiobutton {
+      padding-right: 10px;
+  }
+  
+  
+  /************************************************************************************************************************************************
+   * Editor de direcciones
+  *************************************************************************************************************************************************/
+  .address-editor {
+    font-size: 9pt;
+    .v-select-select {
+      height: $v-unit-size;
+    }
+    
+    hr {
+      width: 80%;
+      height: 1px;
+      border-color: #3D94F6 -moz-use-text-color -moz-use-text-color;
+      margin: 0 auto;
+    }
+    
+    .address-editor-maincontent{
+      border-radius: 4px;
+      border: 1px solid #d5d5d5;
+      -webkit-box-shadow: 0 2px 3px rgba(0, 0, 0, 0.05);
+      box-shadow: 0 2px 3px rgba(0, 0, 0, 0.05);
+      padding-left:   0px;
+      padding-right:  0px;
+      padding-top:    10px;
+      padding-bottom: 10px;
+    }
+    
+  }
+  
+  /************************************************************************************************************************************************
+   * Formularios 
+  *************************************************************************************************************************************************/
+  .fmw-form-panel .v-panel-caption{
+    
+  }
 }
