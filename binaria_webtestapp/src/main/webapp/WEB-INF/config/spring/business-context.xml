@@ -8,6 +8,5 @@
 	
 	<bean id="entityCRUDDao" class="co.com.binariasystems.fmw.entity.dao.EntityCRUDDAOImpl">
 		<property name="dataSource" ref="mainDS"/>
-		<property name="messagesFilePath" value="co.com.binariasystems.fmw.entity.dao.entitycruddao.xml"/>
 	</bean>
 </beans>

@@ -7,13 +7,19 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 
 import co.com.binariasystems.fmw.dataaccess.db.FMWAbstractDAO;
+import co.com.binariasystems.fmw.entity.resources.resources;
 import co.com.binariasystems.fmw.exception.FMWDataAccessException;
 import co.com.binariasystems.fmw.util.db.DBUtil;
 import co.com.binariasystems.fmw.util.db.DBUtil.DBMS;
 import co.com.binariasystems.fmw.util.exception.FMWExceptionUtils;
+import co.com.binariasystems.fmw.util.messagebundle.PropertiesManager;
 import co.com.binariasystems.fmw.util.pagination.ListPage;
 
 public class EntityCRUDDAOImpl<T> extends FMWAbstractDAO implements EntityCRUDDAO<T> {
+	
+	public EntityCRUDDAOImpl() {
+		messages = PropertiesManager.forPath(resources.getPropertyFilePath("entitycruddao.xml"), resources.class);
+	}
 
 
 	public void save(String sqlStatement, MapSqlParameterSource paramSource) throws FMWDataAccessException {

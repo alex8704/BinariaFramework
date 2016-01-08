@@ -370,8 +370,8 @@ public class DefaultViewProvider implements ViewProvider, ServletContextAware {
 
 	@Override
 	public boolean isPublicView(String url) {
-		ViewInfo viewInfo = viewsContext.get(url);
-		return (viewInfo == null || viewInfo.isPublicView());
+		ViewInfo viewInfo = getViewInfoByURL(url, null);
+		return viewInfo.isPublicView();
 	}
 	
 	@Override
@@ -386,21 +386,25 @@ public class DefaultViewProvider implements ViewProvider, ServletContextAware {
 	
 	@Override
 	public ViewInfo getViewInfo(RequestData request) {
+		return getViewInfoByURL(request.getUrl(), request.getPathInfo());
+	}
+	
+	private ViewInfo getViewInfoByURL(String viewURL, String pathInfo) {
 		ViewInstanceCreator viewCreator = null;
 		for(ViewInstanceCreator candidate : viewInstanceCreators){
-			if(candidate.matches(request.getUrl())){
+			if(candidate.matches(viewURL)){
 				viewCreator = candidate;
 				break;
 			}
 		}
 		
 		if(viewCreator != null)
-			return new ViewInfo(request.getUrl()); 
+			return new ViewInfo(viewURL); 
 		
 		ViewInfo viewInfo = null;
-		String verifierUrl = StringUtils.defaultIfEmpty(request.getUrl(), SPECIAL_VIEWS_URL);
+		String verifierUrl = StringUtils.defaultIfEmpty(viewURL, SPECIAL_VIEWS_URL);
 		
-		verifierUrl = !(verifierUrl.equals(SPECIAL_VIEWS_URL)) ? request.getUrl() :  request.getUrl() + (StringUtils.isEmpty(request.getPathInfo()) ? "" : "?" + request.getPathInfo());
+		verifierUrl = !(verifierUrl.equals(SPECIAL_VIEWS_URL)) ? viewURL :  viewURL + (StringUtils.isEmpty(pathInfo) ? "" : "?" + pathInfo);
 		
 		viewInfo = viewsContext.get(verifierUrl);
 		if(viewInfo == null)
