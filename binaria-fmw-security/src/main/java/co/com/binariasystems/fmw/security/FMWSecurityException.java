@@ -27,7 +27,7 @@ public class FMWSecurityException extends FMWException {
 	}
 
 	public FMWSecurityException(Throwable cause) {
-		super(cause);
+		super(cause.getMessage(), cause);
 		// TODO Auto-generated constructor stub
 	}
 	

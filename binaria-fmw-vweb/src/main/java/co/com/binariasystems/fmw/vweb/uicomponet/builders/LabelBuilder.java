@@ -1,5 +1,7 @@
 package co.com.binariasystems.fmw.vweb.uicomponet.builders;
 
+import co.com.binariasystems.fmw.vweb.uicomponet.Dimension;
+
 import com.vaadin.data.Property;
 import com.vaadin.server.Resource;
 import com.vaadin.shared.ui.label.ContentMode;
@@ -62,73 +64,23 @@ public class LabelBuilder extends Label {
 		return this;
 	}
 	
-	public LabelBuilder withPixelsWidth(float width){
-		setWidth(width, Unit.PIXELS);
+	public LabelBuilder withWidth(Dimension width){
+		setWidth(width.value, width.unit);
 		return this;
 	}
 	
-	public LabelBuilder withPointsWidth(float width){
-		setWidth(width, Unit.POINTS);
+	public LabelBuilder withHeight(Dimension height){
+		setWidth(height.value, height.unit);
 		return this;
 	}
 	
-	public LabelBuilder withEmWidth(float width){
-		setWidth(width, Unit.EM);
+	public LabelBuilder withFullWidth(){
+		setWidth(100, Unit.PERCENTAGE);
 		return this;
 	}
 	
-	public LabelBuilder withRemWidth(float width){
-		setWidth(width, Unit.REM);
-		return this;
-	}
-	
-	public LabelBuilder withMilimetersWidth(float width){
-		setWidth(width, Unit.MM);
-		return this;
-	}
-	
-	public LabelBuilder withCentimetersWidth(float width){
-		setWidth(width, Unit.CM);
-		return this;
-	}
-	
-	public LabelBuilder withInchsWidth(float width){
-		setWidth(width, Unit.INCH);
-		return this;
-	}
-	
-	public LabelBuilder withPixelsHeight(float height){
-		setHeight(height, Unit.PIXELS);
-		return this;
-	}
-	
-	public LabelBuilder withPointsHeight(float height){
-		setHeight(height, Unit.POINTS);
-		return this;
-	}
-	
-	public LabelBuilder withEmHeight(float height){
-		setHeight(height, Unit.EM);
-		return this;
-	}
-	
-	public LabelBuilder withRemHeight(float height){
-		setHeight(height, Unit.REM);
-		return this;
-	}
-	
-	public LabelBuilder withMilimetersHeight(float height){
-		setHeight(height, Unit.MM);
-		return this;
-	}
-	
-	public LabelBuilder withCentimetersHeight(float height){
-		setHeight(height, Unit.CM);
-		return this;
-	}
-	
-	public LabelBuilder withInchsHeight(float height){
-		setHeight(height, Unit.INCH);
+	public LabelBuilder withFullHeight(){
+		setHeight(100, Unit.PERCENTAGE);
 		return this;
 	}
 	

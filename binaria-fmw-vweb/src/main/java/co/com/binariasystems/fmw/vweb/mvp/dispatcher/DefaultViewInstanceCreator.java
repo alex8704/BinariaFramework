@@ -2,7 +2,6 @@
 
 package co.com.binariasystems.fmw.vweb.mvp.dispatcher;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.text.ParseException;
 import java.util.Observable;
@@ -11,8 +10,6 @@ import java.util.Observer;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.reflect.MethodUtils;
 import org.reflections.Reflections;
-
-import com.vaadin.ui.Component;
 
 import co.com.binariasystems.fmw.exception.FMWException;
 import co.com.binariasystems.fmw.util.messagebundle.MessageBundleManager;
@@ -23,6 +20,8 @@ import co.com.binariasystems.fmw.vweb.mvp.dispatcher.data.ControllerInfo;
 import co.com.binariasystems.fmw.vweb.mvp.dispatcher.data.RequestData;
 import co.com.binariasystems.fmw.vweb.mvp.dispatcher.data.ViewAndController;
 import co.com.binariasystems.fmw.vweb.mvp.dispatcher.data.ViewInfo;
+
+import com.vaadin.ui.Component;
 
 public class DefaultViewInstanceCreator implements ViewInstanceCreator {
 	
@@ -88,7 +87,7 @@ public class DefaultViewInstanceCreator implements ViewInstanceCreator {
 			
 			
 			resp = new ViewAndController(viewInstance, uiContainer, controller);
-		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException | ParseException | FMWException e) {
+		} catch (ReflectiveOperationException | IllegalArgumentException | SecurityException | ParseException | FMWException e) {
 			throw new ViewInstantiationException(e);
 		}
 

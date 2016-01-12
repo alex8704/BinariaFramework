@@ -11,7 +11,7 @@ public class FMWUncheckedException extends RuntimeException {
 	}
 
 	public FMWUncheckedException(Throwable cause) {
-		super(cause);
+		super(cause.getMessage(), cause);
 	}
 
 	public FMWUncheckedException(String message, Throwable cause) {

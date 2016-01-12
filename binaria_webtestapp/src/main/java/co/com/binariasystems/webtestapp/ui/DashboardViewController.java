@@ -163,7 +163,7 @@ public class DashboardViewController extends AbstractViewController {
 	private void handleMenuAction(MenuActionDTO menuAction){
 		if("logout".equals(menuAction.getActionId())){
 			if(logoutConfirmDialog == null){
-				logoutConfirmDialog = new MessageDialog("Salir", "Esta seguro de salir de la aplicaci\u00f3", Type.QUESTION);
+				logoutConfirmDialog = new MessageDialog("Salir", "Esta seguro de salir de la aplicaci\u00f3n", Type.QUESTION);
 				logoutConfirmDialog.addYesClickListener(new ClickListener() {
 					@Override public void buttonClick(ClickEvent event) {
 						VaadinServletRequest vaadinRequest = (VaadinServletRequest) VaadinService.getCurrentRequest();

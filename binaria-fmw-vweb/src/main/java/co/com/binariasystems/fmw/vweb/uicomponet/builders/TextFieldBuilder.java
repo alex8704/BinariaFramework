@@ -4,6 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import co.com.binariasystems.fmw.vweb.constants.UIConstants;
 import co.com.binariasystems.fmw.vweb.constants.VWebCommonConstants;
+import co.com.binariasystems.fmw.vweb.uicomponet.Dimension;
 import co.com.binariasystems.fmw.vweb.util.VWebUtils;
 import co.com.binariasystems.fmw.vweb.util.ValidationUtils;
 
@@ -131,73 +132,13 @@ public class TextFieldBuilder extends TextField{
 		return this;
 	}
 	
-	public TextFieldBuilder withPixelsWidth(float width){
-		setWidth(width, Unit.PIXELS);
+	public TextFieldBuilder withWidth(Dimension width){
+		setWidth(width.value, width.unit);
 		return this;
 	}
 	
-	public TextFieldBuilder withPointsWidth(float width){
-		setWidth(width, Unit.POINTS);
-		return this;
-	}
-	
-	public TextFieldBuilder withEmWidth(float width){
-		setWidth(width, Unit.EM);
-		return this;
-	}
-	
-	public TextFieldBuilder withRemWidth(float width){
-		setWidth(width, Unit.REM);
-		return this;
-	}
-	
-	public TextFieldBuilder withMilimetersWidth(float width){
-		setWidth(width, Unit.MM);
-		return this;
-	}
-	
-	public TextFieldBuilder withCentimetersWidth(float width){
-		setWidth(width, Unit.CM);
-		return this;
-	}
-	
-	public TextFieldBuilder withInchsWidth(float width){
-		setWidth(width, Unit.INCH);
-		return this;
-	}
-	
-	public TextFieldBuilder withPixelsHeight(float height){
-		setHeight(height, Unit.PIXELS);
-		return this;
-	}
-	
-	public TextFieldBuilder withPointsHeight(float height){
-		setHeight(height, Unit.POINTS);
-		return this;
-	}
-	
-	public TextFieldBuilder withEmHeight(float height){
-		setHeight(height, Unit.EM);
-		return this;
-	}
-	
-	public TextFieldBuilder withRemHeight(float height){
-		setHeight(height, Unit.REM);
-		return this;
-	}
-	
-	public TextFieldBuilder withMilimetersHeight(float height){
-		setHeight(height, Unit.MM);
-		return this;
-	}
-	
-	public TextFieldBuilder withCentimetersHeight(float height){
-		setHeight(height, Unit.CM);
-		return this;
-	}
-	
-	public TextFieldBuilder withInchsHeight(float height){
-		setHeight(height, Unit.INCH);
+	public TextFieldBuilder withHeight(Dimension height){
+		setWidth(height.value, height.unit);
 		return this;
 	}
 	

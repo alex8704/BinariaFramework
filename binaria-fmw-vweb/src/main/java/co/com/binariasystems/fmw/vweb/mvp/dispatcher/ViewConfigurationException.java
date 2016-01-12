@@ -14,7 +14,7 @@ public class ViewConfigurationException extends FMWException {
 	}
 
 	public ViewConfigurationException(Throwable cause) {
-		super(cause);
+		super(cause.getMessage(), cause);
 		// TODO Auto-generated constructor stub
 	}
 

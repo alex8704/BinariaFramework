@@ -2,6 +2,8 @@ package co.com.binariasystems.fmw.vweb.uicomponet.builders;
 
 import org.apache.commons.lang3.StringUtils;
 
+import co.com.binariasystems.fmw.vweb.uicomponet.Dimension;
+
 import com.vaadin.server.Resource;
 import com.vaadin.ui.MenuBar;
 
@@ -71,73 +73,13 @@ public class MenuButtonBuilder extends MenuBar {
 	}
 	
 	
-	public MenuButtonBuilder withPixelsWidth(float width){
-		setWidth(width, Unit.PIXELS);
+	public MenuButtonBuilder withWidth(Dimension width){
+		setWidth(width.value, width.unit);
 		return this;
 	}
 	
-	public MenuButtonBuilder withPointsWidth(float width){
-		setWidth(width, Unit.POINTS);
-		return this;
-	}
-	
-	public MenuButtonBuilder withEmWidth(float width){
-		setWidth(width, Unit.EM);
-		return this;
-	}
-	
-	public MenuButtonBuilder withRemWidth(float width){
-		setWidth(width, Unit.REM);
-		return this;
-	}
-	
-	public MenuButtonBuilder withMilimetersWidth(float width){
-		setWidth(width, Unit.MM);
-		return this;
-	}
-	
-	public MenuButtonBuilder withCentimetersWidth(float width){
-		setWidth(width, Unit.CM);
-		return this;
-	}
-	
-	public MenuButtonBuilder withInchsWidth(float width){
-		setWidth(width, Unit.INCH);
-		return this;
-	}
-	
-	public MenuButtonBuilder withPixelsHeight(float height){
-		setHeight(height, Unit.PIXELS);
-		return this;
-	}
-	
-	public MenuButtonBuilder withPointsHeight(float height){
-		setHeight(height, Unit.POINTS);
-		return this;
-	}
-	
-	public MenuButtonBuilder withEmHeight(float height){
-		setHeight(height, Unit.EM);
-		return this;
-	}
-	
-	public MenuButtonBuilder withRemHeight(float height){
-		setHeight(height, Unit.REM);
-		return this;
-	}
-	
-	public MenuButtonBuilder withMilimetersHeight(float height){
-		setHeight(height, Unit.MM);
-		return this;
-	}
-	
-	public MenuButtonBuilder withCentimetersHeight(float height){
-		setHeight(height, Unit.CM);
-		return this;
-	}
-	
-	public MenuButtonBuilder withInchsHeight(float height){
-		setHeight(height, Unit.INCH);
+	public MenuButtonBuilder withHeight(Dimension height){
+		setWidth(height.value, height.unit);
 		return this;
 	}
 	

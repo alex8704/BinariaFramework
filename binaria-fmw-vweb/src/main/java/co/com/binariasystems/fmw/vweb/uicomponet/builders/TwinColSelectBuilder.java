@@ -7,6 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import co.com.binariasystems.fmw.dto.Listable;
 import co.com.binariasystems.fmw.vweb.constants.VWebCommonConstants;
+import co.com.binariasystems.fmw.vweb.uicomponet.Dimension;
 import co.com.binariasystems.fmw.vweb.util.VWebUtils;
 import co.com.binariasystems.fmw.vweb.util.ValidationUtils;
 
@@ -143,73 +144,13 @@ public class TwinColSelectBuilder extends TwinColSelect {
 		return this;
 	}
 	
-	public TwinColSelectBuilder withPixelsWidth(float width){
-		setWidth(width, Unit.PIXELS);
+	public TwinColSelectBuilder withWidth(Dimension width){
+		setWidth(width.value, width.unit);
 		return this;
 	}
 	
-	public TwinColSelectBuilder withPointsWidth(float width){
-		setWidth(width, Unit.POINTS);
-		return this;
-	}
-	
-	public TwinColSelectBuilder withEmWidth(float width){
-		setWidth(width, Unit.EM);
-		return this;
-	}
-	
-	public TwinColSelectBuilder withRemWidth(float width){
-		setWidth(width, Unit.REM);
-		return this;
-	}
-	
-	public TwinColSelectBuilder withMilimetersWidth(float width){
-		setWidth(width, Unit.MM);
-		return this;
-	}
-	
-	public TwinColSelectBuilder withCentimetersWidth(float width){
-		setWidth(width, Unit.CM);
-		return this;
-	}
-	
-	public TwinColSelectBuilder withInchsWidth(float width){
-		setWidth(width, Unit.INCH);
-		return this;
-	}
-	
-	public TwinColSelectBuilder withPixelsHeight(float height){
-		setHeight(height, Unit.PIXELS);
-		return this;
-	}
-	
-	public TwinColSelectBuilder withPointsHeight(float height){
-		setHeight(height, Unit.POINTS);
-		return this;
-	}
-	
-	public TwinColSelectBuilder withEmHeight(float height){
-		setHeight(height, Unit.EM);
-		return this;
-	}
-	
-	public TwinColSelectBuilder withRemHeight(float height){
-		setHeight(height, Unit.REM);
-		return this;
-	}
-	
-	public TwinColSelectBuilder withMilimetersHeight(float height){
-		setHeight(height, Unit.MM);
-		return this;
-	}
-	
-	public TwinColSelectBuilder withCentimetersHeight(float height){
-		setHeight(height, Unit.CM);
-		return this;
-	}
-	
-	public TwinColSelectBuilder withInchsHeight(float height){
-		setHeight(height, Unit.INCH);
+	public TwinColSelectBuilder withHeight(Dimension height){
+		setWidth(height.value, height.unit);
 		return this;
 	}
 	

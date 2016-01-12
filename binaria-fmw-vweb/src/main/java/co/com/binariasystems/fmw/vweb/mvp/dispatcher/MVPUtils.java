@@ -79,7 +79,7 @@ public class MVPUtils {
 			}
 			if (!field.getType().isAssignableFrom(sourceField.getType()))
 				throw new ViewInstantiationException("Cannot bind the @" + ViewField.class.getSimpleName()
-						+ " source value for" + viewInfo.getControllerInfo().getControllerClass().getName() + "." + field.getName() + ", because are incopatible types");
+						+ " source value for " + viewInfo.getControllerInfo().getControllerClass().getName() + "." + field.getName() + ", because are incopatible types");
 			sourceValue = FieldUtils.readField(sourceField, sourceView, forceAccess);
 			if (sourceValue != null)
 				FieldUtils.writeField(field, targetController, sourceValue, forceAccess);

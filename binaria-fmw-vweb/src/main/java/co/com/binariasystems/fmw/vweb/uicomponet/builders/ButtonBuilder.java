@@ -1,5 +1,7 @@
 package co.com.binariasystems.fmw.vweb.uicomponet.builders;
 
+import co.com.binariasystems.fmw.vweb.uicomponet.Dimension;
+
 import com.vaadin.server.Resource;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.themes.ValoTheme;
@@ -57,73 +59,13 @@ public class ButtonBuilder extends Button{
 	}
 	
 	
-	public ButtonBuilder withPixelsWidth(float width){
-		setWidth(width, Unit.PIXELS);
+	public ButtonBuilder withWidth(Dimension width){
+		setWidth(width.value, width.unit);
 		return this;
 	}
 	
-	public ButtonBuilder withPointsWidth(float width){
-		setWidth(width, Unit.POINTS);
-		return this;
-	}
-	
-	public ButtonBuilder withEmWidth(float width){
-		setWidth(width, Unit.EM);
-		return this;
-	}
-	
-	public ButtonBuilder withRemWidth(float width){
-		setWidth(width, Unit.REM);
-		return this;
-	}
-	
-	public ButtonBuilder withMilimetersWidth(float width){
-		setWidth(width, Unit.MM);
-		return this;
-	}
-	
-	public ButtonBuilder withCentimetersWidth(float width){
-		setWidth(width, Unit.CM);
-		return this;
-	}
-	
-	public ButtonBuilder withInchsWidth(float width){
-		setWidth(width, Unit.INCH);
-		return this;
-	}
-	
-	public ButtonBuilder withPixelsHeight(float height){
-		setHeight(height, Unit.PIXELS);
-		return this;
-	}
-	
-	public ButtonBuilder withPointsHeight(float height){
-		setHeight(height, Unit.POINTS);
-		return this;
-	}
-	
-	public ButtonBuilder withEmHeight(float height){
-		setHeight(height, Unit.EM);
-		return this;
-	}
-	
-	public ButtonBuilder withRemHeight(float height){
-		setHeight(height, Unit.REM);
-		return this;
-	}
-	
-	public ButtonBuilder withMilimetersHeight(float height){
-		setHeight(height, Unit.MM);
-		return this;
-	}
-	
-	public ButtonBuilder withCentimetersHeight(float height){
-		setHeight(height, Unit.CM);
-		return this;
-	}
-	
-	public ButtonBuilder withInchsHeight(float height){
-		setHeight(height, Unit.INCH);
+	public ButtonBuilder withHeight(Dimension height){
+		setWidth(height.value, height.unit);
 		return this;
 	}
 	

@@ -14,7 +14,7 @@ public class ViewInstantiationException extends FMWException {
 	}
 
 	public ViewInstantiationException(Throwable cause) {
-		super(cause);
+		super(cause.getMessage(), cause);
 		// TODO Auto-generated constructor stub
 	}
 

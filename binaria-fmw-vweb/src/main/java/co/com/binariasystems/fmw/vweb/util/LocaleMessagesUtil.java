@@ -23,7 +23,7 @@ public class LocaleMessagesUtil {
 		return resp;
 	}
 	
-	private static MessageFormat uiConventionMsgFmt(){
+	public static MessageFormat uiConventionMsgFmt(){
 		if(UI_CONVENTION_MF == null){
 			synchronized (LocaleMessagesUtil.class) {
 				UI_CONVENTION_MF = new MessageFormat(VWebCommonConstants.UI_CONVENTION_STRINGS_TEMPLATE);

@@ -89,19 +89,13 @@ public class ShiroCredentialsCrypto extends CodecSupport implements CredentialsC
 
 	@Override
 	public boolean credentialsMatches(MatchingRequest request) {
-		ByteSource salt = StringUtils.isEmpty(request.getStoredPasswordSalt()) ? null : ByteSource.Util.bytes(request.getStoredPasswordSalt());
-		
-		SimpleAuthenticationInfo authinfo = new SimpleAuthenticationInfo("none", StringUtils.defaultString(request.getStoredPassword()).toCharArray(), "none");
-		authinfo.setCredentialsSalt(salt);
-		UsernamePasswordToken authToken = new UsernamePasswordToken("none", StringUtils.defaultString(request.getProvidedPassword()));
-		
 		ShiroBasedHashedCredentialsMatcher cm = new ShiroBasedHashedCredentialsMatcher(request.getAlgorithmName());
 		
 		cm.setPrivateSalt(new SimpleByteSource(Base64.decodeToString( StringUtils.defaultString(request.getPrivateSalt()) )));
 		cm.setHashIterations(request.getHashIterations());
 		cm.setStoredCredentialsHexEncoded(request.isHexEncoded());
 		
-		return cm.doCredentialsMatch(authToken, authinfo);
+		return cm.doCredentialsMatch(request);
 	}
 	
 	public static void main(String[] args) {
@@ -113,7 +107,7 @@ public class ShiroCredentialsCrypto extends CodecSupport implements CredentialsC
 		request.setHexFormat(true);
 		request.setPrivateSalt("dzNidDNzdDRwcDUzY3VyM3A0NTV3MHJkc2FsdA==");
 		request.setSource("Gana1111");
-		
+
 		EncryptionResult resp = crypto.encryptPassword(request);
 		System.out.println("Valor encriptado: "+resp.getEncryptedValue());
 		System.out.println("SaltBase64: "+resp.getBase64Salt());

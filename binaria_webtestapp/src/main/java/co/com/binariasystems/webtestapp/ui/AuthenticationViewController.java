@@ -8,9 +8,6 @@ import co.com.binariasystems.fmw.annotation.Dependency;
 import co.com.binariasystems.fmw.security.FMWSecurityException;
 import co.com.binariasystems.fmw.security.mgt.SecurityManager;
 import co.com.binariasystems.fmw.security.model.AuthenticationRequest;
-import co.com.binariasystems.fmw.util.mail.SimpleMailMessage;
-import co.com.binariasystems.fmw.util.messagebundle.PropertiesManager;
-import co.com.binariasystems.fmw.util.velocity.VelocityMailSender;
 import co.com.binariasystems.fmw.vweb.mvp.annotation.Init;
 import co.com.binariasystems.fmw.vweb.mvp.annotation.ViewController;
 import co.com.binariasystems.fmw.vweb.mvp.annotation.ViewController.OnLoad;
@@ -42,18 +39,14 @@ public class AuthenticationViewController extends AbstractViewController{
 	@ViewField private Button logInBtn;
 	@ViewField private PropertysetItem item;
 	@ViewField(isViewReference = true) private FormPanel form;
-	private PropertiesManager mailProperties;
 	@Autowired
 	private AuthenticationBusiness authBusiness;
 	@Dependency
 	private SecurityManager securityManager;
-	@Dependency
-	private VelocityMailSender mailSender;
 	
 	@Init
 	public void initController(){
 		
-		mailProperties = PropertiesManager.forPath("/javamail.properties", AuthenticationViewController.class);
 		
 		logInBtn.addClickListener(new ClickListener() {
 			@Override
@@ -69,7 +62,7 @@ public class AuthenticationViewController extends AbstractViewController{
 					
 					securityManager.authenticate(authRequest);
 					System.out.println(authBusiness.dato());
-					sendAuthenticationMail();
+					authBusiness.sendAuthenticationMail();
 					new MessageDialog("Bienvenido", "La validaci\u00f3n de las credenciales de autenticaci\u00f3n ha sida satisfactoria", Type.INFORMATION)
 					.addYesClickListener(new ClickListener() {
 						@Override
@@ -93,19 +86,6 @@ public class AuthenticationViewController extends AbstractViewController{
 	
 	private VaadinServletRequest getVaadinRequest(){
 		return (VaadinServletRequest) VaadinService.getCurrentRequest();
-	}
-	
-	
-	private void sendAuthenticationMail(){
-		try{
-			SimpleMailMessage msg = new SimpleMailMessage();
-			msg.setFrom(mailProperties.getString("mail.smtp.user"));
-			msg.setTo("alexander_8704@hotmail.com");
-			msg.setSubject("[Mensaje Simple]");
-			mailSender.send(msg, "/simple-tmpl.vm", null);
-		}catch(Exception ex){
-			ex.printStackTrace();
-		}
 	}
 	
 	@OnLoad

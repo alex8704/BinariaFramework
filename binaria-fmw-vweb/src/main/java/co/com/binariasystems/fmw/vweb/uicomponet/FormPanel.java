@@ -61,7 +61,7 @@ public class FormPanel extends HorizontalLayout{
 	}
 	
 	private void initContent(){
-		content = new Panel(title);
+		content = title != null ? new Panel(title) : new Panel();
 		panelGroup = new PanelGroup(columns);
 		validationErrorListFmt = new MessageFormat(VWebUtils.getCommonString(VWebCommonConstants.VALIDATION_ERRORLIST_TEMPLATE));
 		validationErrorItem = new MessageFormat(VWebUtils.getCommonString(VWebCommonConstants.VALIDATION_ERRORITEM_TEMPLATE));

@@ -14,7 +14,7 @@ public class ViewDispatchException extends FMWException {
 	}
 
 	public ViewDispatchException(Throwable cause) {
-		super(cause);
+		super(cause.getMessage(), cause);
 		// TODO Auto-generated constructor stub
 	}
 

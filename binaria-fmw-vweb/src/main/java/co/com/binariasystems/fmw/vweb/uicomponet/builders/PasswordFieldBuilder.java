@@ -3,12 +3,14 @@ package co.com.binariasystems.fmw.vweb.uicomponet.builders;
 import org.apache.commons.lang3.StringUtils;
 
 import co.com.binariasystems.fmw.vweb.constants.VWebCommonConstants;
+import co.com.binariasystems.fmw.vweb.uicomponet.Dimension;
 import co.com.binariasystems.fmw.vweb.util.VWebUtils;
 import co.com.binariasystems.fmw.vweb.util.ValidationUtils;
 
 import com.vaadin.data.Property;
 import com.vaadin.data.Validator;
 import com.vaadin.server.Resource;
+import com.vaadin.server.Sizeable.Unit;
 import com.vaadin.ui.PasswordField;
 import com.vaadin.ui.themes.ValoTheme;
 
@@ -129,73 +131,13 @@ public class PasswordFieldBuilder extends PasswordField {
 		return this;
 	}
 	
-	public PasswordFieldBuilder withPixelsWidth(float width){
-		setWidth(width, Unit.PIXELS);
+	public PasswordFieldBuilder withWidth(Dimension width){
+		setWidth(width.value, width.unit);
 		return this;
 	}
 	
-	public PasswordFieldBuilder withPointsWidth(float width){
-		setWidth(width, Unit.POINTS);
-		return this;
-	}
-	
-	public PasswordFieldBuilder withEmWidth(float width){
-		setWidth(width, Unit.EM);
-		return this;
-	}
-	
-	public PasswordFieldBuilder withRemWidth(float width){
-		setWidth(width, Unit.REM);
-		return this;
-	}
-	
-	public PasswordFieldBuilder withMilimetersWidth(float width){
-		setWidth(width, Unit.MM);
-		return this;
-	}
-	
-	public PasswordFieldBuilder withCentimetersWidth(float width){
-		setWidth(width, Unit.CM);
-		return this;
-	}
-	
-	public PasswordFieldBuilder withInchsWidth(float width){
-		setWidth(width, Unit.INCH);
-		return this;
-	}
-	
-	public PasswordFieldBuilder withPixelsHeight(float height){
-		setHeight(height, Unit.PIXELS);
-		return this;
-	}
-	
-	public PasswordFieldBuilder withPointsHeight(float height){
-		setHeight(height, Unit.POINTS);
-		return this;
-	}
-	
-	public PasswordFieldBuilder withEmHeight(float height){
-		setHeight(height, Unit.EM);
-		return this;
-	}
-	
-	public PasswordFieldBuilder withRemHeight(float height){
-		setHeight(height, Unit.REM);
-		return this;
-	}
-	
-	public PasswordFieldBuilder withMilimetersHeight(float height){
-		setHeight(height, Unit.MM);
-		return this;
-	}
-	
-	public PasswordFieldBuilder withCentimetersHeight(float height){
-		setHeight(height, Unit.CM);
-		return this;
-	}
-	
-	public PasswordFieldBuilder withInchsHeight(float height){
-		setHeight(height, Unit.INCH);
+	public PasswordFieldBuilder withHeight(Dimension height){
+		setWidth(height.value, height.unit);
 		return this;
 	}
 	

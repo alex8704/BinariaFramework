@@ -1,12 +1,17 @@
 package co.com.binariasystems.fmw.security.authc.credential;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.authc.AuthenticationInfo;
 import org.apache.shiro.authc.AuthenticationToken;
 import org.apache.shiro.authc.SaltedAuthenticationInfo;
 import org.apache.shiro.authc.credential.HashedCredentialsMatcher;
 import org.apache.shiro.codec.Base64;
 import org.apache.shiro.codec.Hex;
+import org.apache.shiro.crypto.hash.AbstractHash;
+import org.apache.shiro.crypto.hash.SimpleHash;
 import org.apache.shiro.util.ByteSource;
+
+import co.com.binariasystems.fmw.security.crypto.MatchingRequest;
 
 public class ShiroBasedHashedCredentialsMatcher extends HashedCredentialsMatcher{
 	
@@ -23,25 +28,57 @@ public class ShiroBasedHashedCredentialsMatcher extends HashedCredentialsMatcher
 		super(hashAlgorithmName);
 	}
 	
+	public boolean doCredentialsMatch(MatchingRequest request){
+		Object tokenHashedCredentials = hashProvidedCredentials(request);
+        Object accountCredentials = getCredentials(request);
+        return equals(tokenHashedCredentials, accountCredentials);
+	}
+	
+	protected Object getCredentials(MatchingRequest request) {
+        Object credentials = StringUtils.defaultString(request.getStoredPassword()).toCharArray();
+
+        byte[] storedBytes = toBytes(credentials);
+
+        if (credentials instanceof String || credentials instanceof char[]) {
+            //account.credentials were a char[] or String, so
+            //we need to do text decoding first:
+            if (isStoredCredentialsHexEncoded()) {
+                storedBytes = Hex.decode(storedBytes);
+            } else {
+                storedBytes = Base64.decode(storedBytes);
+            }
+        }
+        SimpleHash hash = (SimpleHash)newHashInstance();
+        hash.setBytes(storedBytes);
+        return hash;
+    }
+	
+	private Object hashProvidedCredentials(MatchingRequest request){
+		ByteSource salt = StringUtils.isEmpty(request.getStoredPasswordSalt()) ? null : ByteSource.Util.bytes(request.getStoredPasswordSalt());
+		return hashProvidedCredentials(request.getProvidedPassword(), salt);
+	}
+	
 	@Override
 	protected Object hashProvidedCredentials(AuthenticationToken token, AuthenticationInfo info) {
         Object passwordSalt = null;
         if (info instanceof SaltedAuthenticationInfo) {
         	passwordSalt = ((SaltedAuthenticationInfo) info).getCredentialsSalt();
         }
-        
-        ByteSource publicSaltPart = null;
-        if (passwordSalt != null) {
-        	if(isStoredCredentialsHexEncoded())
-        		publicSaltPart = ByteSource.Util.bytes(Hex.decode(convertSaltToBytes(passwordSalt).getBytes()));
-        	else
-        		publicSaltPart = ByteSource.Util.bytes(Base64.decode(convertSaltToBytes(passwordSalt).getBytes()));
-        }
-        
-        ByteSource combined = combine(privateSalt, publicSaltPart);
-        
-        return hashProvidedCredentials(token.getCredentials(), combined, getHashIterations());
+        return hashProvidedCredentials(token.getCredentials(), passwordSalt);
     }
+	
+	private Object hashProvidedCredentials(Object providedCredentials, Object credentialsSalt){
+		ByteSource publicSaltPart = null;
+		if(credentialsSalt != null){
+			if(isStoredCredentialsHexEncoded())
+        		publicSaltPart = ByteSource.Util.bytes(Hex.decode(convertSaltToBytes(credentialsSalt).getBytes()));
+        	else
+        		publicSaltPart = ByteSource.Util.bytes(Base64.decode(convertSaltToBytes(credentialsSalt).getBytes()));
+		}
+		ByteSource combined = combine(privateSalt, publicSaltPart);
+        
+        return hashProvidedCredentials(providedCredentials, combined, getHashIterations());
+	}
 	
 	/**
      * Acquires the specified {@code salt} argument's bytes and returns them in the form of a {@code ByteSource} instance.

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="debug" strict="false" name="WebtestLogginConfig">
+	<Properties>
+		<Property name="filename">/opt/logs/WebtestApp/application.log</Property>
+	</Properties>
+
+	<Appenders>
+		<!-- ****************************************************************************************************************** 
+				Appender Hacia Salida estandard, osea a consola 
+		****************************************************************************************************************** -->
+		<Console name="Stdout" target="SYSTEM_OUT">
+			<PatternLayout pattern="- %m%n" />
+		</Console>
+		
+		<!-- ****************************************************************************************************************** 
+				Appender de Rotacion diaria de Arhcivos por Defecto (destino <ubicacion-logs>/application.log) 
+		****************************************************************************************************************** -->
+		<RollingRandomAccessFile name="DefaultRollingRandomAccessFile"
+			fileName="/opt/logs/WebtestApp/application.log" filePattern="/opt/logs/WebtestApp/application-%d{MM-dd-yyyy}.log.gz"
+			append="true">
+			<PatternLayout>
+				<Pattern>[%p] %d{yyyy/MM/dd HH:mm:ss.SSS} (%t) - %m%n</Pattern>
+			</PatternLayout>
+			<Policies>
+				<TimeBasedTriggeringPolicy />
+			</Policies>
+		</RollingRandomAccessFile>
+		
+		<Async name="AsyncStdout">
+			<AppenderRef ref="Stdout" />
+		</Async>
+
+		<Async name="DefaultAsyncRollingAppender">
+			<AppenderRef ref="DefaultRollingRandomAccessFile" />
+		</Async>
+	</Appenders>
+
+	<Loggers>
+		<!-- ****************************************************************************************************************** 
+				Logger Ancestro del resto de loggers de la aplicacion ya que referencia el 
+				paquete base de los demas paquetes de la aplicacion co.com.binariasystems 
+		****************************************************************************************************************** -->
+		<Logger name="co.com.binariasystems" additivity="false" level="debug">
+			<AppenderRef ref="Stdout" />
+			<AppenderRef ref="DefaultAsyncRollingAppender" />
+		</Logger>
+	
+		<Logger name="org.apache.shiro" additivity="false" level="debug">
+			<AppenderRef ref="Stdout" />
+			<AppenderRef ref="DefaultAsyncRollingAppender" />
+		</Logger>
+	
+		<Logger name="org.atmosphere" additivity="false" level="debug">
+			<AppenderRef ref="Stdout" />
+			<AppenderRef ref="DefaultAsyncRollingAppender" />
+		</Logger>
+		
+		<!-- ****************************************************************************************************************** 
+				Categoria root (raiz), prioridad INFO, por Consola 
+		****************************************************************************************************************** -->
+		<Root level="info">
+			<AppenderRef ref="Stdout" />
+		</Root>
+	</Loggers>
+
+</Configuration>

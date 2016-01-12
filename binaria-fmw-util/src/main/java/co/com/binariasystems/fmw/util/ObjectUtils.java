@@ -1,21 +1,29 @@
 package co.com.binariasystems.fmw.util;
 
+import java.beans.PropertyDescriptor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import org.apache.commons.beanutils.BeanUtils;
+import org.apache.commons.beanutils.PropertyUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import co.com.binariasystems.fmw.exception.FMWUncheckedException;
+import co.com.binariasystems.fmw.reflec.TypeHelper;
 
 public class ObjectUtils {
 private static final Logger LOGGER = LoggerFactory.getLogger(ObjectUtils.class);
 	
 	private static final String NULL_STRING = "null";
 	private static final String EMPTY_STRING = "";
+	private static final ConcurrentMap<Class<?>, Map<String, PropertyDescriptor>> classessPropertyDescCache = new ConcurrentHashMap<Class<?>, Map<String,PropertyDescriptor>>();
 	
 	/**
 	 * Determine if the given objects are equal, returning {@code true}
@@ -158,4 +166,78 @@ private static final Logger LOGGER = LoggerFactory.getLogger(ObjectUtils.class);
 			throw new FMWUncheckedException(e.getMessage(), e);
 		}
 	}
+	
+	private static Map<String, PropertyDescriptor> putClassPropertiesInCacheAndReturn(Class<?> clazz){
+		PropertyDescriptor[] propertyDescriptors = PropertyUtils.getPropertyDescriptors(clazz);
+		Map<String, PropertyDescriptor> descriptorsMap = new HashMap<String, PropertyDescriptor>();
+		for(PropertyDescriptor descriptor : propertyDescriptors){
+			descriptorsMap.put(descriptor.getName(), descriptor);
+		}
+		classessPropertyDescCache.putIfAbsent(clazz, descriptorsMap);
+		return descriptorsMap;
+	}
+	
+	public static <F, T> T transferPropertiesRecursive(F sourceObject, T targetObject) throws FMWUncheckedException{
+		Map<String, PropertyDescriptor> sourceProps = classessPropertyDescCache.get(sourceObject.getClass());
+		Map<String, PropertyDescriptor> targetProps = classessPropertyDescCache.get(targetObject.getClass());
+		sourceProps = sourceProps != null ? sourceProps : putClassPropertiesInCacheAndReturn(sourceObject.getClass());
+		targetProps = targetProps != null ? targetProps : putClassPropertiesInCacheAndReturn(targetObject.getClass());
+		
+		try {
+			PropertyDescriptor sourcePropertyDesc = null;
+			PropertyDescriptor targetPropertyDesc = null;
+			for(String propertyName : sourceProps.keySet()){
+				sourcePropertyDesc = sourceProps.get(propertyName);
+				targetPropertyDesc = targetProps.get(propertyName);
+				if(targetPropertyDesc == null || "class".equals(propertyName)) continue;
+				
+				if (PropertyUtils.isReadable(sourceObject, propertyName) && PropertyUtils.isWriteable(targetObject, propertyName)){
+					//Caso especial en que dos propiedades se llaman igual pero son de diferentes clases con iguales atributos
+					//Entonces se hace un mecanismo de copiado recursivo [Solo para clases propias de la aplicacion, que no hagan parte del API de java]
+					if(!targetPropertyDesc.getPropertyType().isAssignableFrom(sourcePropertyDesc.getPropertyType()) 
+							&& !TypeHelper.isBasicType(targetPropertyDesc.getPropertyType()) && !TypeHelper.isBasicType(sourcePropertyDesc.getPropertyType())){
+						Object value = PropertyUtils.getSimpleProperty(sourceObject, propertyName);
+						if(value != null){
+							Object target = targetPropertyDesc.getPropertyType().newInstance();
+							transferPropertiesRecursive(value,target);
+							BeanUtils.copyProperty(targetObject, propertyName, target);
+						}
+							
+					}
+					else{
+						Object value = PropertyUtils.getSimpleProperty(sourceObject, propertyName);
+						BeanUtils.copyProperty(targetObject, propertyName, value);
+					}
+				}
+				
+			}
+		} catch (ReflectiveOperationException e) {
+			throw new FMWUncheckedException(e.getMessage(), e);
+		} 
+		return targetObject;
+	}
+	
+	public static <F, T> T transferPropertiesRecursive(F sourceObject, Class<T> targetType) throws FMWUncheckedException{
+		T resp = null;
+		try {
+			resp = transferPropertiesRecursive(sourceObject, targetType.newInstance());
+		} catch (ReflectiveOperationException e) {
+			throw new FMWUncheckedException(e.getMessage(), e);
+		}
+		return resp;
+	}
+	
+	public static <F, T> List<T> transferPropertiesListRecursive(List<F> sourceList, Class<T> targetType) throws FMWUncheckedException{
+		try {
+			List<T> operationResult = new ArrayList<T>();
+			for(F item : sourceList){
+				operationResult.add(transferPropertiesRecursive(item, targetType.newInstance()));
+			}
+			return operationResult;
+		
+		} catch (ReflectiveOperationException e) {
+			throw new FMWUncheckedException(e.getMessage(), e);
+		}
+	}
+	
 }

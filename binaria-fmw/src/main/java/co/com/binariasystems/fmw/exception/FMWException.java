@@ -11,7 +11,7 @@ public class FMWException extends Exception {
 	}
 
 	public FMWException(Throwable cause) {
-		super(cause);
+		super(cause.getMessage(), cause);
 	}
 
 	public FMWException(String message, Throwable cause) {

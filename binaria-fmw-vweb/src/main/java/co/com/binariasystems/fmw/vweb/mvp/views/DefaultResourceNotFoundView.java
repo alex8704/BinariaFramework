@@ -3,6 +3,7 @@ package co.com.binariasystems.fmw.vweb.mvp.views;
 import co.com.binariasystems.fmw.vweb.mvp.annotation.ResourceNotFound;
 import co.com.binariasystems.fmw.vweb.mvp.annotation.View;
 import co.com.binariasystems.fmw.vweb.mvp.annotation.ViewBuild;
+import co.com.binariasystems.fmw.vweb.resources.resources;
 import co.com.binariasystems.fmw.vweb.uicomponet.Dimension;
 import co.com.binariasystems.fmw.vweb.uicomponet.FormPanel;
 
@@ -13,7 +14,7 @@ import com.vaadin.ui.themes.ValoTheme;
 @ResourceNotFound
 @View(
 	url="/",
-	messages="co.com.binariasystems.fmw.vweb.resources.properties.default_views_strings"
+	messages="co.com.binariasystems.fmw.vweb.resources.messages.default_views_strings"
 )
 public class DefaultResourceNotFoundView extends AbstractView{
 	public static final String VIEW_BUILD_METHOD = "buildView";

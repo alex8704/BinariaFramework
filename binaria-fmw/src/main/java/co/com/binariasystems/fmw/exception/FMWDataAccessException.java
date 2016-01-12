@@ -11,7 +11,7 @@ public class FMWDataAccessException extends FMWException {
 	}
 
 	public FMWDataAccessException(Throwable cause) {
-		super(cause);
+		super(cause.getMessage(), cause);
 	}
 
 	public FMWDataAccessException(String message, Throwable cause) {

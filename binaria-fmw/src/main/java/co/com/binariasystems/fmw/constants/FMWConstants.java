@@ -7,6 +7,7 @@ public interface FMWConstants {
 	final String RPARENTHESIS = ")";
 	final String COMMA = ",";
 	final String DEFAULT_NULL_REPRESENTATION = "-";
+	final String LINE_SEP = System.getProperty("line.separator");
 	
 	//Id con el cual se obtendra del contexto de IOC la clase usada para invocar Class.getResource() y evitar
 	//Errores de recursos no encontrados por problemas de Classloader y Classpath

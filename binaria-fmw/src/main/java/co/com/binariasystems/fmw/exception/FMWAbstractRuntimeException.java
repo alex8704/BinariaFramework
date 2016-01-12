@@ -3,7 +3,7 @@ package co.com.binariasystems.fmw.exception;
 public abstract class FMWAbstractRuntimeException extends RuntimeException {
 	
 	static {
-		//Se carga de forma temprana la clase NextedExceotionUtils para evitar deadlock
+		//Se carga de forma temprana la clase NextedExceptionUtils para evitar deadlock
 		//en el classloader, al ejecutar sobre OSGI, al llamar el metodo getMessage()
 		FMWAbstractRuntimeException.class.getName();
 	}

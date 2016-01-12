@@ -22,7 +22,7 @@ public class DBUtil {
         
         try {
             dbName = dataSource.getConnection().getMetaData().getDatabaseProductName();
-            LOGGER.info("{0}.init(''{1}'')", DBUtil.class.getSimpleName(), dbName);
+            LOGGER.info("{}.init(''{}'')", DBUtil.class.getSimpleName(), dbName);
         } catch (SQLException ex) {
             dbName = null;
         }

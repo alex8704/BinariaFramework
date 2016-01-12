@@ -1,5 +1,6 @@
 package co.com.binariasystems.fmw.reflec;
 
+import java.beans.PropertyDescriptor;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.Time;
@@ -10,6 +11,8 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.Map;
+
+import org.apache.commons.beanutils.PropertyUtils;
 
 import co.com.binariasystems.fmw.constants.FMWConstants;
 import co.com.binariasystems.fmw.dto.Listable;
