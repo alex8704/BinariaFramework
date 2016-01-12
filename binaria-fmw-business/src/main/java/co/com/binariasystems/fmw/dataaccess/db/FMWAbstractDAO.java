@@ -46,10 +46,15 @@ public class FMWAbstractDAO extends NamedParameterJdbcDaoSupport implements FMWD
 	}
 	
 	private boolean haveMessagesManager(){
-		if(messages != null) return true;
-		if(StringUtils.isEmpty(messagesFilePath)) return false;
-		this.messages = PropertiesManager.forPath(messagesFilePath, IOCHelper.getBean(FMWConstants.APPLICATION_DEFAULT_CLASS_FOR_RESOURCE_LOAD_IOC_KEY, Class.class));
+		ensureMessageBundle();
 		return messages != null;
+	}
+	
+	protected void ensureMessageBundle(){
+		if(messages != null) return;
+		if(StringUtils.isEmpty(messagesFilePath)) return;
+		Class loaderClass = IOCHelper.isConfigured() ? IOCHelper.getBean(FMWConstants.APPLICATION_DEFAULT_CLASS_FOR_RESOURCE_LOAD_IOC_KEY, Class.class) : this.getClass();
+		this.messages = PropertiesManager.forPath(messagesFilePath, loaderClass);
 	}
 	
 	protected String getString(String key){

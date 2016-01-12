@@ -3,8 +3,12 @@ package co.com.binariasystems.fmw.ioc;
 public class IOCHelper {
 	private static IOCProvider defaultIOC;
 	
-	public static void setDefault(IOCProvider iocProvider){
+	public static void setProvider(IOCProvider iocProvider){
 		defaultIOC = iocProvider;
+	}
+	
+	public static boolean isConfigured(){
+		return defaultIOC != null;
 	}
 	
     public static <T> T getBean(String beanId, Class<T> clazz){
