@@ -3,6 +3,7 @@ package co.com.binariasystems.fmw.util.messagebundle;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -80,5 +81,9 @@ public abstract class PropertiesManager {
 		if (props != null)
 			resp = props.getProperty(key);
 		return (returnKeyWhenNotFound && StringUtils.isEmpty(resp)) ? key : StringUtils.defaultString(resp);
+	}
+	
+	public Set<Object> getKeys(){
+		return props == null ? null : props.keySet();
 	}
 }

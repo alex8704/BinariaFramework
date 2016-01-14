@@ -16,15 +16,16 @@ public class DBUtil {
 	private static DBMS currentDBMS;
 	private static final String STANDARD_SQL_DATETIME_FMT = "yyyy-MM-dd HH:mm:ss.SSS";
 	private static final String STANDARD_SQL_DATE_FMT = "yyyy-MM-dd";
+	private static boolean initialized;
 	
 	public static void init(DataSource dataSource){
+		if(initialized)return;
 		String dbName = null;
-        
         try {
             dbName = dataSource.getConnection().getMetaData().getDatabaseProductName();
             LOGGER.info("{}.init(''{}'')", DBUtil.class.getSimpleName(), dbName);
         } catch (SQLException ex) {
-            dbName = null;
+        	LOGGER.error("Error on {}.init(<DataSource>)", ex);
         }
         
         try{
@@ -40,6 +41,7 @@ public class DBUtil {
             	currentDBMS = DBMS.HSQLDB;
             else
             	currentDBMS = DBMS.UNSUPPORTED;
+            initialized = true;
         }catch(Exception ex){
         	currentDBMS = null;
         }

@@ -11,7 +11,7 @@ public interface FMWConstants {
 	
 	//Id con el cual se obtendra del contexto de IOC la clase usada para invocar Class.getResource() y evitar
 	//Errores de recursos no encontrados por problemas de Classloader y Classpath
-	final String APPLICATION_DEFAULT_CLASS_FOR_RESOURCE_LOAD_IOC_KEY = "application.default.resorceLoaderClass"; 
+	final String DEFAULT_LOADER_CLASS = "application.default.resorceLoaderClass"; 
 	
 	String TIMESTAMP_DEFAULT_FORMAT = "dd/MM/yyyy HH:mm";
 	String DATE_DEFAULT_FORMAT = "dd/MM/yyyy";

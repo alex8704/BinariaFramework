@@ -3,6 +3,7 @@ package co.com.binariasystems.fmw.util.messagebundle;
 import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -104,4 +105,7 @@ public abstract class MessageBundleManager {
         }
         return targetResource;
     }
+    public Set<String> getKeys(){
+		return initialBundle == null ? null : initialBundle.keySet();
+	}
 }

@@ -16,6 +16,7 @@
 		<javaee.version>6.0</javaee.version>
 		<reflections.version>0.9.10</reflections.version>
 		<jetty.plugin.version>9.2.3.v20140905</jetty.plugin.version>
+		<springplatform.version>2.0.1.RELEASE</springplatform.version>
 		<project.source.version>1.7</project.source.version>
 		<project.target.version>1.7</project.target.version>
 		<project.encoding>UTF-8</project.encoding>
@@ -59,7 +60,7 @@
 			<dependency>
 				<groupId>io.spring.platform</groupId>
 				<artifactId>platform-bom</artifactId>
-				<version>1.1.4.RELEASE</version>
+				<version>${springplatform.version}</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>

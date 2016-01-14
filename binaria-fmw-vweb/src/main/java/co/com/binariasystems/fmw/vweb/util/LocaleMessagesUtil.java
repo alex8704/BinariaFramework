@@ -17,7 +17,7 @@ public class LocaleMessagesUtil {
 	
 	public static String getLocalizedMessage(String messagesFile, String key){
 		String resp = null;
-		MessageBundleManager messages = MessageBundleManager.forPath(messagesFile, IOCHelper.getBean(FMWConstants.APPLICATION_DEFAULT_CLASS_FOR_RESOURCE_LOAD_IOC_KEY, Class.class));
+		MessageBundleManager messages = MessageBundleManager.forPath(messagesFile, IOCHelper.getBean(FMWConstants.DEFAULT_LOADER_CLASS, Class.class));
 		if(messages != null)
 			resp = getLocalizedMessage(messages, key);
 		return resp;

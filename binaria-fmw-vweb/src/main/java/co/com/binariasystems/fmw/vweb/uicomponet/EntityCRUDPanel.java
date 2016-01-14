@@ -67,7 +67,7 @@ public class EntityCRUDPanel<T> extends FormPanel implements ClickListener{
 	private MessageFormat titleFmt;
 	private MessageBundleManager entityStrings = MessageBundleManager.forPath(
 			StringUtils.defaultIfBlank(IOCHelper.getBean(VWebCommonConstants.APP_ENTITIES_MESSAGES_FILE_IOC_KEY, String.class), VWebCommonConstants.ENTITY_STRINGS_PROPERTIES_FILENAME),
-			IOCHelper.getBean(FMWConstants.APPLICATION_DEFAULT_CLASS_FOR_RESOURCE_LOAD_IOC_KEY, Class.class));
+			IOCHelper.getBean(FMWConstants.DEFAULT_LOADER_CLASS, Class.class));
 	
 	private boolean attached;
 	

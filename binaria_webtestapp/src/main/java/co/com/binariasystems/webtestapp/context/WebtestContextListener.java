@@ -34,11 +34,11 @@ public class WebtestContextListener implements ServletContextListener {
     public void contextInitialized(ServletContextEvent sce)  { 
     	IOCHelper.setProvider(SpringIOCProvider.configure(WebApplicationContextUtils.getRequiredWebApplicationContext(sce.getServletContext())));
     	DBUtil.init(IOCHelper.getBean("mainDS", DataSource.class));
-    	Class resourceLoaderClass = IOCHelper.getBean(FMWConstants.APPLICATION_DEFAULT_CLASS_FOR_RESOURCE_LOAD_IOC_KEY, Class.class);
+    	Class resourceLoaderClass = IOCHelper.getBean(FMWConstants.DEFAULT_LOADER_CLASS, Class.class);
     	String entitiesStringsFilePath = IOCHelper.getBean(VWebCommonConstants.APP_ENTITIES_MESSAGES_FILE_IOC_KEY, String.class);
     	String entityOperatiosShowSql = IOCHelper.getBean(FMWEntityConstants.ENTITY_OPERATIONS_SHOWSQL_IOC_KEY, String.class);
     	
-    	LOGGER.info(FMWConstants.APPLICATION_DEFAULT_CLASS_FOR_RESOURCE_LOAD_IOC_KEY + ": " + resourceLoaderClass);
+    	LOGGER.info(FMWConstants.DEFAULT_LOADER_CLASS + ": " + resourceLoaderClass);
     	LOGGER.info(VWebCommonConstants.APP_ENTITIES_MESSAGES_FILE_IOC_KEY + ": " + entitiesStringsFilePath);
     	LOGGER.info(FMWEntityConstants.ENTITY_OPERATIONS_SHOWSQL_IOC_KEY + ": " + entityOperatiosShowSql);
     	
