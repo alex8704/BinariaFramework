@@ -199,4 +199,12 @@ public class MessageDialog extends Window implements ClickListener{
 		Throwable pretty = FMWExceptionUtils.prettyMessageException(ex);
 		new MessageDialog(VWebUtils.getCommonString(ValidationUtils.VALIDATION_ERROR_WINDOW_TITLE), pretty.getMessage(), Type.ERROR).show();
 	}
+    
+    public Button yesButton(){
+    	return okBtn;
+    }
+    
+    public Button noButton(){
+    	return noBtn;
+    }
 }

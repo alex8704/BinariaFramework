@@ -160,7 +160,9 @@ public class TreeMenu extends VerticalLayout {
 		return this;
 	}
 
-
+	public Property getPropertyDS(){
+		return tree;
+	}
 
 
 	private class TreeMenuItemDescriptionGenerator implements ItemDescriptionGenerator{
