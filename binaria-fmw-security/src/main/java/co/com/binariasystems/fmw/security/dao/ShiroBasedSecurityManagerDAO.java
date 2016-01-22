@@ -49,7 +49,7 @@ public class ShiroBasedSecurityManagerDAO implements SecurityManagerDAO {
 	@Override
 	public void authenticate(AuthenticationRequest authRequest) throws FMWSecurityException {
 		Subject currentUser = getCurrentSecurityUser(authRequest.getHttpRequest());
-		UsernamePasswordToken authToken = new UsernamePasswordToken(authRequest.getUsername(), authRequest.getPassword());
+		UsernamePasswordToken authToken = new UsernamePasswordToken(authRequest.getUsername(), authRequest.getPassword(), Boolean.TRUE.equals(authRequest.getRememberMe()));
 		try{
 			currentUser.login(authToken);
 		}catch(UnknownAccountException | IncorrectCredentialsException | LockedAccountException | ExcessiveAttemptsException ex){

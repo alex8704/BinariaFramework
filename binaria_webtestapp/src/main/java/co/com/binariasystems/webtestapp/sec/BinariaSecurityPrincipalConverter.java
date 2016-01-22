@@ -4,6 +4,7 @@ import java.util.List;
 
 import co.com.binariasystems.fmw.entity.manager.EntityCRUDOperationsManager;
 import co.com.binariasystems.fmw.exception.FMWException;
+import co.com.binariasystems.fmw.exception.FMWUncheckedException;
 import co.com.binariasystems.fmw.security.FMWSecurityException;
 import co.com.binariasystems.fmw.security.authc.SecurityPrincipalConverter;
 import co.com.binariasystems.fmw.security.util.SecConstants;
@@ -26,7 +27,7 @@ public class BinariaSecurityPrincipalConverter implements SecurityPrincipalConve
 	}
 
 	@Override
-	public UsuarioDTO toPrincipalModel(String representation) throws FMWSecurityException{
+	public UsuarioDTO toPrincipalModel(String representation){
 		List<UsuarioDTO> searchResult = null;
 		UsuarioDTO usuarioDTO = new UsuarioDTO();
 		usuarioDTO.setAlias(representation);
@@ -35,13 +36,13 @@ public class BinariaSecurityPrincipalConverter implements SecurityPrincipalConve
 			if(searchResult.isEmpty())
 				throw new FMWSecurityException(LocaleMessagesUtil.getLocalizedMessage(messageManager, "UnknownAccountException"+".localizedMessage"));
 		} catch (FMWException | ReflectiveOperationException e) {
-			throw new FMWSecurityException(e.getMessage());
+			throw new FMWUncheckedException(e.getMessage());
 		}
 		return searchResult.get(0);
 	}
 
 	@Override
-	public String toPrincipalRepresentation(UsuarioDTO model) throws FMWSecurityException{
+	public String toPrincipalRepresentation(UsuarioDTO model){
 		return model.getAlias();
 	}
 

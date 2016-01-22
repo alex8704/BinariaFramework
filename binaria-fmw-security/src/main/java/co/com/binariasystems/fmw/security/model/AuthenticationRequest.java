@@ -6,11 +6,17 @@ public class AuthenticationRequest {
 	private String username;
 	private String password;
 	private HttpServletRequest httpRequest;
-	
+	private Boolean rememberMe;
 	
 	public AuthenticationRequest() {
 	}
 	
+	public AuthenticationRequest(String username, String password, Boolean rememberMe, HttpServletRequest httpRequest) {
+		this.username = username;
+		this.password = password;
+		this.rememberMe = rememberMe;
+		this.httpRequest = httpRequest;
+	}
 	
 	public AuthenticationRequest(String username, String password, HttpServletRequest httpRequest) {
 		this.username = username;
@@ -36,4 +42,19 @@ public class AuthenticationRequest {
 	public void setHttpRequest(HttpServletRequest httpRequest) {
 		this.httpRequest = httpRequest;
 	}
+
+	/**
+	 * @return the rememberMe
+	 */
+	public Boolean getRememberMe() {
+		return rememberMe;
+	}
+
+	/**
+	 * @param rememberMe the rememberMe to set
+	 */
+	public void setRememberMe(Boolean rememberMe) {
+		this.rememberMe = rememberMe;
+	}
+	
 }

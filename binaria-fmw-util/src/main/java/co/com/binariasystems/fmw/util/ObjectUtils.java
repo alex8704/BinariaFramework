@@ -4,6 +4,7 @@ import java.beans.PropertyDescriptor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -178,6 +179,7 @@ private static final Logger LOGGER = LoggerFactory.getLogger(ObjectUtils.class);
 	}
 	
 	public static <F, T> T transferPropertiesRecursive(F sourceObject, T targetObject) throws FMWUncheckedException{
+		if(sourceObject == null) return (T)null;
 		Map<String, PropertyDescriptor> sourceProps = classessPropertyDescCache.get(sourceObject.getClass());
 		Map<String, PropertyDescriptor> targetProps = classessPropertyDescCache.get(targetObject.getClass());
 		sourceProps = sourceProps != null ? sourceProps : putClassPropertiesInCacheAndReturn(sourceObject.getClass());
@@ -201,10 +203,12 @@ private static final Logger LOGGER = LoggerFactory.getLogger(ObjectUtils.class);
 							Object target = targetPropertyDesc.getPropertyType().newInstance();
 							transferPropertiesRecursive(value,target);
 							BeanUtils.copyProperty(targetObject, propertyName, target);
-						}
+						}else
+							BeanUtils.copyProperty(targetObject, propertyName, value);
 							
 					}
-					else{
+					else if(!targetPropertyDesc.getPropertyType().isArray() && !Collection.class.isAssignableFrom(targetPropertyDesc.getPropertyType()) &&
+							targetPropertyDesc.getPropertyType().isAssignableFrom(sourcePropertyDesc.getPropertyType()) ){
 						Object value = PropertyUtils.getSimpleProperty(sourceObject, propertyName);
 						BeanUtils.copyProperty(targetObject, propertyName, value);
 					}

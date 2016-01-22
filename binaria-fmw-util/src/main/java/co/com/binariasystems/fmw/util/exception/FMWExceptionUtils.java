@@ -1,6 +1,11 @@
 package co.com.binariasystems.fmw.util.exception;
 
 import java.lang.reflect.InvocationTargetException;
+import java.net.BindException;
+import java.net.ConnectException;
+import java.net.NoRouteToHostException;
+import java.net.PortUnreachableException;
+import java.net.SocketException;
 import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.util.HashMap;
@@ -43,8 +48,9 @@ import co.com.binariasystems.fmw.util.messagebundle.MessageBundleManager;
 
 public class FMWExceptionUtils {
 	private static Map<Class<? extends Exception>, String> springExceptionMsgMapping = new HashMap<Class<? extends Exception>, String>();
-	private static MessageBundleManager mm = MessageBundleManager.forPath(FMWUtilConstants.BFMW_DAOEXCEPTIONS_MESSAGESFILE);
+	private static MessageBundleManager mm = MessageBundleManager.forPath(FMWUtilConstants.DAOEXCEPTIONMSG_FILE);
 	private static final String DEFAUL_DATAACCESERROR_MSG_KEY = DataAccessException.class.getSimpleName().toLowerCase()+".error_message";
+	private static final String DEFAUL_SOCKETERRROR_MSG_KEY = SocketException.class.getSimpleName().toLowerCase()+".error_message";
 	
 	static{
 		springExceptionMsgMapping.put(EmptyResultDataAccessException.class, EmptyResultDataAccessException.class.getSimpleName().toLowerCase()+".error_message");
@@ -73,6 +79,11 @@ public class FMWExceptionUtils {
 		springExceptionMsgMapping.put(DuplicateKeyException.class, DuplicateKeyException.class.getSimpleName().toLowerCase()+".error_message");
 		springExceptionMsgMapping.put(TransientDataAccessException.class, TransientDataAccessException.class.getSimpleName().toLowerCase()+".error_message");
 		springExceptionMsgMapping.put(DataAccessException.class, DataAccessException.class.getSimpleName().toLowerCase()+".error_message");
+		springExceptionMsgMapping.put(PortUnreachableException.class, PortUnreachableException.class.getSimpleName().toLowerCase()+".error_message");
+		springExceptionMsgMapping.put(NoRouteToHostException.class, NoRouteToHostException.class.getSimpleName().toLowerCase()+".error_message");
+		springExceptionMsgMapping.put(ConnectException.class, ConnectException.class.getSimpleName().toLowerCase()+".error_message");
+		springExceptionMsgMapping.put(BindException.class, BindException.class.getSimpleName().toLowerCase()+".error_message");
+		springExceptionMsgMapping.put(SocketException.class, SocketException.class.getSimpleName().toLowerCase()+".error_message");
 	}
 	
 	public static Throwable prettyMessageException(Throwable ex){
@@ -96,12 +107,23 @@ public class FMWExceptionUtils {
 				tr = tr.getCause();
 			}
 			return new FMWException(tr instanceof NullPointerException ? "Null Value exception" : tr.getMessage(), tr);
+		}else if(ex instanceof SocketException){
+			String msgKey = StringUtils.defaultIfEmpty(springExceptionMsgMapping.get(ex.getClass()), DEFAUL_DATAACCESERROR_MSG_KEY);
+			return new FMWException(getSocketErrorMessage(msgKey, ex, locale));
 		}
 		return ex;
 	}
 	
 	private static String getSQLErrorMessage(String messageKey, Throwable cause, Locale locale){
 		String defaultDataAcessError = mm.getString(DEFAUL_DATAACCESERROR_MSG_KEY, locale);
+		String message = mm.getString(messageKey, locale);
+		if(defaultDataAcessError.equals(message))
+			return MessageFormat.format(message, new Object[]{cause.getMessage()});
+		return message;
+	}
+	
+	private static String getSocketErrorMessage(String messageKey, Throwable cause, Locale locale){
+		String defaultDataAcessError = mm.getString(DEFAUL_SOCKETERRROR_MSG_KEY, locale);
 		String message = mm.getString(messageKey, locale);
 		if(defaultDataAcessError.equals(message))
 			return MessageFormat.format(message, new Object[]{cause.getMessage()});
