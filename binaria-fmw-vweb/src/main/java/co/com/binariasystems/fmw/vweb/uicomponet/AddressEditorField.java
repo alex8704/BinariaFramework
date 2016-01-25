@@ -93,13 +93,13 @@ public class AddressEditorField<T extends Address> extends CustomField<T> implem
 		this.setCaption(caption);
 		this.addStyleName(ADDRESS_EDITOR_STYLENAME);
 		this.valueType = valueType;
-		initComponents();
 		
 	}
 
 
 	@Override
 	protected Component initContent() {
+		initComponents();
 		loadParameters();
 		return content;
 	}

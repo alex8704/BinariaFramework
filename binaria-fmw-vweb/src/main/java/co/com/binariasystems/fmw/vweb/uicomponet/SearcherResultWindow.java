@@ -82,6 +82,7 @@ public class SearcherResultWindow<T> extends Window implements CloseListener, Cl
 	private String selectionEventFunction;
 	private SearchSelectionChangeListener<T> selectionChangeListener;
 	private boolean wasChoice;
+	private boolean initialized;
 	private static final String ACTIONS_COLUM_ID = "actions";
 	
 	private MessageBundleManager entityStrings = MessageBundleManager.forPath(
@@ -93,9 +94,24 @@ public class SearcherResultWindow<T> extends Window implements CloseListener, Cl
 	public SearcherResultWindow(Class<T> entityClazz) {
 		this.entityClazz = entityClazz;
 		labelsFmt = FMWEntityUtils.createEntityLabelsMessageFormat();
+		this.addCloseListener(this);
+		try {
+			entityConfigData = (EntityConfigData<T>)EntityConfigurationManager.getInstance().getConfigurator(entityClazz).configure();
+		} catch (FMWException ex) {
+			MessageDialog.showExceptions(ex);
+			return;
+		}
+		manager = (EntityCRUDOperationsManager<T>)EntityCRUDOperationsManager.getInstance(entityClazz);
+		selectionEventFunction = SearcherResultWindow.class.getSimpleName()+"_fn"+Math.abs(hashCode());
+	}
+	
+	@Override
+	public void attach() {
+		super.attach();
+		if(initialized) return;
 		try {
 			initContent();
-			this.addCloseListener(this);
+			initialized = true;
 		} catch (FMWException ex) {
 			MessageDialog.showExceptions(ex);
 		}
@@ -111,11 +127,7 @@ public class SearcherResultWindow<T> extends Window implements CloseListener, Cl
 		this.conditions = conditions;
 	}
 	
-	public void initContent() throws FMWException{
-		entityConfigData = (EntityConfigData<T>)EntityConfigurationManager.getInstance().getConfigurator(entityClazz).configure();
-		manager = (EntityCRUDOperationsManager<T>)EntityCRUDOperationsManager.getInstance(entityClazz);
-		selectionEventFunction = SearcherResultWindow.class.getSimpleName()+"_fn"+Math.abs(hashCode());
-		
+	private void initContent() throws FMWException{
 		setCaption(VWebUtils.getCommonString(VWebCommonConstants.SEARCH_WIN_CAPTION));
 		form = new FormPanel(2);
 		List<FieldConfigData> sortedFields = FMWEntityUtils.sortByUIControlTypePriority(entityConfigData.getFieldsData(), entityConfigData.getPkFieldName());
@@ -255,6 +267,57 @@ public class SearcherResultWindow<T> extends Window implements CloseListener, Cl
 			handleClean();
 		pager.setFilterDto((T)BeanUtils.cloneBean(beanItem.getBean()));
 	}
+	
+	private void handlePKSearch(Object pkValue){
+		if(initialized){
+			beanItem.getItemProperty(entityConfigData.getPkFieldName()).setValue(pkValue);
+			searchBtn.click();
+			if(gridContainer.size() == 1)
+				selectedValue = (T)gridContainer.firstItemId();
+		}else{
+			try{
+				T emptyBean = entityConfigData.getEntityClass().getConstructor().newInstance();
+				PropertyUtils.setProperty(emptyBean, entityConfigData.getPkFieldName(), pkValue);
+				ListPage<T> listPage = manager.searchForFmwComponent(emptyBean, 1, 1, conditions);
+				if(listPage.getRowCount() > 0)
+					selectedValue = listPage.getData().get(0);
+			}catch(NumberFormatException | FMWException | ReflectiveOperationException ex){
+				MessageDialog.showExceptions(ex);
+				return;
+			}
+		}
+		fireSelectionChangeEvent();
+	}
+	
+	private void handleFilterSearch(Object filterValue){
+		if(initialized){
+			beanItem.getItemProperty(entityConfigData.getSearchFieldName()).setValue(filterValue);
+			searchBtn.click();
+			if(gridContainer.size() != 1){
+				show();
+				return;
+			}else
+				selectedValue = (T)gridContainer.firstItemId();
+		}else{
+			try{
+				T emptyBean = entityConfigData.getEntityClass().getConstructor().newInstance();
+				PropertyUtils.setProperty(emptyBean, entityConfigData.getSearchFieldName(), filterValue);
+				ListPage<T> listPage = manager.searchForFmwComponent(emptyBean, 1, 1, conditions);
+				if(listPage.getRowCount() != 1){
+					show();
+					for(T item : listPage.getData())
+						gridContainer.addItem(item);
+					return;
+				}else
+					selectedValue = listPage.getData().get(0);
+				return;
+			}catch(NumberFormatException | FMWException | ReflectiveOperationException ex){
+				MessageDialog.showExceptions(ex);
+				return;
+			}
+		}
+		fireSelectionChangeEvent();
+	}
 
 	private void handleClean() throws Exception{
 		Object emptyBean = entityConfigData.getEntityClass().getConstructor().newInstance();
@@ -284,10 +347,17 @@ public class SearcherResultWindow<T> extends Window implements CloseListener, Cl
 	
 	//Para el boton de "buscar" siempre se busca y se abre la ventana
 	private void doButtonSearch(Object filterValue){
-		if(filterValue != null)
-			beanItem.getItemProperty(entityConfigData.getSearchFieldName()).setValue(filterValue);
-		searchBtn.click();
-		show();
+		if(!initialized){
+			show();
+			if(filterValue != null)
+				beanItem.getItemProperty(entityConfigData.getSearchFieldName()).setValue(filterValue);
+			searchBtn.click();
+		}else{
+			show();
+			if(filterValue != null)
+				beanItem.getItemProperty(entityConfigData.getSearchFieldName()).setValue(filterValue);
+			searchBtn.click();
+		}
 	}
 	
 	//Busca y abre la ventana solo si no encuentra resultado
@@ -296,14 +366,7 @@ public class SearcherResultWindow<T> extends Window implements CloseListener, Cl
 			fireResetSelectionEvent();
 			return;
 		}
-		beanItem.getItemProperty(entityConfigData.getSearchFieldName()).setValue(filterValue);
-		searchBtn.click();
-		if(gridContainer.size() != 1)
-			show();
-		else{
-			selectedValue = (T)gridContainer.firstItemId();
-			fireSelectionChangeEvent();
-		}
+		handleFilterSearch(filterValue);
 	}
 	
 	//Busca y retorna unicamente
@@ -312,11 +375,7 @@ public class SearcherResultWindow<T> extends Window implements CloseListener, Cl
 			fireResetSelectionEvent();
 			return;
 		}
-		beanItem.getItemProperty(entityConfigData.getPkFieldName()).setValue(pkValue);
-		searchBtn.click();
-		if(gridContainer.size() == 1)
-			selectedValue = (T)gridContainer.firstItemId();
-		fireSelectionChangeEvent();
+		handlePKSearch(pkValue);
 	}
 
 	@Override

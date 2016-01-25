@@ -4,12 +4,17 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
+import co.com.binariasystems.fmw.vweb.constants.VWebCommonConstants;
+import co.com.binariasystems.fmw.vweb.uicomponet.treemenu.MenuElement;
+import co.com.binariasystems.fmw.vweb.util.VWebUtils;
+
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.util.HierarchicalContainer;
 import com.vaadin.data.util.filter.SimpleStringFilter;
 import com.vaadin.event.FieldEvents.TextChangeEvent;
 import com.vaadin.event.FieldEvents.TextChangeListener;
+import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.AbstractSelect.ItemDescriptionGenerator;
 import com.vaadin.ui.Component;
@@ -18,10 +23,6 @@ import com.vaadin.ui.Tree;
 import com.vaadin.ui.Tree.ItemStyleGenerator;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
-
-import co.com.binariasystems.fmw.vweb.constants.VWebCommonConstants;
-import co.com.binariasystems.fmw.vweb.uicomponet.treemenu.MenuElement;
-import co.com.binariasystems.fmw.vweb.util.VWebUtils;
 
 public class TreeMenu extends VerticalLayout {
 	private TextField searchTxT;
@@ -46,6 +47,7 @@ public class TreeMenu extends VerticalLayout {
 	public TreeMenu(String title, List<MenuElement> items, boolean showSearcher){
 		buildComponent();
 		setTitle(title);
+		this.showSearcher = showSearcher;
 		if(showSearcher)
 			setShowSearcher();
 		setItems(items);
@@ -66,11 +68,13 @@ public class TreeMenu extends VerticalLayout {
 		treeDs.addContainerProperty("caption", String.class, "");
 		
 		tree = new Tree(title, treeDs);
+		tree.setCaptionAsHtml(true);
 		tree.setImmediate(true);
 		tree.setItemDescriptionGenerator(descriptionsGenerator);
 		tree.setItemStyleGenerator(styleGenerator);
 		tree.setItemCaptionPropertyId("caption");
 		tree.setWidth(100, Unit.PERCENTAGE);
+		tree.setNullSelectionAllowed(false);
 		
 		addComponent(searchTxT);
 		addComponent(tree);
@@ -95,6 +99,7 @@ public class TreeMenu extends VerticalLayout {
 	}
 
 	public TreeMenu setTitle(String title) {
+		this.title = title;
 		tree.setCaption(title);
 		return this;
 	}
@@ -145,6 +150,18 @@ public class TreeMenu extends VerticalLayout {
 	public TreeMenu removeValueChangeListener(ValueChangeListener valChangeListener){
 		if(valChangeListener != null)
 			tree.removeValueChangeListener(valChangeListener);
+		return this;
+	}
+	
+	public TreeMenu addItemClickListener(ItemClickListener clickListener){
+		if(clickListener != null)
+			tree.addItemClickListener(clickListener);
+		return this;
+	}
+	
+	public TreeMenu removeItemClickListener(ItemClickListener clickListener){
+		if(clickListener != null)
+			tree.addItemClickListener(clickListener);
 		return this;
 	}
 

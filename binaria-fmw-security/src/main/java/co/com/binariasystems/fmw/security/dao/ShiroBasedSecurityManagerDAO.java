@@ -49,7 +49,10 @@ public class ShiroBasedSecurityManagerDAO implements SecurityManagerDAO {
 	@Override
 	public void authenticate(AuthenticationRequest authRequest) throws FMWSecurityException {
 		Subject currentUser = getCurrentSecurityUser(authRequest.getHttpRequest());
-		UsernamePasswordToken authToken = new UsernamePasswordToken(authRequest.getUsername(), authRequest.getPassword(), Boolean.TRUE.equals(authRequest.getRememberMe()));
+		UsernamePasswordToken authToken = new UsernamePasswordToken(authRequest.getUsername(), 
+				authRequest.getPassword(), 
+				Boolean.TRUE.equals(authRequest.getRememberMe()),
+				authRequest.getHost());
 		try{
 			currentUser.login(authToken);
 		}catch(UnknownAccountException | IncorrectCredentialsException | LockedAccountException | ExcessiveAttemptsException ex){
@@ -68,7 +71,7 @@ public class ShiroBasedSecurityManagerDAO implements SecurityManagerDAO {
 	}
 	
 	private Subject getCurrentSecurityUser(HttpServletRequest httpRequest){
-		Subject currentSubject = supportAtmosphereWebSockets ? (Subject) httpRequest.getAttribute(SecConstants.ATMOSPHERE_SUBJECT_ATTRIBUTE) : null;
+		Subject currentSubject = (supportAtmosphereWebSockets && httpRequest != null) ? (Subject) httpRequest.getAttribute(SecConstants.ATMOSPHERE_SUBJECT_ATTRIBUTE) : null;
 		return currentSubject != null ? currentSubject : SecurityUtils.getSubject();
 	}
 

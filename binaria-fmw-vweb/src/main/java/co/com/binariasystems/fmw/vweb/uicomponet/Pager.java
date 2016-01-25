@@ -54,6 +54,7 @@ public class Pager<FILTER_TYPE, RESULT_TYPE> extends HorizontalLayout implements
 	private FILTER_TYPE filterDto;
 	private int maxCachedPages=1;
 	private int currentCacheGroup;
+	private boolean initialized;
 	
 	
 	public Pager(){
@@ -66,9 +67,12 @@ public class Pager<FILTER_TYPE, RESULT_TYPE> extends HorizontalLayout implements
 	
 	public Pager(PagerMode pMode, int rowsByPage){
 		this.pagerMode = (pMode != null) ? pMode : PagerMode.PAGE;
-		//Se invoca dentro del constructor ya que hay ocasiones en que se hacen operaciones
-		//Con el componente antes de ser atado al componente padre, lo cual desemboca en errores NullPointer
-		//Por ejemplo el SercherResultWindow
+	}
+	
+	@Override
+	public void attach() {
+		super.attach();
+		if(initialized)return;
 		initContent();
 	}
 	
@@ -159,7 +163,10 @@ public class Pager<FILTER_TYPE, RESULT_TYPE> extends HorizontalLayout implements
 		
 		bindEvents();
 		resetConstrains();
-		reset();
+		//Se marca inicializado aqui
+		//Para que tenga efecto el setFilterDTO
+		initialized = true;
+		setFilterDto(filterDto);
 	}
 	
 	private void bindEvents(){
@@ -291,7 +298,8 @@ public class Pager<FILTER_TYPE, RESULT_TYPE> extends HorizontalLayout implements
 	
 	public void setFilterDto(FILTER_TYPE filterDto){
 		this.filterDto = filterDto;
-		fireFilterDtoChangeEvent();
+		if(initialized)
+			fireFilterDtoChangeEvent();
 	}
 	
 	public void setMaxCachedPages(int max){

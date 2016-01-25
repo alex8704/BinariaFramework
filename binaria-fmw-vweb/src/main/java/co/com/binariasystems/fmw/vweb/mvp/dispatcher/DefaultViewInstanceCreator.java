@@ -64,17 +64,19 @@ public class DefaultViewInstanceCreator implements ViewInstanceCreator {
 			//Se inyectan las dependencias antes de invocar metodos de inicializacion
 			MVPUtils.injectIOCProviderDependencies(viewInstance, viewInfo.getViewClass());
 			
-			if(viewInstance instanceof Initializable)
-				((Initializable)viewInstance).init();
-			else if(StringUtils.isNoneEmpty(viewInfo.getInitMethod()))
-				MethodUtils.getAccessibleMethod(viewInfo.getViewClass().getMethod(viewInfo.getInitMethod())).invoke(viewInstance);
-			
 			if(!StringUtils.isEmpty(viewInfo.getViewBuildMethod())){
 				uiContainer = (Component) MethodUtils.getAccessibleMethod(viewInfo.getViewClass(), viewInfo.getViewBuildMethod()).invoke(viewInstance);
 			}else
 				uiContainer = (Component)viewInstance;
 			
 			MVPUtils.applyConventionStringsAndValidationsForView(viewInstance, viewInfo, messageBundleManager);
+			
+			
+			if(viewInstance instanceof Initializable)
+				((Initializable)viewInstance).init();
+			else if(StringUtils.isNoneEmpty(viewInfo.getInitMethod()))
+				MethodUtils.getAccessibleMethod(viewInfo.getViewClass().getMethod(viewInfo.getInitMethod())).invoke(viewInstance);
+			
 			
 			ControllerInfo controllerInfo = viewInfo.getControllerInfo();
 			

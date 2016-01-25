@@ -7,8 +7,17 @@ public class AuthenticationRequest {
 	private String password;
 	private HttpServletRequest httpRequest;
 	private Boolean rememberMe;
+	private String host;
 	
 	public AuthenticationRequest() {
+	}
+	
+	public AuthenticationRequest(String username, String password, Boolean rememberMe, String host, HttpServletRequest httpRequest) {
+		this.username = username;
+		this.password = password;
+		this.rememberMe = rememberMe;
+		this.httpRequest = httpRequest;
+		this.host = host;
 	}
 	
 	public AuthenticationRequest(String username, String password, Boolean rememberMe, HttpServletRequest httpRequest) {
@@ -56,5 +65,14 @@ public class AuthenticationRequest {
 	public void setRememberMe(Boolean rememberMe) {
 		this.rememberMe = rememberMe;
 	}
+
+	public String getHost() {
+		return host;
+	}
+
+	public void setHost(String host) {
+		this.host = host;
+	}
+	
 	
 }

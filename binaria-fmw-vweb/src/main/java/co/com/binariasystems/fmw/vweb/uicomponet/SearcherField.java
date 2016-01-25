@@ -57,6 +57,7 @@ public class SearcherField<T> extends CustomField<T> implements SearchSelectionC
 	private ValueChangeListener valueChangeListener;
 	
 	private boolean omitSearchCall;
+	private boolean initialized;
 	
 	public SearcherField(Class<?> entityClazz, String caption) {
 		this(entityClazz, (Class<T>) entityClazz, caption);
@@ -66,12 +67,14 @@ public class SearcherField<T> extends CustomField<T> implements SearchSelectionC
 		this.entityClazz = entityClazz;
 		this.returnType = returnType;
 		setCaption(caption);
-		initComponents();
+		
 	}
 
 	
 	@Override
 	protected Component initContent() {
+		initComponents();
+		initialized = true;
 		return content;
 	}
 	
@@ -105,6 +108,8 @@ public class SearcherField<T> extends CustomField<T> implements SearchSelectionC
 			content.setExpandRatio(descriptionTxt, 1.0f);
 			
 			searchWindow = new SearcherResultWindow<Object>((Class<Object>) entityClazz);
+			applyConditionsPropertyListener(conditions);
+			searchWindow.setConditions(VCriteriaUtils.castVCriteria(conditions));
 			bindEvents();
 		}catch(FMWException ex){
 			MessageDialog.showExceptions(ex, LOGGER);
@@ -212,16 +217,16 @@ public class SearcherField<T> extends CustomField<T> implements SearchSelectionC
 	
 	
 	public SearcherField<T> setCriteria(Criteria newConditios){
-		if(conditions != null)
-			freeConditionsPropertyListener(conditions);
+		freeConditionsPropertyListener(conditions);
 		conditions = newConditios;
-		if(conditions != null)
-			applyConditionsPropertyListener(conditions);
-		searchWindow.setConditions(VCriteriaUtils.castVCriteria(conditions));
+		applyConditionsPropertyListener(conditions);
+		if(initialized)
+			searchWindow.setConditions(VCriteriaUtils.castVCriteria(conditions));
 		return this;
 	}
 	
 	private void freeConditionsPropertyListener(Criteria oldCriteria) {
+		if(oldCriteria == null || !initialized) return;
 		if(oldCriteria instanceof MultipleGroupedCriteria){
 			for(Criteria criteria : ((MultipleGroupedCriteria)oldCriteria).getCriteriaCollection())
 				freeConditionsPropertyListener(criteria);
@@ -238,6 +243,7 @@ public class SearcherField<T> extends CustomField<T> implements SearchSelectionC
 	}
 	
 	private void applyConditionsPropertyListener(Criteria newCriteria) {
+		if(newCriteria == null || !initialized) return;
 		if(newCriteria instanceof MultipleGroupedCriteria){
 			for(Criteria criteria : ((MultipleGroupedCriteria)newCriteria).getCriteriaCollection())
 				freeConditionsPropertyListener(criteria);
