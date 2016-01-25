@@ -188,10 +188,10 @@ public class DefaultViewProvider implements ViewProvider, ServletContextAware {
 				namespaceInfo.setPath(StringUtils.defaultString(urlPrefix));
 			}
 			
-			viewInfo.setUrl(shortUrl.substring(shortUrl.lastIndexOf("/")));
-			viewInfo.setMessages(StringUtils.defaultIfEmpty(view.messages(), namespaceInfo.getMessages()));
+			largeUrl = namespaceInfo.getPath() + shortUrl.substring(shortUrl.lastIndexOf("/"));
 			
-			largeUrl = namespaceInfo.getPath() + viewInfo.getUrl();
+			viewInfo.setUrl(largeUrl);
+			viewInfo.setMessages(StringUtils.defaultIfEmpty(view.messages(), namespaceInfo.getMessages()));
 			
 			if(StringUtils.isEmpty(largeUrl))
 				throw new ViewConfigurationException("Empty url has not valid for view "+viewInfo.getViewClass().getName());

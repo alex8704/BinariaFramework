@@ -144,12 +144,12 @@ public class SearcherResultWindow<T> extends Window implements CloseListener, Cl
 		cleanBtn = new Button(VWebUtils.getCommonString(VWebCommonConstants.MASTER_CRUD_MSG_CLEANCAPTION));
 		
 		gridContainer = new GeneratedPropertyContainer(new BeanItemContainer<T>(entityConfigData.getEntityClass()));
-		gridContainer.addGeneratedProperty(ACTIONS_COLUM_ID, new GridUtils.ActionLinkValueGenerator(entityConfigData.getPkFieldName(), null, this, selectionEventFunction, new ActionLinkInfo("select","Seleccionar")));
+		gridContainer.addGeneratedProperty(ACTIONS_COLUM_ID, new GridUtils.ActionLinkValueGenerator(entityConfigData.getPkFieldName(), null, this, selectionEventFunction, new ActionLinkInfo("select",VWebUtils.getCommonString(VWebCommonConstants.SEARCH_WIN_CHOOSE_CAPTION))));
 		resultsGrid = new Grid(VWebUtils.getCommonString(VWebCommonConstants.SEARCH_WIN_TABLE_CAPTION), gridContainer);
 		resultsGrid.setSelectionMode(SelectionMode.NONE);
 		
 		resultsGrid.getColumn(ACTIONS_COLUM_ID)
-		.setHeaderCaption("Seleccionar")
+		.setHeaderCaption(VWebUtils.getCommonString(VWebCommonConstants.SEARCH_WIN_CHOOSE_CAPTION))
 		.setRenderer(new HtmlRenderer());
 		
 		List<String> columnIds = getGridColumnFields();
@@ -407,7 +407,8 @@ public class SearcherResultWindow<T> extends Window implements CloseListener, Cl
 			selectedValue = null;
 		}
 		SearchSelectionChangeEvent<T> event = new SearchSelectionChangeEvent<T>(oldValue, selectedValue, currentSearchType, isReset);
-		cleanBtn.click();
+		if(initialized)
+			cleanBtn.click();
 		if(selectionChangeListener != null)
 			selectionChangeListener.selectionChange(event);
 	}

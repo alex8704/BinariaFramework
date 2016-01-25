@@ -114,15 +114,15 @@ public class EntityConfigUtils {
 					((AbstractSelect)resp).setContainerDataSource(itemContainer);
 					Enum<?>[] vals = (Enum<?>[]) fieldInfo.getFieldType().getEnumConstants();
 					for(Enum<?> value : vals){
-						Item item = ((AbstractSelect)resp).addItem(value);
-						((AbstractSelect)resp).setItemCaption(item, TypeHelper.objectToString(value));
+						((AbstractSelect)resp).addItem(value);
+						((AbstractSelect)resp).setItemCaption(value, TypeHelper.objectToString(value));
 					}
 				}else if(fieldInfo.getFixedValues() != null && fieldInfo.getFixedValues().length > 0){
 					BeanItemContainer<?> itemContainer = new BeanItemContainer(fieldInfo.getFieldType());
 					((AbstractSelect)resp).setContainerDataSource(itemContainer);
 					for(Listable value : fieldInfo.getFixedValues()){
-						Item item = ((AbstractSelect)resp).addItem(value);
-						((AbstractSelect)resp).setItemCaption(item, value.getDescription());
+						((AbstractSelect)resp).addItem(value);
+						((AbstractSelect)resp).setItemCaption(value, value.getDescription());
 					}
 				}else{
 					EntityCRUDOperationsManager<?> auxManager = EntityCRUDOperationsManager.getInstance(((RelationFieldConfigData)fieldInfo).getRelationEntityClass());
@@ -130,8 +130,8 @@ public class EntityConfigUtils {
 					BeanItemContainer<?> itemContainer = new BeanItemContainer(fieldInfo.getFieldType(), fieldValues);
 					((AbstractSelect)resp).setContainerDataSource(itemContainer);
 					for(Object value : fieldValues){
-						Item item = ((AbstractSelect)resp).addItem(value);
-						((AbstractSelect)resp).setItemCaption(item, FMWEntityUtils.generateStringRepresentationForField(value, FMWConstants.PIPE));
+						((AbstractSelect)resp).addItem(value);
+						((AbstractSelect)resp).setItemCaption(value, FMWEntityUtils.generateStringRepresentationForField(value, FMWConstants.PIPE));
 					}
 				}
 			}
@@ -242,15 +242,15 @@ public class EntityConfigUtils {
 					
 					Enum<?>[] vals = (Enum<?>[]) fieldInfo.getFieldType().getEnumConstants();
 					for(Enum<?> value : vals){
-						Item item = ((AbstractSelect)resp).addItem(value);
-						((AbstractSelect)resp).setItemCaption(item, TypeHelper.objectToString(value));
+						((AbstractSelect)resp).addItem(value);
+						((AbstractSelect)resp).setItemCaption(value, TypeHelper.objectToString(value));
 					}
 				}else if(fieldInfo.getFixedValues() != null && fieldInfo.getFixedValues().length > 0){
 					BeanItemContainer<?> itemContainer = new BeanItemContainer(fieldInfo.getFieldType());
 					((AbstractSelect)resp).setContainerDataSource(itemContainer);
 					for(Listable value : fieldInfo.getFixedValues()){
-						Item item = ((AbstractSelect)resp).addItem(value);
-						((AbstractSelect)resp).setItemCaption(item, value.getDescription());
+						((AbstractSelect)resp).addItem(value);
+						((AbstractSelect)resp).setItemCaption(value, value.getDescription());
 					}
 				}else{
 					EntityCRUDOperationsManager<?> auxManager = EntityCRUDOperationsManager.getInstance(((RelationFieldConfigData)fieldInfo).getRelationEntityClass());
@@ -258,8 +258,8 @@ public class EntityConfigUtils {
 					BeanItemContainer<?> itemContainer = new BeanItemContainer(fieldInfo.getFieldType(), fieldValues);
 					((AbstractSelect)resp).setContainerDataSource(itemContainer);
 					for(Object value : fieldValues){
-						Item item = ((AbstractSelect)resp).addItem(value);
-						((AbstractSelect)resp).setItemCaption(item, FMWEntityUtils.generateStringRepresentationForField(value, FMWConstants.PIPE));
+						((AbstractSelect)resp).addItem(value);
+						((AbstractSelect)resp).setItemCaption(value, FMWEntityUtils.generateStringRepresentationForField(value, FMWConstants.PIPE));
 					}
 				}
 			}

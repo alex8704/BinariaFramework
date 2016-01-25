@@ -36,7 +36,8 @@ public class VCriteriaUtils {
 	}
 
 	public static <T> Criteria equals(String entityField, Property<T> valueProperty) {
-		return new VSimpleCriteria<T>((SingleValueCompareCriteria) equals(entityField, valueProperty.getValue()), valueProperty);
+		Criteria auxCriteria = equals(entityField, valueProperty.getValue());
+		return (auxCriteria instanceof SingleValueCompareCriteria) ? new VSimpleCriteria<T>((SingleValueCompareCriteria) auxCriteria, valueProperty) : auxCriteria;
 	}
 
 	public static Criteria notEquals(String entityField, Object value) {
@@ -44,7 +45,8 @@ public class VCriteriaUtils {
 	}
 
 	public static <T> Criteria notEquals(String entityField, Property<T> valueProperty) {
-		return new VSimpleCriteria<T>((SingleValueCompareCriteria) notEquals(entityField, valueProperty.getValue()), valueProperty);
+		Criteria auxCriteria = notEquals(entityField, valueProperty.getValue());
+		return (auxCriteria instanceof SingleValueCompareCriteria) ? new VSimpleCriteria<T>((SingleValueCompareCriteria) auxCriteria, valueProperty) : auxCriteria;
 	}
 
 	public static Criteria greater(String entityField, Object value) {

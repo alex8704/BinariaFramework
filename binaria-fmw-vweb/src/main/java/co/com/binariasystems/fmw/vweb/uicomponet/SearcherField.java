@@ -59,6 +59,10 @@ public class SearcherField<T> extends CustomField<T> implements SearchSelectionC
 	private boolean omitSearchCall;
 	private boolean initialized;
 	
+	public SearcherField(Class<?> entityClazz) {
+		this(entityClazz, null);
+	}
+	
 	public SearcherField(Class<?> entityClazz, String caption) {
 		this(entityClazz, (Class<T>) entityClazz, caption);
 	}
@@ -66,7 +70,8 @@ public class SearcherField<T> extends CustomField<T> implements SearchSelectionC
 	public SearcherField(Class<?> entityClazz, Class<T> returnType, String caption) {
 		this.entityClazz = entityClazz;
 		this.returnType = returnType;
-		setCaption(caption);
+		if(caption != null)
+			setCaption(caption);
 		
 	}
 

@@ -212,7 +212,7 @@ public class DefaultEntityConfigurator<T> implements EntityConfigurator<T>{
 		if(fieldCfg.isAuditoryField())return;
 		
 		if(fieldCfg.getFieldUIControl() != null && fieldCfg.getFieldUIControl() != EntityConfigUIControl.DEFAULT){
-			if(FMWEntityUtils.isValidControlForField(fieldCfg))
+			if(!FMWEntityUtils.isValidControlForField(fieldCfg))
 				throw new FMWException("Cannot create UIControl of type "+fieldCfg.getFieldUIControl().name()+" for "+fieldCfg.getFieldType()+" field "+fieldCfg.getFieldName());
 		}else{
 			if(fieldCfg instanceof RelationFieldConfigData){// Buscador Por defecto

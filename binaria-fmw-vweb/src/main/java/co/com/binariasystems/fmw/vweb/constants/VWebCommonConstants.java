@@ -29,6 +29,7 @@ public interface VWebCommonConstants {
 	final String MASTER_CRUD_AREYOU_SURE_CONTINUE = "masterCrud.msg.areYouSureContinue";
 	final String SEARCH_WIN_CAPTION = "searchResultWin.caption";
 	final String SEARCH_WIN_TABLE_CAPTION = "searchResultWin.table.caption";
+	final String SEARCH_WIN_CHOOSE_CAPTION = "seracherWindow.chooseColumn.caption";
 	
 	final String CTX_PARAM_APP_SHORTNAME = "applicationShortName";
 	final String CTX_PARAM_APP_COMPLETENAME = "applicationCompleteName";

@@ -164,6 +164,8 @@ public class FormPanel extends HorizontalLayout{
 	
 	
 	public void initFocus(){
+		if(!navigationEventApplieds)
+			applyNavigationActions();
 		if(firstFocusComp != null)
 			firstFocusComp.focus();
 	}
@@ -204,16 +206,6 @@ public class FormPanel extends HorizontalLayout{
 			}
 		}
 		return new FormValidationException(validationErrorListFmt.format(new Object[]{itemsBuilder.toString()}), validationMessages);
-	}
-	
-	
-	@Override
-	public void attach() {
-		super.attach();
-		if(!navigationEventApplieds){
-			applyNavigationActions();
-		}
-		initFocus();
 	}
 	
 	private void applyNavigationActions(){

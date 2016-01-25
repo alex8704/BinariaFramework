@@ -22,6 +22,7 @@ public class LabelBuilder extends Label {
 
 	public LabelBuilder(Property contentSource) {
 		super(contentSource);
+		setContentMode(ContentMode.HTML);
 	}
 
 	public LabelBuilder(String content, ContentMode contentMode) {
@@ -30,6 +31,7 @@ public class LabelBuilder extends Label {
 
 	public LabelBuilder(String content) {
 		super(content);
+		setContentMode(ContentMode.HTML);
 	}
 	
 	public LabelBuilder withContentMode(ContentMode contentMode){

@@ -373,7 +373,7 @@ public class EntityCRUDOperationsManager<T> {
 		dao.delete(sqlBuilder.toString(), paramSource);
 	}
 
-	private String buildCriteriaStatements(EntityConfigData<?> configData, Criteria criteria) {
+	private String buildCriteriaStatements(EntityConfigData<?> configData, Criteria criteria) throws FMWException {
 		if (criteria == null)
 			return "";
 
@@ -412,7 +412,7 @@ public class EntityCRUDOperationsManager<T> {
 
 			columnName = FMWEntityConstants.ENTITY_DYNASQL_MAIN_ALIAS + "." + fieldCfg.getColumnName();
 			if (fieldCfg instanceof RelationFieldConfigData && !TypeHelper.isBasicType(fieldCfg.getFieldType())) {
-				((RelationFieldConfigData) fieldCfg).getClass();
+				LOGGER.warn("FMWEntity Relational field Criteria not implemented yet.");
 			}
 			resp.append(CriteriaUtils.buildSingleValueSQLCondition(criteria, columnName));
 		}

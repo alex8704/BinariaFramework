@@ -162,7 +162,7 @@ public class EntityCRUDPanel<T> extends FormPanel implements ClickListener{
 		searchBtn.addClickListener(this);
 		searchAllBtn.addClickListener(this);
 		cleanBtn.addClickListener(this);
-		if(deleteBtn == null) return;
+		if(deleteBtn != null)
 			deleteBtn.addClickListener(this);
 			
 		pager.setPageChangeHandler(new PageChangeHandler<T, T>() {

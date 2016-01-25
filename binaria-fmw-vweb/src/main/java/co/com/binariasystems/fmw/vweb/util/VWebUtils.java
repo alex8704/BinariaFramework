@@ -18,6 +18,7 @@ import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.event.ShortcutListener;
 import com.vaadin.server.VaadinService;
 import com.vaadin.server.VaadinServletRequest;
+import com.vaadin.server.VaadinServletService;
 import com.vaadin.ui.AbstractSelect;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.CheckBox;
@@ -54,7 +55,7 @@ public final class VWebUtils {
 	}
 	
 	public static String getContextPath(){
-		return VaadinService.getCurrentRequest().getContextPath();
+		return ((VaadinServletService)VaadinService.getCurrent()).getServlet().getServletContext().getContextPath();
 	}
 	
 	public static String getContextAbsolutePath(){

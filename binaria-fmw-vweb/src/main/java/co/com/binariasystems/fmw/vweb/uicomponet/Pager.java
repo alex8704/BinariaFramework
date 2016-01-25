@@ -55,6 +55,7 @@ public class Pager<FILTER_TYPE, RESULT_TYPE> extends HorizontalLayout implements
 	private int maxCachedPages=1;
 	private int currentCacheGroup;
 	private boolean initialized;
+	private int rowsByPage;
 	
 	
 	public Pager(){
@@ -62,11 +63,8 @@ public class Pager<FILTER_TYPE, RESULT_TYPE> extends HorizontalLayout implements
 	}
 	
 	public Pager(PagerMode pagerMode){
-		this(pagerMode, ROWS_BY_PAGE_ITEMS[0]);
-	}
-	
-	public Pager(PagerMode pMode, int rowsByPage){
-		this.pagerMode = (pMode != null) ? pMode : PagerMode.PAGE;
+		this.pagerMode = (pagerMode != null) ? pagerMode : PagerMode.PAGE;
+		rowsByPageProperty.setValue(pagerMode.equals(PagerMode.ITEM) ? 1 : ROWS_BY_PAGE_ITEMS[0]);
 	}
 	
 	@Override
@@ -219,7 +217,7 @@ public class Pager<FILTER_TYPE, RESULT_TYPE> extends HorizontalLayout implements
 	}
 	
 	private int rowsByPage(){
-		return rowsByPageProperty.getValue() != null ? rowsByPageProperty.getValue() : 0;
+		return rowsByPageProperty.getValue() != null ? rowsByPageProperty.getValue() : rowsByPage;
 	}
 	
 	private void fireFilterDtoChangeEvent(){
