@@ -113,8 +113,6 @@ public class SearcherField<T> extends CustomField<T> implements SearchSelectionC
 			content.setExpandRatio(descriptionTxt, 1.0f);
 			
 			searchWindow = new SearcherResultWindow<Object>((Class<Object>) entityClazz);
-			applyConditionsPropertyListener(conditions);
-			searchWindow.setConditions(VCriteriaUtils.castVCriteria(conditions));
 			bindEvents();
 		}catch(FMWException ex){
 			MessageDialog.showExceptions(ex, LOGGER);
@@ -151,6 +149,10 @@ public class SearcherField<T> extends CustomField<T> implements SearchSelectionC
 		textfieldProperty.addValueChangeListener(valueChangeListener);
 		button.addClickListener(buttonClickListener);
 		searchWindow.setSelectionChangeListener(this);
+		applyConditionsPropertyListener(conditions);
+		searchWindow.setConditions(VCriteriaUtils.castVCriteria(conditions));
+		if(getPropertyDataSource() instanceof AbstractProperty)
+			((AbstractProperty)getPropertyDataSource()).addValueChangeListener(valueChangeListener);
 	}
 	
 	private void onTextfieldValueChange(Property.ValueChangeEvent event) {
@@ -216,7 +218,7 @@ public class SearcherField<T> extends CustomField<T> implements SearchSelectionC
 	@Override
 	public void setPropertyDataSource(Property newDataSource) {
 		super.setPropertyDataSource(newDataSource);
-		if(newDataSource instanceof AbstractProperty)
+		if(newDataSource instanceof AbstractProperty && initialized)
 			((AbstractProperty)newDataSource).addValueChangeListener(valueChangeListener);
 	}
 	

@@ -244,4 +244,17 @@ private static final Logger LOGGER = LoggerFactory.getLogger(ObjectUtils.class);
 		}
 	}
 	
+	public static <F, T> List<T> transferPropertiesIterableRecursive(Iterable<F> sourceIterable, Class<T> targetType) throws FMWUncheckedException{
+		try {
+			List<T> operationResult = new ArrayList<T>();
+			for(F item : sourceIterable){
+				operationResult.add(transferPropertiesRecursive(item, targetType.newInstance()));
+			}
+			return operationResult;
+		
+		} catch (ReflectiveOperationException e) {
+			throw new FMWUncheckedException(e.getMessage(), e);
+		}
+	}
+	
 }
