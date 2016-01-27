@@ -3,11 +3,14 @@ package co.com.binariasystems.fmw.vweb.mvp.dispatcher;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.StringTokenizer;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.reflect.MethodUtils;
 
 import co.com.binariasystems.fmw.exception.FMWException;
+import co.com.binariasystems.fmw.util.codec.Base64;
+import co.com.binariasystems.fmw.vweb.mvp.dispatcher.data.ControllerInfo;
 import co.com.binariasystems.fmw.vweb.mvp.dispatcher.data.RequestData;
 import co.com.binariasystems.fmw.vweb.mvp.dispatcher.data.ViewAndController;
 import co.com.binariasystems.fmw.vweb.mvp.dispatcher.data.ViewInfo;
@@ -38,15 +41,15 @@ public class ViewDispatcherImpl implements ViewDispatcher{
 		
 		ViewInfo viewInfo = viewProvider.getViewInfo(requestData);
 		if(viewInfo != null && viewInfo.isRootView()){
-			handleRootViewDispatch(viewInfo, viewAndController);
+			handleRootViewDispatch(viewInfo, viewAndController, requestData);
 			return;
 		}
 		
-		handleViewDispatch(viewInfo, viewAndController);
+		handleViewDispatch(viewInfo, viewAndController, requestData);
 	}
 	
 	
-	private void handleViewDispatch(ViewInfo newViewInfo, ViewAndController newViewAndController) throws FMWException{
+	private void handleViewDispatch(ViewInfo newViewInfo, ViewAndController newViewAndController, RequestData requestData) throws FMWException{
 		try{
 			if(currentViewInfo != null && currentViewInfo.getControllerInfo() != null){
 				ViewAndController oldViewAndController = loadedViews.get(currentViewInfo.getUrl());
@@ -64,8 +67,10 @@ public class ViewDispatcherImpl implements ViewDispatcher{
 			 */
 			if(newViewInfo != null && newViewInfo.getControllerInfo() != null){
 				String onLoadMtd = newViewInfo.getControllerInfo().getBeforeLoadMethod();
-				if(StringUtils.isNotEmpty(onLoadMtd)){
+				if(hasOnLoadWithoutArguments(newViewInfo.getControllerInfo())){
 					MethodUtils.invokeExactMethod(newViewAndController.getController(), onLoadMtd);
+				}else if(hasOnLoadWithArguments(newViewInfo.getControllerInfo())){
+					MethodUtils.invokeExactMethod(newViewAndController.getController(), onLoadMtd, requestData.getParameters());
 				}
 			}
 			if(currentRootViewInfo != null && StringUtils.isNotEmpty(currentRootViewInfo.getContentSetterMethod())){
@@ -82,7 +87,7 @@ public class ViewDispatcherImpl implements ViewDispatcher{
 	}
 
 
-	private void handleRootViewDispatch(ViewInfo newViewInfo, ViewAndController newViewAndController) throws FMWException {
+	private void handleRootViewDispatch(ViewInfo newViewInfo, ViewAndController newViewAndController, RequestData requestData) throws FMWException {
 		try{
 			if(currentRootViewInfo != null && currentRootViewInfo.getControllerInfo() != null){
 				ViewAndController oldViewAndController = loadedViews.get(currentRootViewInfo.getUrl());
@@ -100,8 +105,10 @@ public class ViewDispatcherImpl implements ViewDispatcher{
 			 */
 			if(newViewInfo != null && newViewInfo.getControllerInfo() != null){
 				String onLoadMtd = newViewInfo.getControllerInfo().getBeforeLoadMethod();
-				if(StringUtils.isNotEmpty(onLoadMtd)){
+				if(hasOnLoadWithoutArguments(newViewInfo.getControllerInfo())){
 					MethodUtils.invokeExactMethod(newViewAndController.getController(), onLoadMtd);
+				}else if(hasOnLoadWithArguments(newViewInfo.getControllerInfo())){
+					MethodUtils.invokeExactMethod(newViewAndController.getController(), onLoadMtd, requestData.getParameters());
 				}
 			}
 			
@@ -121,6 +128,9 @@ public class ViewDispatcherImpl implements ViewDispatcher{
 		if(urlinfoIndex >= 0)
 			resp.setPathInfo(url.substring(urlinfoIndex+1));
 		
+		if(hasRequestParameters(dispatchRequest))
+			resp.setParameters(decodeAndBuildParametersMap(resp.getPathInfo()));
+		
 		ViewInfo viewInfo = viewProvider.getViewInfo(resp);
 		if(viewInfo != null)
 			resp.setUrl(viewInfo.getUrl());//Esta se hace para el caso del ResourceNotFount, Forbidden y Otros
@@ -128,6 +138,47 @@ public class ViewDispatcherImpl implements ViewDispatcher{
 		resp.setEventBus(eventBus);
 		
 		return resp;
+	}
+	
+	private Map<String, String> decodeAndBuildParametersMap(String pathInfo) {
+		StringTokenizer paramsTokens = new StringTokenizer(new String(Base64.base64ToByteArray(pathInfo)), "&");
+		Map<String, String>  requestParameters = new HashMap<String, String>();
+		while(paramsTokens.hasMoreTokens()){
+			String[] keyValuePair = paramsTokens.nextToken().split("=");
+			if(keyValuePair.length < 2)continue;
+			requestParameters.put(keyValuePair[0].trim(), keyValuePair[1].trim());
+		}
+		return requestParameters;
+	}
+
+	private boolean hasOnLoadWithArguments(ControllerInfo controllerInfo){
+		if(StringUtils.isEmpty(controllerInfo.getBeforeLoadMethod()))return false;
+		try {
+			controllerInfo.getControllerClass().getMethod(controllerInfo.getBeforeLoadMethod(), Map.class);
+			return true;
+		} catch (NoSuchMethodException | SecurityException e) {
+			return false;
+		}
+	}
+	
+	private boolean hasOnLoadWithoutArguments(ControllerInfo controllerInfo){
+		if(StringUtils.isEmpty(controllerInfo.getBeforeLoadMethod()))return false;
+		try {
+			controllerInfo.getControllerClass().getMethod(controllerInfo.getBeforeLoadMethod());
+			return true;
+		} catch (NoSuchMethodException | SecurityException e) {
+			return false;
+		}
+	}
+	
+	public boolean hasRequestParameters(ViewDispatchRequest dispatchRequest){
+		int urlinfoIndex = StringUtils.defaultString(dispatchRequest.getViewURL()).indexOf("?");
+		String pathInfo = (urlinfoIndex >= 0) ? StringUtils.defaultString(dispatchRequest.getViewURL()).substring(urlinfoIndex+1) : null;
+		return pathInfo != null && 
+				!ViewProvider.AUTHENTICATION_VIEW_PARAM_IDENTIFIER.equals(pathInfo) &&
+				!ViewProvider.DASHBOARD_VIEW_PARAM_IDENTIFIER.equals(pathInfo) &&
+				!ViewProvider.FORBIDDEN_VIEW_PARAM_IDENTIFIER.equals(pathInfo) &&
+				!ViewProvider.RESNOTFOUND_VIEW_PARAM_IDENTIFIER.equals(pathInfo);
 	}
 	
 	public ViewProvider getViewProvider() {

@@ -152,7 +152,8 @@ public class EntityCRUDPanel<T> extends FormPanel implements ClickListener{
 			}
 			initialKeyValue = beanItem.getItemProperty(entityConfigData.getPkFieldName()).getValue();
 		} catch (ReflectiveOperationException | SecurityException ex) {
-			throw new FMWException(ex);
+			Throwable cause = FMWExceptionUtils.prettyMessageException(ex);
+			throw new FMWException(cause.getMessage(), cause);
 		}
 	}
 	

@@ -20,6 +20,7 @@ import co.com.binariasystems.fmw.entity.cfg.EntityConfigurationManager;
 import co.com.binariasystems.fmw.exception.FMWException;
 import co.com.binariasystems.fmw.ioc.IOCHelper;
 import co.com.binariasystems.fmw.reflec.TypeHelper;
+import co.com.binariasystems.fmw.util.exception.FMWExceptionUtils;
 
 public class FMWEntityUtils {
 	
@@ -69,7 +70,8 @@ public class FMWEntityUtils {
 			}else	//BasicTypes, Enums, Collections
 				resp.append(TypeHelper.objectToString(fieldValue));
 		}catch(ReflectiveOperationException ex){
-			throw new FMWException(ex);
+			Throwable cause = FMWExceptionUtils.prettyMessageException(ex);
+			throw new FMWException(cause.getMessage(), cause);
 		}
 		
 		return resp.toString();

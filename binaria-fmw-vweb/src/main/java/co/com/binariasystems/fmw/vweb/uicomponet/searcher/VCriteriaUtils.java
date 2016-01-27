@@ -1,3 +1,4 @@
+
 package co.com.binariasystems.fmw.vweb.uicomponet.searcher;
 
 import java.util.Collection;
@@ -150,14 +151,17 @@ public class VCriteriaUtils {
 			if (currentCriteria instanceof And)
 				return and(multipleCriterias);
 		} else if (currentCriteria instanceof VCriteria) {
-			if (currentCriteria instanceof VSimpleCriteria)
-				return ((VSimpleCriteria<?>) currentCriteria).getProperty().getValue().equals(((VSimpleCriteria<?>)currentCriteria).getCriteria().getValue()) ? 
+			if (currentCriteria instanceof VSimpleCriteria){
+				Object propVal = ((VSimpleCriteria<?>) currentCriteria).getProperty().getValue();
+				Object currVal = ((VSimpleCriteria<?>)currentCriteria).getCriteria().getValue();
+				return (propVal == null && currVal == null) || (propVal != null && currVal != null && propVal.equals(currVal)) ? 
 						((VSimpleCriteria<?>) currentCriteria).getCriteria() : copyWithNewValue(((VSimpleCriteria<?>)currentCriteria).getCriteria(), ((VSimpleCriteria<?>) currentCriteria).getProperty().getValue());
-			if(currentCriteria instanceof VRangeCriteria)
+			}if(currentCriteria instanceof VRangeCriteria){
 				return ((VRangeCriteria<?>) currentCriteria).getMinProperty().getValue().equals(((VRangeCriteria<?>) currentCriteria).getCriteria().getMinValue()) &&
 						((VRangeCriteria<?>) currentCriteria).getMaxProperty().getValue().equals(((VRangeCriteria<?>) currentCriteria).getCriteria().getMaxValue())? 
 						((VRangeCriteria<?>) currentCriteria).getCriteria() : copyWithNewValues(((VRangeCriteria) currentCriteria).getCriteria(), 
 								((VRangeCriteria) currentCriteria).getMinProperty().getValue(), ((VRangeCriteria) currentCriteria).getMaxProperty().getValue(), ((VRangeCriteria) currentCriteria).getTargetClazz());
+			}
 		}
 		return currentCriteria;
 	}

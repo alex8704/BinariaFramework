@@ -12,6 +12,7 @@ import org.apache.commons.lang3.reflect.MethodUtils;
 import org.reflections.Reflections;
 
 import co.com.binariasystems.fmw.exception.FMWException;
+import co.com.binariasystems.fmw.util.exception.FMWExceptionUtils;
 import co.com.binariasystems.fmw.util.messagebundle.MessageBundleManager;
 import co.com.binariasystems.fmw.vweb.constants.VWebCommonConstants;
 import co.com.binariasystems.fmw.vweb.mvp.Initializable;
@@ -69,7 +70,7 @@ public class DefaultViewInstanceCreator implements ViewInstanceCreator {
 			}else
 				uiContainer = (Component)viewInstance;
 			
-			MVPUtils.applyConventionStringsAndValidationsForView(viewInstance, viewInfo, messageBundleManager);
+			MVPUtils.applyConventionStringsForView(viewInstance, viewInfo, messageBundleManager);
 			
 			
 			if(viewInstance instanceof Initializable)
@@ -77,6 +78,7 @@ public class DefaultViewInstanceCreator implements ViewInstanceCreator {
 			else if(StringUtils.isNoneEmpty(viewInfo.getInitMethod()))
 				MethodUtils.getAccessibleMethod(viewInfo.getViewClass().getMethod(viewInfo.getInitMethod())).invoke(viewInstance);
 			
+			MVPUtils.applyValidatorsForView(viewInstance, viewInfo);
 			
 			ControllerInfo controllerInfo = viewInfo.getControllerInfo();
 			
@@ -90,7 +92,8 @@ public class DefaultViewInstanceCreator implements ViewInstanceCreator {
 			
 			resp = new ViewAndController(viewInstance, uiContainer, controller);
 		} catch (ReflectiveOperationException | IllegalArgumentException | SecurityException | ParseException | FMWException e) {
-			throw new ViewInstantiationException(e);
+			Throwable cause = FMWExceptionUtils.prettyMessageException(e);
+			throw new ViewInstantiationException(cause.getMessage(), cause);
 		}
 
 		return resp;

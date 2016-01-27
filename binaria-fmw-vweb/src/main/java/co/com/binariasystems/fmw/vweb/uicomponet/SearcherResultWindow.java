@@ -108,13 +108,7 @@ public class SearcherResultWindow<T> extends Window implements CloseListener, Cl
 	@Override
 	public void attach() {
 		super.attach();
-		if(initialized) return;
-		try {
-			initContent();
-			initialized = true;
-		} catch (FMWException ex) {
-			MessageDialog.showExceptions(ex);
-		}
+		initContent();
 	}
 	
 	public void setSelectionChangeListener(SearchSelectionChangeListener<T> selectionChangeListener) {
@@ -127,70 +121,76 @@ public class SearcherResultWindow<T> extends Window implements CloseListener, Cl
 		this.conditions = conditions;
 	}
 	
-	private void initContent() throws FMWException{
-		setCaption(VWebUtils.getCommonString(VWebCommonConstants.SEARCH_WIN_CAPTION));
-		form = new FormPanel(2);
-		List<FieldConfigData> sortedFields = FMWEntityUtils.sortByUIControlTypePriority(entityConfigData.getFieldsData(), entityConfigData.getPkFieldName());
-		
-		for(FieldConfigData fieldCfg : sortedFields){
-			Component comp = EntityConfigUtils.createComponentForField(fieldCfg, entityConfigData, labelsFmt, entityStrings);
-			form.add(comp, Dimension.percent(100));
-			componentMap.put(fieldCfg.getFieldName(), comp);
-		}
-		
-		pager = new Pager<T, T>(PagerMode.PAGE);
-		searchBtn = new Button(VWebUtils.getCommonString(VWebCommonConstants.MASTER_CRUD_MSG_SEARCHCAPTION));
-		searchAllBtn = new Button(VWebUtils.getCommonString(VWebCommonConstants.MASTER_CRUD_MSG_SEARCHALLCAPTION));
-		cleanBtn = new Button(VWebUtils.getCommonString(VWebCommonConstants.MASTER_CRUD_MSG_CLEANCAPTION));
-		
-		gridContainer = new GeneratedPropertyContainer(new BeanItemContainer<T>(entityConfigData.getEntityClass()));
-		gridContainer.addGeneratedProperty(ACTIONS_COLUM_ID, new GridUtils.ActionLinkValueGenerator(entityConfigData.getPkFieldName(), null, this, selectionEventFunction, new ActionLinkInfo("select",VWebUtils.getCommonString(VWebCommonConstants.SEARCH_WIN_CHOOSE_CAPTION))));
-		resultsGrid = new Grid(VWebUtils.getCommonString(VWebCommonConstants.SEARCH_WIN_TABLE_CAPTION), gridContainer);
-		resultsGrid.setSelectionMode(SelectionMode.NONE);
-		
-		resultsGrid.getColumn(ACTIONS_COLUM_ID)
-		.setHeaderCaption(VWebUtils.getCommonString(VWebCommonConstants.SEARCH_WIN_CHOOSE_CAPTION))
-		.setRenderer(new HtmlRenderer());
-		
-		List<String> columnIds = getGridColumnFields();
-		GenericStringPropertyGenerator genericPropertyGenerator = new GenericStringPropertyGenerator();
-		for(String columnId : columnIds){
-			if(columnId.equals(ACTIONS_COLUM_ID)) continue;
-			FieldConfigData fieldCfg = entityConfigData.getFieldData(columnId);
-			Renderer<?> renderer = GridUtils.obtainRendererForType(fieldCfg.getFieldType());
-			Column column = resultsGrid.getColumn(columnId);
-			column.setHeaderCaption(EntityConfigUtils.getFieldCaptionText(fieldCfg, entityConfigData, labelsFmt, entityStrings));
-			if(fieldCfg.isRelationField() && FMWEntityUtils.isEntityClass(fieldCfg.getFieldType())){
-				gridContainer.addGeneratedProperty(columnId, genericPropertyGenerator);
+	private void initContent(){
+		if(initialized) return;
+		try{
+			setCaption(VWebUtils.getCommonString(VWebCommonConstants.SEARCH_WIN_CAPTION));
+			form = new FormPanel(2);
+			List<FieldConfigData> sortedFields = FMWEntityUtils.sortByUIControlTypePriority(entityConfigData.getFieldsData(), entityConfigData.getPkFieldName());
+			
+			for(FieldConfigData fieldCfg : sortedFields){
+				Component comp = EntityConfigUtils.createComponentForField(fieldCfg, entityConfigData, labelsFmt, entityStrings);
+				form.add(comp, Dimension.percent(100));
+				componentMap.put(fieldCfg.getFieldName(), comp);
 			}
-			if(renderer != null)
-				column.setRenderer(renderer);	
+			
+			pager = new Pager<T, T>(PagerMode.PAGE);
+			searchBtn = new Button(VWebUtils.getCommonString(VWebCommonConstants.MASTER_CRUD_MSG_SEARCHCAPTION));
+			searchAllBtn = new Button(VWebUtils.getCommonString(VWebCommonConstants.MASTER_CRUD_MSG_SEARCHALLCAPTION));
+			cleanBtn = new Button(VWebUtils.getCommonString(VWebCommonConstants.MASTER_CRUD_MSG_CLEANCAPTION));
+			
+			gridContainer = new GeneratedPropertyContainer(new BeanItemContainer<T>(entityConfigData.getEntityClass()));
+			gridContainer.addGeneratedProperty(ACTIONS_COLUM_ID, new GridUtils.ActionLinkValueGenerator(entityConfigData.getPkFieldName(), null, this, selectionEventFunction, new ActionLinkInfo("select",VWebUtils.getCommonString(VWebCommonConstants.SEARCH_WIN_CHOOSE_CAPTION))));
+			resultsGrid = new Grid(VWebUtils.getCommonString(VWebCommonConstants.SEARCH_WIN_TABLE_CAPTION), gridContainer);
+			resultsGrid.setSelectionMode(SelectionMode.NONE);
+			
+			resultsGrid.getColumn(ACTIONS_COLUM_ID)
+			.setHeaderCaption(VWebUtils.getCommonString(VWebCommonConstants.SEARCH_WIN_CHOOSE_CAPTION))
+			.setRenderer(new HtmlRenderer());
+			
+			List<String> columnIds = getGridColumnFields();
+			GenericStringPropertyGenerator genericPropertyGenerator = new GenericStringPropertyGenerator();
+			for(String columnId : columnIds){
+				if(columnId.equals(ACTIONS_COLUM_ID)) continue;
+				FieldConfigData fieldCfg = entityConfigData.getFieldData(columnId);
+				Renderer<?> renderer = GridUtils.obtainRendererForType(fieldCfg.getFieldType());
+				Column column = resultsGrid.getColumn(columnId);
+				column.setHeaderCaption(EntityConfigUtils.getFieldCaptionText(fieldCfg, entityConfigData, labelsFmt, entityStrings));
+				if(fieldCfg.isRelationField() && FMWEntityUtils.isEntityClass(fieldCfg.getFieldType())){
+					gridContainer.addGeneratedProperty(columnId, genericPropertyGenerator);
+				}
+				if(renderer != null)
+					column.setRenderer(renderer);	
+			}
+			
+			resultsGrid.setColumns(columnIds.toArray());
+			resultsGrid.setCellStyleGenerator(new SimpleCellStyleGenerator(new SimpleStyleInfo("actions", UIConstants.CENTER_ALIGN_STYLE), new SimpleStyleInfo(entityConfigData.getPkFieldName(), UIConstants.CENTER_ALIGN_STYLE)));
+			resultsGrid.setHeightMode(HeightMode.ROW);
+			resultsGrid.setHeightByRows(pager.getRowsByPage());
+			
+			form.addEmptyRow();
+			form.addCenteredOnNewRow(Dimension.pixels(EntityConfigUtils.BUTTONS_WIDTH), searchBtn, searchAllBtn, cleanBtn);
+			form.add(resultsGrid, 2, Dimension.fullPercent());
+			form.addCenteredOnNewRow(Dimension.fullPercent(), pager);
+			
+			bindComponentsToModel();
+			
+			bindControlEvents();
+			
+			form.setSubmitButton(searchBtn);
+			form.setResetButton(cleanBtn);
+			
+			setContent(form);
+			setWidth(1000, Unit.PIXELS);
+			//setHeight(Page.getCurrent().getBrowserWindowHeight() - 25, Unit.PIXELS);
+			center();
+			setModal(true);
+			
+			cleanBtn.click();
+			initialized = true;
+		}catch (FMWException ex) {
+			MessageDialog.showExceptions(ex);
 		}
-		
-		resultsGrid.setColumns(columnIds.toArray());
-		resultsGrid.setCellStyleGenerator(new SimpleCellStyleGenerator(new SimpleStyleInfo("actions", UIConstants.CENTER_ALIGN_STYLE), new SimpleStyleInfo(entityConfigData.getPkFieldName(), UIConstants.CENTER_ALIGN_STYLE)));
-		resultsGrid.setHeightMode(HeightMode.ROW);
-		resultsGrid.setHeightByRows(pager.getRowsByPage());
-		
-		form.addEmptyRow();
-		form.addCenteredOnNewRow(Dimension.pixels(EntityConfigUtils.BUTTONS_WIDTH), searchBtn, searchAllBtn, cleanBtn);
-		form.add(resultsGrid, 2, Dimension.fullPercent());
-		form.addCenteredOnNewRow(Dimension.fullPercent(), pager);
-		
-		bindComponentsToModel();
-		
-		bindControlEvents();
-		
-		form.setSubmitButton(searchBtn);
-		form.setResetButton(cleanBtn);
-		
-		setContent(form);
-		setWidth(1000, Unit.PIXELS);
-		//setHeight(Page.getCurrent().getBrowserWindowHeight() - 25, Unit.PIXELS);
-		center();
-		setModal(true);
-		
-		cleanBtn.click();
 	}
 	
 	private List<String> getGridColumnFields(){
@@ -218,7 +218,8 @@ public class SearcherResultWindow<T> extends Window implements CloseListener, Cl
 					((Field<?>)comp).setPropertyDataSource(beanItem.getItemProperty(fieldName));
 			}
 		}catch(ReflectiveOperationException | SecurityException ex){
-			throw new FMWException(ex);
+			Throwable cause = FMWExceptionUtils.prettyMessageException(ex);
+			throw new FMWException(cause.getMessage(), cause);
 		}
 	}
 	
@@ -269,54 +270,22 @@ public class SearcherResultWindow<T> extends Window implements CloseListener, Cl
 	}
 	
 	private void handlePKSearch(Object pkValue){
-		if(initialized){
-			beanItem.getItemProperty(entityConfigData.getPkFieldName()).setValue(pkValue);
-			searchBtn.click();
-			if(gridContainer.size() == 1)
-				selectedValue = (T)gridContainer.firstItemId();
-		}else{
-			try{
-				T emptyBean = entityConfigData.getEntityClass().getConstructor().newInstance();
-				PropertyUtils.setProperty(emptyBean, entityConfigData.getPkFieldName(), pkValue);
-				ListPage<T> listPage = manager.searchForFmwComponent(emptyBean, 1, 1, conditions);
-				if(listPage.getRowCount() > 0)
-					selectedValue = listPage.getData().get(0);
-			}catch(NumberFormatException | FMWException | ReflectiveOperationException ex){
-				MessageDialog.showExceptions(ex);
-				return;
-			}
-		}
+		beanItem.getItemProperty(entityConfigData.getPkFieldName()).setValue(pkValue);
+		searchBtn.click();
+		selectedValue = (gridContainer.size() == 1) ? (T)gridContainer.firstItemId() : null;
 		fireSelectionChangeEvent();
 	}
 	
 	private void handleFilterSearch(Object filterValue){
-		if(initialized){
-			beanItem.getItemProperty(entityConfigData.getSearchFieldName()).setValue(filterValue);
-			searchBtn.click();
-			if(gridContainer.size() != 1){
-				show();
-				return;
-			}else
-				selectedValue = (T)gridContainer.firstItemId();
-		}else{
-			try{
-				T emptyBean = entityConfigData.getEntityClass().getConstructor().newInstance();
-				PropertyUtils.setProperty(emptyBean, entityConfigData.getSearchFieldName(), filterValue);
-				ListPage<T> listPage = manager.searchForFmwComponent(emptyBean, 1, 1, conditions);
-				if(listPage.getRowCount() != 1){
-					show();
-					for(T item : listPage.getData())
-						gridContainer.addItem(item);
-					return;
-				}else
-					selectedValue = listPage.getData().get(0);
-				return;
-			}catch(NumberFormatException | FMWException | ReflectiveOperationException ex){
-				MessageDialog.showExceptions(ex);
-				return;
-			}
+		beanItem.getItemProperty(entityConfigData.getSearchFieldName()).setValue(filterValue);
+		searchBtn.click();
+		if(gridContainer.size() != 1)
+			show();
+		else{
+			selectedValue = (T)gridContainer.firstItemId();
+			fireSelectionChangeEvent();
 		}
-		fireSelectionChangeEvent();
+			
 	}
 
 	private void handleClean() throws Exception{
@@ -347,21 +316,16 @@ public class SearcherResultWindow<T> extends Window implements CloseListener, Cl
 	
 	//Para el boton de "buscar" siempre se busca y se abre la ventana
 	private void doButtonSearch(Object filterValue){
-		if(!initialized){
-			show();
-			if(filterValue != null)
-				beanItem.getItemProperty(entityConfigData.getSearchFieldName()).setValue(filterValue);
-			searchBtn.click();
-		}else{
-			show();
-			if(filterValue != null)
-				beanItem.getItemProperty(entityConfigData.getSearchFieldName()).setValue(filterValue);
-			searchBtn.click();
-		}
+		initContent();
+		if(filterValue != null)
+			beanItem.getItemProperty(entityConfigData.getSearchFieldName()).setValue(filterValue);
+		searchBtn.click();
+		show();
 	}
 	
 	//Busca y abre la ventana solo si no encuentra resultado
 	private void doFilterSearch(Object filterValue){
+		initContent();
 		if(filterValue == null || (filterValue instanceof CharSequence && StringUtils.isEmpty((CharSequence)filterValue))){
 			fireResetSelectionEvent();
 			return;
@@ -371,6 +335,7 @@ public class SearcherResultWindow<T> extends Window implements CloseListener, Cl
 	
 	//Busca y retorna unicamente
 	private void doPKSearch(Object pkValue){
+		initContent();
 		if(pkValue == null || (pkValue instanceof CharSequence && StringUtils.isEmpty((CharSequence)pkValue))){
 			fireResetSelectionEvent();
 			return;
@@ -407,8 +372,7 @@ public class SearcherResultWindow<T> extends Window implements CloseListener, Cl
 			selectedValue = null;
 		}
 		SearchSelectionChangeEvent<T> event = new SearchSelectionChangeEvent<T>(oldValue, selectedValue, currentSearchType, isReset);
-		if(initialized)
-			cleanBtn.click();
+		cleanBtn.click();
 		if(selectionChangeListener != null)
 			selectionChangeListener.selectionChange(event);
 	}

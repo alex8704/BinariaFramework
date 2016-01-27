@@ -43,6 +43,7 @@ import co.com.binariasystems.fmw.exception.FMWUncheckedException;
 import co.com.binariasystems.fmw.ioc.IOCHelper;
 import co.com.binariasystems.fmw.reflec.TypeHelper;
 import co.com.binariasystems.fmw.util.db.DBUtil;
+import co.com.binariasystems.fmw.util.exception.FMWExceptionUtils;
 import co.com.binariasystems.fmw.util.messagebundle.PropertiesManager;
 import co.com.binariasystems.fmw.util.pagination.ListPage;
 
@@ -75,8 +76,9 @@ public class EntityCRUDOperationsManager<T> {
 			synchronized (EntityCRUDOperationsManager.class) {
 				try {
 					resp = createInstance(entityClazz);
-				} catch (Exception e) {
-					throw new FMWUncheckedException(e);
+				} catch (Exception ex) {
+					Throwable cause = FMWExceptionUtils.prettyMessageException(ex);
+					throw new FMWUncheckedException(cause.getMessage(), cause);
 				}
 				entityCRUDMgrContext.put(entityClazz, resp);
 			}
@@ -412,7 +414,7 @@ public class EntityCRUDOperationsManager<T> {
 
 			columnName = FMWEntityConstants.ENTITY_DYNASQL_MAIN_ALIAS + "." + fieldCfg.getColumnName();
 			if (fieldCfg instanceof RelationFieldConfigData && !TypeHelper.isBasicType(fieldCfg.getFieldType())) {
-				LOGGER.warn("FMWEntity Relational field Criteria not implemented yet.");
+				//LOGGER.warn("FMWEntity Relational field Criteria not implemented yet.");
 			}
 			resp.append(CriteriaUtils.buildSingleValueSQLCondition(criteria, columnName));
 		}

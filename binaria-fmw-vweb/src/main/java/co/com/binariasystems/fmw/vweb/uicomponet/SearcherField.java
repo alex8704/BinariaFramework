@@ -79,7 +79,6 @@ public class SearcherField<T> extends CustomField<T> implements SearchSelectionC
 	@Override
 	protected Component initContent() {
 		initComponents();
-		initialized = true;
 		return content;
 	}
 	
@@ -113,6 +112,7 @@ public class SearcherField<T> extends CustomField<T> implements SearchSelectionC
 			content.setExpandRatio(descriptionTxt, 1.0f);
 			
 			searchWindow = new SearcherResultWindow<Object>((Class<Object>) entityClazz);
+			initialized = true;//Debe estar en este lugar
 			bindEvents();
 		}catch(FMWException ex){
 			MessageDialog.showExceptions(ex, LOGGER);
@@ -200,12 +200,12 @@ public class SearcherField<T> extends CustomField<T> implements SearchSelectionC
 		Object newValue = event.getNewValue();
 		try{
 			if(event.getSearchType().equals(SearchType.PK))
-				textfieldProperty.setValue(event.isReset() ? null : extractFieldValue(event.getNewValue(), masterConfigData.getSearchFieldData()));
+				textfieldProperty.setValue(event.isReset() ? null : extractFieldValue(newValue, masterConfigData.getSearchFieldData()));
 			else {
 				newValue = event.getNewValue() != null ? event.getNewValue() : event.getOldValue();
 				textfieldProperty.setValue(event.isReset() ? null : extractFieldValue(newValue, masterConfigData.getSearchFieldData()));
-				setValue(event.isReset() ? null : extractReturnValue(newValue));
 			}
+			setValue(event.isReset() ? null : extractReturnValue(newValue));
 			description = FMWEntityUtils.generateStringRepresentationForField(newValue, FMWConstants.PIPE);
 		} catch (FMWException ex) {
 			MessageDialog.showExceptions(ex, LOGGER);
@@ -253,7 +253,7 @@ public class SearcherField<T> extends CustomField<T> implements SearchSelectionC
 		if(newCriteria == null || !initialized) return;
 		if(newCriteria instanceof MultipleGroupedCriteria){
 			for(Criteria criteria : ((MultipleGroupedCriteria)newCriteria).getCriteriaCollection())
-				freeConditionsPropertyListener(criteria);
+				applyConditionsPropertyListener(criteria);
 		}else{
 			if(newCriteria instanceof VCriteria){
 				if(newCriteria instanceof VSimpleCriteria && ((VSimpleCriteria<?>)newCriteria).getProperty() instanceof ObjectProperty)
@@ -267,9 +267,10 @@ public class SearcherField<T> extends CustomField<T> implements SearchSelectionC
 	}
 	
 	private void onConditionsChange(){
-		if(getValue() == null) return;
 		searchWindow.setConditions(VCriteriaUtils.castVCriteria(conditions));
-		searchWindow.search(extractPKValue(getValue()), SearchType.PK);
+		if(getValue() != null)
+			searchWindow.search(extractPKValue(getValue()), SearchType.PK);
+		
 	}
 
 }

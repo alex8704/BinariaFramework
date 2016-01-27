@@ -70,12 +70,12 @@ public class Pager<FILTER_TYPE, RESULT_TYPE> extends HorizontalLayout implements
 	@Override
 	public void attach() {
 		super.attach();
-		if(initialized)return;
 		initContent();
 	}
 	
 	
 	private void initContent() {
+		if(initialized)return;
 		foundItemsLbl = new Label(VWebUtils.getCommonString(VWebCommonConstants.PAGER_NO_ROWS_FORSHOW));
 		rowsByPageConfLbl = new Label(VWebUtils.getCommonString(VWebCommonConstants.PAGER_ROWS_CAPTION)+":");
 		rowsByPageConfCmb = new ComboBox();
@@ -161,10 +161,8 @@ public class Pager<FILTER_TYPE, RESULT_TYPE> extends HorizontalLayout implements
 		
 		bindEvents();
 		resetConstrains();
-		//Se marca inicializado aqui
-		//Para que tenga efecto el setFilterDTO
 		initialized = true;
-		setFilterDto(filterDto);
+		reset();
 	}
 	
 	private void bindEvents(){
@@ -205,6 +203,7 @@ public class Pager<FILTER_TYPE, RESULT_TYPE> extends HorizontalLayout implements
 	}
 	
 	public void reset(){
+		initContent();
 		setFilterDto(null);
 	}
 	
@@ -295,9 +294,9 @@ public class Pager<FILTER_TYPE, RESULT_TYPE> extends HorizontalLayout implements
 	}
 	
 	public void setFilterDto(FILTER_TYPE filterDto){
+		initContent();
 		this.filterDto = filterDto;
-		if(initialized)
-			fireFilterDtoChangeEvent();
+		fireFilterDtoChangeEvent();
 	}
 	
 	public void setMaxCachedPages(int max){

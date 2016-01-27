@@ -79,4 +79,14 @@ public class ButtonBuilder extends Button{
 		return this;
 	}
 	
+	public ButtonBuilder disable(){
+		setEnabled(false);
+		return this;
+	}
+	
+	public ButtonBuilder enable(){
+		setEnabled(true);
+		return this;
+	}
+	
 }

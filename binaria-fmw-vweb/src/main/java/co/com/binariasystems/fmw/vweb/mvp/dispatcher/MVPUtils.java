@@ -21,6 +21,7 @@ import co.com.binariasystems.fmw.constants.FMWConstants;
 import co.com.binariasystems.fmw.exception.FMWException;
 import co.com.binariasystems.fmw.ioc.IOCHelper;
 import co.com.binariasystems.fmw.util.messagebundle.MessageBundleManager;
+import co.com.binariasystems.fmw.vweb.mvp.annotation.NoConventionString;
 import co.com.binariasystems.fmw.vweb.mvp.annotation.ViewField;
 import co.com.binariasystems.fmw.vweb.mvp.annotation.validation.AddressValidator;
 import co.com.binariasystems.fmw.vweb.mvp.annotation.validation.DateRangeValidator;
@@ -39,6 +40,7 @@ import co.com.binariasystems.fmw.vweb.util.ValidationUtils;
 
 import com.vaadin.data.Validatable;
 import com.vaadin.ui.AbstractComponent;
+import com.vaadin.ui.Component;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.Grid.Column;
 import com.vaadin.ui.Label;
@@ -86,7 +88,7 @@ public class MVPUtils {
 		}
 	}
 
-	public static void applyConventionStringsAndValidationsForView(Object viewInstance, ViewInfo viewInfo, MessageBundleManager messageManager) throws ParseException {
+	public static void applyConventionStringsForView(Object viewInstance, ViewInfo viewInfo, MessageBundleManager messageManager) throws ParseException {
 		Object fieldValue = null;
 		boolean forceAccess = true;
 		String localizedCaption = "";
@@ -112,30 +114,30 @@ public class MVPUtils {
 				localizedDescription = LocaleMessagesUtil.conventionDescription(viewInfo.getViewClass(), messageManager,
 						viewField.getName());
 				if (viewInfo.isViewStringsByConventions() && messageManager != null) {
-					if (FormPanel.class.isAssignableFrom(viewField.getType()) && fieldValue != viewInstance) {
+					if (FormPanel.class.isAssignableFrom(viewField.getType()) && fieldValue != viewInstance && permitConventionStringCaption(viewField)) {
 						localizedTitle = LocaleMessagesUtil.conventionTitle(viewInfo.getViewClass(), messageManager);
 						((FormPanel) fieldValue).setTitle(localizedTitle);
 					}
-					else if (Panel.class.isAssignableFrom(viewField.getType()) && fieldValue != viewInstance) {
+					else if (Panel.class.isAssignableFrom(viewField.getType()) && fieldValue != viewInstance && permitConventionStringCaption(viewField)) {
 						((Panel) fieldValue).setCaption(localizedCaption);
 					}
-					else if (TreeMenu.class.isAssignableFrom(viewField.getType()))
+					else if (TreeMenu.class.isAssignableFrom(viewField.getType()) && permitConventionStringCaption(viewField))
 						((TreeMenu) fieldValue).setTitle(localizedCaption);
-					else if (Label.class.isAssignableFrom(viewField.getType()))
+					else if (Label.class.isAssignableFrom(viewField.getType()) && permitConventionStringCaption(viewField))
 						((Label) fieldValue).setValue(localizedCaption);
 					else {
-						((AbstractComponent) fieldValue).setCaption(localizedCaption);
-						((AbstractComponent) fieldValue).setDescription(StringUtils.defaultIfEmpty(localizedDescription, localizedCaption));
+						((AbstractComponent) fieldValue).setCaption(permitConventionStringCaption(viewField) ? localizedCaption : null);
+						((AbstractComponent) fieldValue).setDescription(permitConventionStringDescription(viewField) ? StringUtils.defaultIfEmpty(localizedDescription, localizedCaption) : null);
 					}
 
 					if (Table.class.isAssignableFrom(viewField.getType())
-							&& ((Table) fieldValue).getColumnHeaderMode().equals(ColumnHeaderMode.EXPLICIT)) {
+							&& ((Table) fieldValue).getColumnHeaderMode().equals(ColumnHeaderMode.EXPLICIT) && permitConventionStringCaption(viewField)) {
 						String tableColumnTitle = null;
 						for (Object propertyId : ((Table) fieldValue).getContainerPropertyIds()) {
 							tableColumnTitle = LocaleMessagesUtil.conventionCaption(viewInfo.getViewClass(), messageManager, viewField.getName() + "." + propertyId);
 							((Table) fieldValue).setColumnHeader(propertyId, tableColumnTitle);
 						}
-					} else if (Grid.class.isAssignableFrom(viewField.getType())) {
+					} else if (Grid.class.isAssignableFrom(viewField.getType()) && permitConventionStringCaption(viewField)) {
 						String tableColumnTitle = null;
 						for (Column column : ((Grid) fieldValue).getColumns()) {
 							tableColumnTitle = LocaleMessagesUtil.conventionCaption(viewInfo.getViewClass(), messageManager, viewField.getName() + "." + column.getPropertyId());
@@ -143,11 +145,30 @@ public class MVPUtils {
 						}
 					}
 				}
+			}
+		}
+	}
+	
+	public static void applyValidatorsForView(Object viewInstance, ViewInfo viewInfo) throws ParseException {
+		Object fieldValue = null;
+		boolean forceAccess = true;
+		String fieldCaption = null;
+
+		for (Field viewField : viewInfo.getViewClass().getDeclaredFields()) {
+			if (VWebUtils.isVField(viewField.getType())) {
+				try {
+					fieldValue = FieldUtils.readField(viewField, viewInstance, forceAccess);
+				} catch (IllegalAccessException e) {
+					LOGGER.error(e.toString(), e);
+				}
+				if (fieldValue == null) continue;
+				fieldCaption = ((Component)fieldValue).getCaption();
+				
 				if (Validatable.class.isAssignableFrom(viewField.getType())) {
 					Annotation[] fieldAnnotations = viewField.getAnnotations();
 					for (Annotation annotation : fieldAnnotations) {
 						if (annotation instanceof NullValidator)
-							((Validatable) fieldValue).addValidator(ValidationUtils.nullValidator(StringUtils.defaultIfEmpty(((NullValidator) annotation).fieldCaption(), localizedCaption)));
+							((Validatable) fieldValue).addValidator(ValidationUtils.nullValidator(StringUtils.defaultIfEmpty(((NullValidator) annotation).fieldCaption(), fieldCaption)));
 						else if (annotation instanceof DateRangeValidator) {
 							String min = StringUtils.defaultString(((DateRangeValidator) annotation).min());
 							String max = StringUtils.defaultString(((DateRangeValidator) annotation).max());
@@ -157,27 +178,37 @@ public class MVPUtils {
 							Date minDate = min.equals(DateRangeValidator.CURRENT_DATE) ? new Date() : (min.equals("") ? null : new SimpleDateFormat(format).parse(min));
 							Date maxDate = max.equals(DateRangeValidator.CURRENT_DATE) ? new Date() : (max.equals("") ? null : new SimpleDateFormat(format).parse(max));
 
-							((Validatable) fieldValue).addValidator(ValidationUtils.dateRangeValidator(StringUtils.defaultIfEmpty(((DateRangeValidator) annotation).fieldCaption(), localizedCaption), minDate, maxDate));
+							((Validatable) fieldValue).addValidator(ValidationUtils.dateRangeValidator(StringUtils.defaultIfEmpty(((DateRangeValidator) annotation).fieldCaption(), fieldCaption), minDate, maxDate));
 						} else if (annotation instanceof DoubleRangeValidator)
 							((Validatable) fieldValue).addValidator(ValidationUtils.doubleRangeValidator(
-									StringUtils.defaultIfEmpty(((DoubleRangeValidator) annotation).fieldCaption(), localizedCaption), ((DoubleRangeValidator) annotation).min(), ((DoubleRangeValidator) annotation).max()));
+									StringUtils.defaultIfEmpty(((DoubleRangeValidator) annotation).fieldCaption(), fieldCaption), ((DoubleRangeValidator) annotation).min(), ((DoubleRangeValidator) annotation).max()));
 						else if (annotation instanceof IntRangeValidator)
 							((Validatable) fieldValue).addValidator(ValidationUtils.integerRangeValidator(
-									StringUtils.defaultIfEmpty(((IntRangeValidator) annotation).fieldCaption(), localizedCaption), ((IntRangeValidator) annotation).min(), ((IntRangeValidator) annotation).max()));
+									StringUtils.defaultIfEmpty(((IntRangeValidator) annotation).fieldCaption(), fieldCaption), ((IntRangeValidator) annotation).min(), ((IntRangeValidator) annotation).max()));
 						else if (annotation instanceof EmailValidator)
-							((Validatable) fieldValue).addValidator(ValidationUtils.emailValidator(StringUtils.defaultIfEmpty(((EmailValidator) annotation).fieldCaption(), localizedCaption)));
+							((Validatable) fieldValue).addValidator(ValidationUtils.emailValidator(StringUtils.defaultIfEmpty(((EmailValidator) annotation).fieldCaption(), fieldCaption)));
 						else if (annotation instanceof StringLengthValidator)
 							((Validatable) fieldValue).addValidator(ValidationUtils.stringLengthRangeValidator(
-									StringUtils.defaultIfEmpty(((StringLengthValidator) annotation).fieldCaption(), localizedCaption), ((StringLengthValidator) annotation).min(), ((StringLengthValidator) annotation).max()));
+									StringUtils.defaultIfEmpty(((StringLengthValidator) annotation).fieldCaption(), fieldCaption), ((StringLengthValidator) annotation).min(), ((StringLengthValidator) annotation).max()));
 						else if (annotation instanceof RegExpValidator)
 							((Validatable) fieldValue).addValidator(ValidationUtils.regexpValidator(
-									StringUtils.defaultIfEmpty(((RegExpValidator) annotation).fieldCaption(), localizedCaption), ((RegExpValidator) annotation).expression(), ((RegExpValidator) annotation).example()));
+									StringUtils.defaultIfEmpty(((RegExpValidator) annotation).fieldCaption(), fieldCaption), ((RegExpValidator) annotation).expression(), ((RegExpValidator) annotation).example()));
 						else if (annotation instanceof AddressValidator)
-							((Validatable) fieldValue).addValidator(ValidationUtils.addressValidator(StringUtils.defaultIfEmpty(((AddressValidator) annotation).fieldCaption(), localizedCaption)));
+							((Validatable) fieldValue).addValidator(ValidationUtils.addressValidator(StringUtils.defaultIfEmpty(((AddressValidator) annotation).fieldCaption(), fieldCaption)));
 					}
 				}
 			}
 		}
+	}
+	
+	private static boolean permitConventionStringCaption(Field field){
+		return !field.isAnnotationPresent(NoConventionString.class)
+				|| field.getAnnotation(NoConventionString.class).permitCaption();
+	}
+	
+	private static boolean permitConventionStringDescription(Field field){
+		return !field.isAnnotationPresent(NoConventionString.class)
+				|| field.getAnnotation(NoConventionString.class).permitDescription();
 	}
 
 	@SuppressWarnings("unchecked")

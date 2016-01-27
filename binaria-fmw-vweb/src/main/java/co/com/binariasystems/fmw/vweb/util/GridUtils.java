@@ -18,6 +18,7 @@ import co.com.binariasystems.fmw.entity.util.FMWEntityUtils;
 import co.com.binariasystems.fmw.exception.FMWException;
 import co.com.binariasystems.fmw.exception.FMWUncheckedException;
 import co.com.binariasystems.fmw.reflec.TypeHelper;
+import co.com.binariasystems.fmw.util.exception.FMWExceptionUtils;
 import co.com.binariasystems.fmw.vweb.constants.VWebCommonConstants;
 import co.com.binariasystems.fmw.vweb.resources.resources;
 
@@ -376,7 +377,8 @@ public class GridUtils {
 			try {
 				return value == null ? defaultIfNull : FMWEntityUtils.generateStringRepresentationForField(value, separatorCompositeObjects);
 			} catch (FMWException e) {
-				throw new FMWUncheckedException(e);
+				Throwable cause = FMWExceptionUtils.prettyMessageException(e);
+				throw new FMWUncheckedException(cause.getMessage(), cause);
 			}
 		}
 

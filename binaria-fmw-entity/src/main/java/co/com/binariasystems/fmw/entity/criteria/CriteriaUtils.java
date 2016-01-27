@@ -72,8 +72,8 @@ public class CriteriaUtils {
 	public static Criteria equals(String entityField, Object value){
 		if(StringUtils.isBlank(entityField))
 			throw new FMWUncheckedException("Cannot create an "+Equals.class.getName()+" with null entityField");
-		if(value == null)
-			return isNull(entityField);
+//		if(value == null)
+//			return isNull(entityField);
 			//throw new FMWUncheckedException("You shuld use "+IsNull.class.getName()+" instead of "+Equals.class.getName()+" when want to know if a value is NULL");
 		return new Equals(entityField, value);
 	}
@@ -81,8 +81,8 @@ public class CriteriaUtils {
 	public static Criteria notEquals(String entityField, Object value){
 		if(StringUtils.isBlank(entityField))
 			throw new FMWUncheckedException("Cannot create an "+NotEquals.class.getName()+" with null entityField");
-		if(value == null)
-			return isNotNull(entityField);
+//		if(value == null)
+//			return isNotNull(entityField);
 			//throw new FMWUncheckedException("You shuld use "+NotNull.class.getName()+" instead of "+NotEquals.class.getName()+" when want to know if a value is NOT NULL");
 		return new NotEquals(entityField, value);
 	}
@@ -156,16 +156,16 @@ public class CriteriaUtils {
 	public static Criteria like(String entityField, Object value){
 		if(StringUtils.isBlank(entityField))
 			throw new FMWUncheckedException("Cannot create an "+Like.class.getName()+" with null entityField");
-		if(value == null)
-			return isNull(entityField);
+//		if(value == null)
+//			return isNull(entityField);
 		return new Like(entityField, value);
 	}
 	
 	public static Criteria notLike(String entityField, Object value){
 		if(StringUtils.isBlank(entityField))
 			throw new FMWUncheckedException("Cannot create an "+NotLike.class.getName()+" with null entityField");
-		if(value == null)
-			return isNotNull(entityField);
+//		if(value == null)
+//			return isNotNull(entityField);
 		return new NotLike(entityField, value);
 	}
 	

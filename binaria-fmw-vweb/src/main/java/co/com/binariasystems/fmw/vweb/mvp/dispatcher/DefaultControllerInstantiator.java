@@ -6,6 +6,7 @@ import java.lang.reflect.Method;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.reflect.MethodUtils;
 
+import co.com.binariasystems.fmw.util.exception.FMWExceptionUtils;
 import co.com.binariasystems.fmw.util.messagebundle.MessageBundleManager;
 import co.com.binariasystems.fmw.vweb.mvp.Initializable;
 import co.com.binariasystems.fmw.vweb.mvp.annotation.UIEventHandler;
@@ -47,7 +48,8 @@ public class DefaultControllerInstantiator implements ControllerInstantiator {
 		else if(StringUtils.isNoneEmpty(controllerInfo.getInitMethod()))
 			MethodUtils.getAccessibleMethod(controllerInfo.getControllerClass().getMethod(controllerInfo.getInitMethod())).invoke(controller);
 		}catch(InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException ex){
-			throw new ViewInstantiationException(ex);
+			Throwable cause = FMWExceptionUtils.prettyMessageException(ex);
+			throw new ViewInstantiationException(cause.getMessage(), cause);
 		}
 		
 		return controller;
