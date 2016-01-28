@@ -20,5 +20,6 @@ public interface ViewProvider {
 	public String getDashboardViewUrl();
 	public String getForbiddenViewUrl();
 	public void configure() throws ViewConfigurationException;
+	public String getViewUrlByClass(Class<?> viewClass);
 	
 }

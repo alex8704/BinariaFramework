@@ -1,6 +1,5 @@
 package co.com.binariasystems.fmw.vweb.mvp.dispatcher;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
@@ -17,8 +16,10 @@ import co.com.binariasystems.fmw.vweb.mvp.dispatcher.data.ViewInfo;
 import co.com.binariasystems.fmw.vweb.mvp.event.ViewDispatchRequest;
 import co.com.binariasystems.fmw.vweb.mvp.eventbus.EventBus;
 
+import com.vaadin.server.Sizeable.Unit;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.UI;
+import com.vaadin.ui.Window;
 
 public class ViewDispatcherImpl implements ViewDispatcher{
 	private ViewProvider viewProvider;
@@ -40,6 +41,11 @@ public class ViewDispatcherImpl implements ViewDispatcher{
 		}
 		
 		ViewInfo viewInfo = viewProvider.getViewInfo(requestData);
+		handleControllerLoad(viewInfo, viewAndController, requestData);
+		if(dispatchRequest.isPopup()){
+			handlePopupViewDispatch(viewInfo, viewAndController, requestData);
+			return;
+		}
 		if(viewInfo != null && viewInfo.isRootView()){
 			handleRootViewDispatch(viewInfo, viewAndController, requestData);
 			return;
@@ -48,8 +54,7 @@ public class ViewDispatcherImpl implements ViewDispatcher{
 		handleViewDispatch(viewInfo, viewAndController, requestData);
 	}
 	
-	
-	private void handleViewDispatch(ViewInfo newViewInfo, ViewAndController newViewAndController, RequestData requestData) throws FMWException{
+	private void handleControllerLoad(ViewInfo newViewInfo, ViewAndController newViewAndController, RequestData requestData) throws ViewDispatchException{
 		try{
 			if(currentViewInfo != null && currentViewInfo.getControllerInfo() != null){
 				ViewAndController oldViewAndController = loadedViews.get(currentViewInfo.getUrl());
@@ -70,9 +75,18 @@ public class ViewDispatcherImpl implements ViewDispatcher{
 				if(hasOnLoadWithoutArguments(newViewInfo.getControllerInfo())){
 					MethodUtils.invokeExactMethod(newViewAndController.getController(), onLoadMtd);
 				}else if(hasOnLoadWithArguments(newViewInfo.getControllerInfo())){
-					MethodUtils.invokeExactMethod(newViewAndController.getController(), onLoadMtd, requestData.getParameters());
+					MethodUtils.invokeExactMethod(newViewAndController.getController(), onLoadMtd, 
+							new Object[]{requestData.getParameters()}, new Class<?>[]{Map.class});
 				}
 			}
+		}catch(ReflectiveOperationException e){
+			throw new ViewDispatchException(e);
+		}
+	}
+	
+	
+	private void handleViewDispatch(ViewInfo newViewInfo, ViewAndController newViewAndController, RequestData requestData) throws ViewDispatchException {
+		try{
 			if(currentRootViewInfo != null && StringUtils.isNotEmpty(currentRootViewInfo.getContentSetterMethod())){
 				ViewAndController rootView = loadedViews.get(currentRootViewInfo.getUrl());
 				MethodUtils.invokeExactMethod(rootView.getView(), currentRootViewInfo.getContentSetterMethod(), new Component[]{newViewAndController.getUiContainer()}, new Class<?>[]{Component.class});
@@ -81,44 +95,24 @@ public class ViewDispatcherImpl implements ViewDispatcher{
 				currentRootViewInfo = null;
 			}
 			currentViewInfo = newViewInfo;
-		}catch(NoSuchMethodException | IllegalAccessException | InvocationTargetException e){
+		}catch(ReflectiveOperationException e){
 			throw new ViewDispatchException(e);
 		}
 	}
 
 
-	private void handleRootViewDispatch(ViewInfo newViewInfo, ViewAndController newViewAndController, RequestData requestData) throws FMWException {
-		try{
-			if(currentRootViewInfo != null && currentRootViewInfo.getControllerInfo() != null){
-				ViewAndController oldViewAndController = loadedViews.get(currentRootViewInfo.getUrl());
-				String onUnloadMtd = currentRootViewInfo.getControllerInfo().getBeforeUnloadMethod();
-				if(StringUtils.isNotEmpty(onUnloadMtd)){
-					MethodUtils.invokeExactMethod(oldViewAndController.getController(), onUnloadMtd);
-				}
-			}
-			
-			/*
-			 * Este caso puede no darse cuando se trata de Views especiales autogeneradas
-			 * Como por ejemplo las EntityCRUDViews, ya que no se definen como tal y no hay
-			 * Informacion paara generar el ViewInfo Asi que se omiten estas funcionalidades
-			 * para casos como estos
-			 */
-			if(newViewInfo != null && newViewInfo.getControllerInfo() != null){
-				String onLoadMtd = newViewInfo.getControllerInfo().getBeforeLoadMethod();
-				if(hasOnLoadWithoutArguments(newViewInfo.getControllerInfo())){
-					MethodUtils.invokeExactMethod(newViewAndController.getController(), onLoadMtd);
-				}else if(hasOnLoadWithArguments(newViewInfo.getControllerInfo())){
-					MethodUtils.invokeExactMethod(newViewAndController.getController(), onLoadMtd, requestData.getParameters());
-				}
-			}
-			
-			UI.getCurrent().setContent(newViewAndController.getUiContainer());
-			currentRootViewInfo = newViewInfo;
-		}catch(NoSuchMethodException | IllegalAccessException | InvocationTargetException e){
-			throw new ViewDispatchException(e);
-		}
+	private void handleRootViewDispatch(ViewInfo newViewInfo, ViewAndController newViewAndController, RequestData requestData) {
+		UI.getCurrent().setContent(newViewAndController.getUiContainer());
+		currentRootViewInfo = newViewInfo;
 	}
-
+	
+	private void handlePopupViewDispatch(ViewInfo newViewInfo, ViewAndController newViewAndController, RequestData requestData){
+		UI ui = UI.getCurrent();
+		Window window = new Window(ui.getCaption(), newViewAndController.getUiContainer());
+		window.setWidth(80, Unit.PERCENTAGE);
+		window.setModal(true);
+		ui.addWindow(window);
+	}
 
 	private RequestData buildRequestData(ViewDispatchRequest dispatchRequest){
 		RequestData resp = new RequestData();
@@ -128,7 +122,7 @@ public class ViewDispatcherImpl implements ViewDispatcher{
 		if(urlinfoIndex >= 0)
 			resp.setPathInfo(url.substring(urlinfoIndex+1));
 		
-		if(hasRequestParameters(dispatchRequest))
+		if(MVPUtils.hasRequestParameters(dispatchRequest.getViewURL()))
 			resp.setParameters(decodeAndBuildParametersMap(resp.getPathInfo()));
 		
 		ViewInfo viewInfo = viewProvider.getViewInfo(resp);
@@ -169,16 +163,6 @@ public class ViewDispatcherImpl implements ViewDispatcher{
 		} catch (NoSuchMethodException | SecurityException e) {
 			return false;
 		}
-	}
-	
-	public boolean hasRequestParameters(ViewDispatchRequest dispatchRequest){
-		int urlinfoIndex = StringUtils.defaultString(dispatchRequest.getViewURL()).indexOf("?");
-		String pathInfo = (urlinfoIndex >= 0) ? StringUtils.defaultString(dispatchRequest.getViewURL()).substring(urlinfoIndex+1) : null;
-		return pathInfo != null && 
-				!ViewProvider.AUTHENTICATION_VIEW_PARAM_IDENTIFIER.equals(pathInfo) &&
-				!ViewProvider.DASHBOARD_VIEW_PARAM_IDENTIFIER.equals(pathInfo) &&
-				!ViewProvider.FORBIDDEN_VIEW_PARAM_IDENTIFIER.equals(pathInfo) &&
-				!ViewProvider.RESNOTFOUND_VIEW_PARAM_IDENTIFIER.equals(pathInfo);
 	}
 	
 	public ViewProvider getViewProvider() {

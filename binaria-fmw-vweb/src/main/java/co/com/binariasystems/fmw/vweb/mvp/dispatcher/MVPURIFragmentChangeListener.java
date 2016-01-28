@@ -1,5 +1,6 @@
 package co.com.binariasystems.fmw.vweb.mvp.dispatcher;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,9 +18,11 @@ public class MVPURIFragmentChangeListener implements UriFragmentChangedListener{
 	private ViewDispatcher viewDispatcher;
 	@Override
 	public void uriFragmentChanged(UriFragmentChangedEvent event) {
+		
 		VaadinServletRequest vaadinRequest = (VaadinServletRequest) VaadinService.getCurrentRequest();
 		ViewDispatchRequest dispatchRequest = new ViewDispatchRequest();
-		dispatchRequest.setViewURL(event.getUriFragment());
+		dispatchRequest.setPopup(StringUtils.defaultString(event.getUriFragment()).startsWith(ViewDispatcher.POPUP_REQUEST_PREFIX));
+		dispatchRequest.setViewURL(dispatchRequest.isPopup() ? event.getUriFragment().substring(ViewDispatcher.POPUP_REQUEST_PREFIX.length()) :event.getUriFragment());
 		dispatchRequest.setHttpRequest(vaadinRequest.getHttpServletRequest());
 		dispatchRequest.setHttpSession(vaadinRequest.getSession());
 		

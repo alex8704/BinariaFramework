@@ -71,4 +71,5 @@ public abstract class AbstractView {
 		else
 			throwable.printStackTrace();
 	}
+	
 }

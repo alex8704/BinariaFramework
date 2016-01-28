@@ -20,6 +20,7 @@ import co.com.binariasystems.fmw.annotation.Dependency;
 import co.com.binariasystems.fmw.constants.FMWConstants;
 import co.com.binariasystems.fmw.exception.FMWException;
 import co.com.binariasystems.fmw.ioc.IOCHelper;
+import co.com.binariasystems.fmw.util.codec.Base64;
 import co.com.binariasystems.fmw.util.messagebundle.MessageBundleManager;
 import co.com.binariasystems.fmw.vweb.mvp.annotation.NoConventionString;
 import co.com.binariasystems.fmw.vweb.mvp.annotation.ViewField;
@@ -39,6 +40,7 @@ import co.com.binariasystems.fmw.vweb.util.VWebUtils;
 import co.com.binariasystems.fmw.vweb.util.ValidationUtils;
 
 import com.vaadin.data.Validatable;
+import com.vaadin.server.Page;
 import com.vaadin.ui.AbstractComponent;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.Grid;
@@ -238,5 +240,29 @@ public class MVPUtils {
 			}
 		}
 
+	}
+	
+	public static void navigateTo(String targetURI){
+		Page.getCurrent().setUriFragment(encodeURI(targetURI));
+	}
+	
+	public static String encodeURI(String targetURI){
+		String transformedPath = targetURI;
+		if(hasRequestParameters(targetURI)){
+			String pathInfo = targetURI.substring(targetURI.indexOf("?")+1);
+			String encodedParams = StringUtils.isEmpty(pathInfo) ? "" : Base64.byteArrayToBase64(pathInfo.getBytes());
+			transformedPath = targetURI.substring(0, targetURI.indexOf("?") + 1) + encodedParams ;
+		}
+		return transformedPath;
+	}
+	
+	public static boolean hasRequestParameters(String targetURI){
+		int urlinfoIndex = StringUtils.defaultString(targetURI).indexOf("?");
+		String pathInfo = (urlinfoIndex >= 0) ? targetURI.substring(urlinfoIndex+1) : null;
+		return pathInfo != null && 
+				!ViewProvider.AUTHENTICATION_VIEW_PARAM_IDENTIFIER.equals(pathInfo) &&
+				!ViewProvider.DASHBOARD_VIEW_PARAM_IDENTIFIER.equals(pathInfo) &&
+				!ViewProvider.FORBIDDEN_VIEW_PARAM_IDENTIFIER.equals(pathInfo) &&
+				!ViewProvider.RESNOTFOUND_VIEW_PARAM_IDENTIFIER.equals(pathInfo);
 	}
 }

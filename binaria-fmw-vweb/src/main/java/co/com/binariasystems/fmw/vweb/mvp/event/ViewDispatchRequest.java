@@ -7,6 +7,7 @@ public class ViewDispatchRequest {
 	private HttpServletRequest httpRequest;
 	private String viewURL;
 	private HttpSession httpSession;
+	private boolean popup;
 	public HttpServletRequest getHttpRequest() {
 		return httpRequest;
 	}
@@ -24,6 +25,18 @@ public class ViewDispatchRequest {
 	}
 	public void setHttpSession(HttpSession httpSession) {
 		this.httpSession = httpSession;
+	}
+	/**
+	 * @return the popup
+	 */
+	public boolean isPopup() {
+		return popup;
+	}
+	/**
+	 * @param popup the popup to set
+	 */
+	public void setPopup(boolean popup) {
+		this.popup = popup;
 	}
 	
 	

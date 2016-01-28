@@ -120,8 +120,8 @@ public class DefaultViewProvider implements ViewProvider, ServletContextAware {
 			
 			for(Method method : annotated.getMethods()){
 				if(method.isAnnotationPresent(OnLoad.class)){
-					if(method.getParameterTypes() != null && method.getParameterTypes().length > 0)
-						throw new ViewConfigurationException("Method annotated with @"+OnLoad.class.getSimpleName()+" on controller class "+annotated.getSimpleName()+" must have no parameters");
+					if(method.getParameterTypes() != null && method.getParameterTypes().length > 1)
+						throw new ViewConfigurationException("Method annotated with @"+OnLoad.class.getSimpleName()+" on controller class "+annotated.getSimpleName()+" must have only 1 parameter of type "+Map.class.getName());
 					controllerInfo.setBeforeLoadMethod(method.getName());
 				}
 				if(method.isAnnotationPresent(OnUnLoad.class)){
@@ -412,6 +412,15 @@ public class DefaultViewProvider implements ViewProvider, ServletContextAware {
 		
 		
 		return viewInfo;
+	}
+	
+	@Override
+	public String getViewUrlByClass(Class<?> viewClass) {
+		for(ViewInfo viewInfo : viewsContext.values()){
+			if(viewInfo.getViewClass().equals(viewClass))
+				return viewInfo.getUrl();
+		}
+		return null;
 	}
 	
 	private void printConfigurationDebugInfo(){
