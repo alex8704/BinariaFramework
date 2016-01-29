@@ -6,13 +6,17 @@ import java.util.StringTokenizer;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.reflect.MethodUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import co.com.binariasystems.fmw.exception.FMWException;
 import co.com.binariasystems.fmw.util.codec.Base64;
+import co.com.binariasystems.fmw.vweb.mvp.annotation.UIEventHandler;
 import co.com.binariasystems.fmw.vweb.mvp.dispatcher.data.ControllerInfo;
 import co.com.binariasystems.fmw.vweb.mvp.dispatcher.data.RequestData;
 import co.com.binariasystems.fmw.vweb.mvp.dispatcher.data.ViewAndController;
 import co.com.binariasystems.fmw.vweb.mvp.dispatcher.data.ViewInfo;
+import co.com.binariasystems.fmw.vweb.mvp.event.PopupViewCloseEvent;
 import co.com.binariasystems.fmw.vweb.mvp.event.ViewDispatchRequest;
 import co.com.binariasystems.fmw.vweb.mvp.eventbus.EventBus;
 
@@ -20,15 +24,21 @@ import com.vaadin.server.Sizeable.Unit;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.Window;
+import com.vaadin.ui.Window.CloseEvent;
+import com.vaadin.ui.Window.CloseListener;
 
 public class ViewDispatcherImpl implements ViewDispatcher{
+	private Logger LOGGER = LoggerFactory.getLogger(ViewDispatcherImpl.class);
 	private ViewProvider viewProvider;
 	private EventBus eventBus;
 	private Map<String, ViewAndController> loadedViews = new HashMap<String, ViewAndController>();
 	private ViewInfo currentViewInfo;
 	private ViewInfo currentRootViewInfo;
+	private Window currentPopupView;
+	private PopupViewCloseEventHandler popupViewCloseHandler;
 	
 	public ViewDispatcherImpl(){
+		popupViewCloseHandler = new PopupViewCloseEventHandler();
 	}
 	
 	@Override
@@ -59,7 +69,7 @@ public class ViewDispatcherImpl implements ViewDispatcher{
 			if(currentViewInfo != null && currentViewInfo.getControllerInfo() != null){
 				ViewAndController oldViewAndController = loadedViews.get(currentViewInfo.getUrl());
 				String onUnloadMtd = currentViewInfo.getControllerInfo().getBeforeUnloadMethod();
-				if(StringUtils.isNotEmpty(onUnloadMtd)){
+				if(StringUtils.isNotEmpty(onUnloadMtd) && !requestData.isPopup()){
 					MethodUtils.invokeExactMethod(oldViewAndController.getController(), onUnloadMtd);
 				}
 			}
@@ -106,16 +116,30 @@ public class ViewDispatcherImpl implements ViewDispatcher{
 		currentRootViewInfo = newViewInfo;
 	}
 	
-	private void handlePopupViewDispatch(ViewInfo newViewInfo, ViewAndController newViewAndController, RequestData requestData){
+	private void handlePopupViewDispatch(final ViewInfo newViewInfo, final ViewAndController newViewAndController, final RequestData requestData){
 		UI ui = UI.getCurrent();
 		Window window = new Window(ui.getCaption(), newViewAndController.getUiContainer());
 		window.setWidth(80, Unit.PERCENTAGE);
 		window.setModal(true);
+		window.addCloseListener(new CloseListener() {
+			@Override public void windowClose(CloseEvent e) {
+				try{
+					String onUnloadMtd = newViewInfo.getControllerInfo().getBeforeUnloadMethod();
+					if(StringUtils.isNotEmpty(onUnloadMtd)){
+						MethodUtils.invokeExactMethod(newViewAndController.getController(), onUnloadMtd);
+					}
+				}catch(ReflectiveOperationException ex){
+					LOGGER.error("Has ocurred an unexpected error handling view onUnload method", ex);
+				}
+			}
+		});
 		ui.addWindow(window);
+		currentPopupView = window;
 	}
 
 	private RequestData buildRequestData(ViewDispatchRequest dispatchRequest){
 		RequestData resp = new RequestData();
+		resp.setPopup(dispatchRequest.isPopup());
 		String url = StringUtils.defaultString(dispatchRequest.getViewURL());
 		int urlinfoIndex = url.indexOf("?");
 		resp.setUrl((urlinfoIndex < 0) ? url : url.substring(0, urlinfoIndex));
@@ -182,5 +206,16 @@ public class ViewDispatcherImpl implements ViewDispatcher{
 
 	public void setEventBus(EventBus eventBus) {
 		this.eventBus = eventBus;
+		if(eventBus!= null){
+			eventBus.addHandler(popupViewCloseHandler);
+		}
+	}
+	
+	private class PopupViewCloseEventHandler{
+		@UIEventHandler
+		public void handlePopupViewClose(PopupViewCloseEvent event){
+			if(currentPopupView != null)
+				currentPopupView.close();
+		}
 	}
 }

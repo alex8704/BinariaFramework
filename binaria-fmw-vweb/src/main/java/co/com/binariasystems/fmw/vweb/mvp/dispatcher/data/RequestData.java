@@ -10,6 +10,7 @@ public class RequestData {
 	private String pathInfo;
 	private EventBus eventBus;
 	private Map<String, String> parameters;
+	private boolean popup;
 	
 	public String getUrl() {
 		return url;
@@ -43,5 +44,19 @@ public class RequestData {
 	public void setParameters(Map<String, String> parameters) {
 		this.parameters = parameters;
 	}
+	/**
+	 * @return the popup
+	 */
+	public boolean isPopup() {
+		return popup;
+	}
+	/**
+	 * @param popup the popup to set
+	 */
+	public void setPopup(boolean popup) {
+		this.popup = popup;
+	}
+	
+	
 	
 }
