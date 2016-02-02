@@ -89,4 +89,9 @@ public class ButtonBuilder extends Button{
 		return this;
 	}
 	
+	public ButtonBuilder withData(Object data){
+		setData(data);
+		return this;
+	}
+	
 }

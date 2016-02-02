@@ -10,6 +10,8 @@ import co.com.binariasystems.fmw.vweb.util.ValidationUtils;
 
 import com.vaadin.data.Property;
 import com.vaadin.data.Validator;
+import com.vaadin.event.FieldEvents.TextChangeEvent;
+import com.vaadin.event.FieldEvents.TextChangeListener;
 import com.vaadin.server.Resource;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.themes.ValoTheme;

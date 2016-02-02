@@ -93,7 +93,7 @@ public final class VWebUtils {
 	public static boolean isFocusableControlClass(Class<?> fieldClass){
         return (Field.class.isAssignableFrom(fieldClass) || 
                 Label.class.isAssignableFrom(fieldClass) ||
-                Link.class.isAssignableFrom(fieldClass) ||
+//                Link.class.isAssignableFrom(fieldClass) ||
                 Upload.class.isAssignableFrom(fieldClass) ||
                 Button.class.isAssignableFrom(fieldClass));
     }

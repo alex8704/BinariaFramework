@@ -1,7 +1,10 @@
 package co.com.binariasystems.fmw.util;
 
 import java.beans.PropertyDescriptor;
-import java.lang.reflect.InvocationTargetException;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -13,6 +16,8 @@ import java.util.concurrent.ConcurrentMap;
 
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.beanutils.PropertyUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.reflect.FieldUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -134,39 +139,39 @@ private static final Logger LOGGER = LoggerFactory.getLogger(ObjectUtils.class);
 	}
 	
 	
-	public static <F, T> T transferProperties(F sourceObject, T targetObject) throws FMWUncheckedException{
-		try {
-			BeanUtils.copyProperties(targetObject, sourceObject);
-		} catch (IllegalAccessException e) {
-			throw new FMWUncheckedException(e.getMessage(), e);
-		} catch (InvocationTargetException e) {
-			throw new FMWUncheckedException(e.getMessage(), e);
-		}
-		return targetObject;
-	}
-	
-	public static <F, T> T transferProperties(F sourceObject, Class<T> targetType) throws FMWUncheckedException{
-		T resp = null;
-		try {
-			resp = transferProperties(sourceObject, targetType.newInstance());
-		} catch (ReflectiveOperationException e) {
-			throw new FMWUncheckedException(e.getMessage(), e);
-		}
-		return resp;
-	}
-	
-	public static <F, T> List<T> transferPropertiesList(List<F> sourceList, Class<T> targetType) throws FMWUncheckedException{
-		try {
-			List<T> operationResult = new ArrayList<T>();
-			for(F item : sourceList){
-				operationResult.add(transferProperties(item, targetType.newInstance()));
-			}
-			return operationResult;
-		
-		} catch (ReflectiveOperationException e) {
-			throw new FMWUncheckedException(e.getMessage(), e);
-		}
-	}
+//	public static <F, T> T transferProperties(F sourceObject, T targetObject) throws FMWUncheckedException{
+//		try {
+//			BeanUtils.copyProperties(targetObject, sourceObject);
+//		} catch (IllegalAccessException e) {
+//			throw new FMWUncheckedException(e.getMessage(), e);
+//		} catch (InvocationTargetException e) {
+//			throw new FMWUncheckedException(e.getMessage(), e);
+//		}
+//		return targetObject;
+//	}
+//	
+//	public static <F, T> T transferProperties(F sourceObject, Class<T> targetType) throws FMWUncheckedException{
+//		T resp = null;
+//		try {
+//			resp = transferProperties(sourceObject, targetType.newInstance());
+//		} catch (ReflectiveOperationException e) {
+//			throw new FMWUncheckedException(e.getMessage(), e);
+//		}
+//		return resp;
+//	}
+//	
+//	public static <F, T> List<T> transferPropertiesList(List<F> sourceList, Class<T> targetType) throws FMWUncheckedException{
+//		try {
+//			List<T> operationResult = new ArrayList<T>();
+//			for(F item : sourceList){
+//				operationResult.add(transferProperties(item, targetType.newInstance()));
+//			}
+//			return operationResult;
+//		
+//		} catch (ReflectiveOperationException e) {
+//			throw new FMWUncheckedException(e.getMessage(), e);
+//		}
+//	}
 	
 	private static Map<String, PropertyDescriptor> putClassPropertiesInCacheAndReturn(Class<?> clazz){
 		PropertyDescriptor[] propertyDescriptors = PropertyUtils.getPropertyDescriptors(clazz);
@@ -178,7 +183,7 @@ private static final Logger LOGGER = LoggerFactory.getLogger(ObjectUtils.class);
 		return descriptorsMap;
 	}
 	
-	public static <F, T> T transferPropertiesRecursive(F sourceObject, T targetObject) throws FMWUncheckedException{
+	public static <F, T> T transferProperties(F sourceObject, T targetObject) throws FMWUncheckedException{
 		if(sourceObject == null) return (T)null;
 		Map<String, PropertyDescriptor> sourceProps = classessPropertyDescCache.get(sourceObject.getClass());
 		Map<String, PropertyDescriptor> targetProps = classessPropertyDescCache.get(targetObject.getClass());
@@ -201,7 +206,7 @@ private static final Logger LOGGER = LoggerFactory.getLogger(ObjectUtils.class);
 						Object value = PropertyUtils.getSimpleProperty(sourceObject, propertyName);
 						if(value != null){
 							Object target = targetPropertyDesc.getPropertyType().newInstance();
-							transferPropertiesRecursive(value,target);
+							transferProperties(value,target);
 							BeanUtils.copyProperty(targetObject, propertyName, target);
 						}else
 							BeanUtils.copyProperty(targetObject, propertyName, value);
@@ -210,7 +215,10 @@ private static final Logger LOGGER = LoggerFactory.getLogger(ObjectUtils.class);
 					else if(!targetPropertyDesc.getPropertyType().isArray() && !Collection.class.isAssignableFrom(targetPropertyDesc.getPropertyType()) &&
 							targetPropertyDesc.getPropertyType().isAssignableFrom(sourcePropertyDesc.getPropertyType()) ){
 						Object value = PropertyUtils.getSimpleProperty(sourceObject, propertyName);
-						BeanUtils.copyProperty(targetObject, propertyName, value);
+						UpperTransform upperTrans = FieldUtils.getField(sourceObject.getClass(), propertyName, true).getAnnotation(UpperTransform.class);
+						boolean setUpper = (CharSequence.class.isAssignableFrom(sourcePropertyDesc.getPropertyType()) && upperTrans != null);
+						
+						BeanUtils.copyProperty(targetObject, propertyName, (setUpper && value != null ? StringUtils.upperCase(value.toString()) :value));
 					}
 				}
 				
@@ -221,21 +229,22 @@ private static final Logger LOGGER = LoggerFactory.getLogger(ObjectUtils.class);
 		return targetObject;
 	}
 	
-	public static <F, T> T transferPropertiesRecursive(F sourceObject, Class<T> targetType) throws FMWUncheckedException{
+	public static <F, T> T transferProperties(F sourceObject, Class<T> targetType) throws FMWUncheckedException{
 		T resp = null;
 		try {
-			resp = transferPropertiesRecursive(sourceObject, targetType.newInstance());
+			resp = transferProperties(sourceObject, targetType.newInstance());
 		} catch (ReflectiveOperationException e) {
 			throw new FMWUncheckedException(e.getMessage(), e);
 		}
 		return resp;
 	}
 	
-	public static <F, T> List<T> transferPropertiesListRecursive(List<F> sourceList, Class<T> targetType) throws FMWUncheckedException{
+	public static <F, T> List<T> transferProperties(Iterable<F> sourceIterable, Class<T> targetType) throws FMWUncheckedException{
+		if(sourceIterable == null) return null;
 		try {
 			List<T> operationResult = new ArrayList<T>();
-			for(F item : sourceList){
-				operationResult.add(transferPropertiesRecursive(item, targetType.newInstance()));
+			for(F item : sourceIterable){
+				operationResult.add(transferProperties(item, targetType.newInstance()));
 			}
 			return operationResult;
 		
@@ -244,17 +253,9 @@ private static final Logger LOGGER = LoggerFactory.getLogger(ObjectUtils.class);
 		}
 	}
 	
-	public static <F, T> List<T> transferPropertiesIterableRecursive(Iterable<F> sourceIterable, Class<T> targetType) throws FMWUncheckedException{
-		try {
-			List<T> operationResult = new ArrayList<T>();
-			for(F item : sourceIterable){
-				operationResult.add(transferPropertiesRecursive(item, targetType.newInstance()));
-			}
-			return operationResult;
-		
-		} catch (ReflectiveOperationException e) {
-			throw new FMWUncheckedException(e.getMessage(), e);
-		}
+	@Target(value = ElementType.FIELD)
+	@Retention(value = RetentionPolicy.RUNTIME)
+	public static @interface UpperTransform{
 	}
 	
 }
