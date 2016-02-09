@@ -58,6 +58,7 @@ public class SearcherField<T> extends CustomField<T> implements SearchSelectionC
 	
 	private boolean omitSearchCall;
 	private boolean initialized;
+	private boolean readOnly;
 	
 	public SearcherField(Class<?> entityClazz) {
 		this(entityClazz, null);
@@ -111,14 +112,26 @@ public class SearcherField<T> extends CustomField<T> implements SearchSelectionC
 			content.addComponent(button);
 			content.setExpandRatio(descriptionTxt, 1.0f);
 			
+			textfield.setReadOnly(readOnly);
+			button.setEnabled(!readOnly);
+			
 			searchWindow = new SearcherResultWindow<Object>((Class<Object>) entityClazz);
 			initialized = true;//Debe estar en este lugar
+			
 			bindEvents();
 		}catch(FMWException ex){
 			MessageDialog.showExceptions(ex, LOGGER);
 		}
 	}
 	
+	@Override
+	public void setReadOnly(boolean readOnly) {
+		this.readOnly = readOnly;
+		if(initialized){
+			textfield.setReadOnly(readOnly);
+			button.setEnabled(!readOnly);
+		}
+	}
 	
 	private void initEntityConfig() throws FMWException{
 		masterConfigData = EntityConfigurationManager.getInstance().getConfigurator(entityClazz).configure();

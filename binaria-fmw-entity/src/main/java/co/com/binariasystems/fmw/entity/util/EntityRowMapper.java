@@ -37,8 +37,8 @@ public class EntityRowMapper<T> implements RowMapper<T>{
 	
 	public T mapRow(ResultSet rs, int rowIndex) throws SQLException {
 		T bean = (T) newInstanceOf(entityConfigData.getEntityClass()); 
-		for(String fieldName : entityConfigData.getFieldsData().keySet()){
-			FieldConfigData fieldCfg = entityConfigData.getFieldsData().get(fieldName);
+		for(String fieldName : entityConfigData.getFieldNames()){
+			FieldConfigData fieldCfg = entityConfigData.getFieldData(fieldName);
 			
 			try {
 				PropertyUtils.setProperty(bean, fieldName, mapEntityField(fieldCfg, null, rs, true));
@@ -78,13 +78,13 @@ public class EntityRowMapper<T> implements RowMapper<T>{
 			}
 			
 			if(!includeForeigns){
-				FieldConfigData fieldBeanConfig = fieldEntityConfigData.getFieldsData().get(fieldEntityConfigData.getPkFieldName());
+				FieldConfigData fieldBeanConfig = fieldEntityConfigData.getFieldData(fieldEntityConfigData.getPkFieldName());
 				PropertyUtils.setNestedProperty(fieldBean, fieldEntityConfigData.getPkFieldName(), determineTypeAndGetValueFromRs(rs, columnAlias, fieldBeanConfig.getFieldType()));
 			}else{
 				String recursivePrefix = fieldCfg.getFieldName()+"_";
 				Object recursiveValue = null;
-				for(String fieldName : fieldEntityConfigData.getFieldsData().keySet()){
-					recursiveValue = mapEntityField(fieldEntityConfigData.getFieldsData().get(fieldName), recursivePrefix, rs, false);
+				for(String fieldName : fieldEntityConfigData.getFieldNames()){
+					recursiveValue = mapEntityField(fieldEntityConfigData.getFieldData(fieldName), recursivePrefix, rs, false);
 					PropertyUtils.setProperty(fieldBean, fieldName, recursiveValue);
 				}
 			}

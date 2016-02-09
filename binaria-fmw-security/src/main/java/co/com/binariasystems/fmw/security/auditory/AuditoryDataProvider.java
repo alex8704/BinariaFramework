@@ -6,7 +6,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 public interface AuditoryDataProvider<T> {
-	public T getCurrenAuditoryUserByHttpSession(HttpSession httpSession);
-	public T getCurrenAuditoryUserByServletRequest(HttpServletRequest httpRequest);
+	public T getCurrenAuditoryUser(HttpSession httpSession);
+	public T getCurrenAuditoryUser(HttpServletRequest httpRequest);
+	public Object gettCurrentAuditoryUserForEntityCRUD(HttpSession httpSession);
+	public Object gettCurrentAuditoryUserForEntityCRUD(HttpServletRequest httpRequest);
 	public Date getCurrentDate();
 }

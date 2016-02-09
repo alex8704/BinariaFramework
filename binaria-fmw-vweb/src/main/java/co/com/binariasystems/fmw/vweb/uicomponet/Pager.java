@@ -64,7 +64,7 @@ public class Pager<FILTER_TYPE, RESULT_TYPE> extends HorizontalLayout implements
 	
 	public Pager(PagerMode pagerMode){
 		this.pagerMode = (pagerMode != null) ? pagerMode : PagerMode.PAGE;
-		rowsByPageProperty.setValue(pagerMode.equals(PagerMode.ITEM) ? 1 : ROWS_BY_PAGE_ITEMS[0]);
+		rowsByPageProperty.setValue(this.pagerMode.equals(PagerMode.ITEM) ? 1 : ROWS_BY_PAGE_ITEMS[0]);
 	}
 	
 	@Override
@@ -162,7 +162,7 @@ public class Pager<FILTER_TYPE, RESULT_TYPE> extends HorizontalLayout implements
 		bindEvents();
 		resetConstrains();
 		initialized = true;
-		reset();
+		//reset();
 	}
 	
 	private void bindEvents(){

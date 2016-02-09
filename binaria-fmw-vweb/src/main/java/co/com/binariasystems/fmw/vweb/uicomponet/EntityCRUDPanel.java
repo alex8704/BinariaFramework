@@ -13,7 +13,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import co.com.binariasystems.fmw.constants.FMWConstants;
 import co.com.binariasystems.fmw.entity.cfg.EntityConfigData;
 import co.com.binariasystems.fmw.entity.cfg.EntityConfigData.AuditableEntityConfigData;
 import co.com.binariasystems.fmw.entity.cfg.EntityConfigData.FieldConfigData;
@@ -22,7 +21,6 @@ import co.com.binariasystems.fmw.entity.manager.EntityCRUDOperationsManager;
 import co.com.binariasystems.fmw.entity.util.FMWEntityUtils;
 import co.com.binariasystems.fmw.exception.FMWException;
 import co.com.binariasystems.fmw.exception.FMWUncheckedException;
-import co.com.binariasystems.fmw.ioc.IOCHelper;
 import co.com.binariasystems.fmw.security.auditory.AuditoryDataProvider;
 import co.com.binariasystems.fmw.util.exception.FMWExceptionUtils;
 import co.com.binariasystems.fmw.util.messagebundle.MessageBundleManager;
@@ -65,9 +63,7 @@ public class EntityCRUDPanel<T> extends FormPanel implements ClickListener{
 	
 	private MessageFormat labelsFmt;
 	private MessageFormat titleFmt;
-	private MessageBundleManager entityStrings = MessageBundleManager.forPath(
-			StringUtils.defaultIfBlank(IOCHelper.getBean(VWebCommonConstants.APP_ENTITIES_MESSAGES_FILE_IOC_KEY, String.class), VWebCommonConstants.ENTITY_STRINGS_PROPERTIES_FILENAME),
-			IOCHelper.getBean(FMWConstants.DEFAULT_LOADER_CLASS, Class.class));
+	private MessageBundleManager entityStrings;
 	
 	private boolean attached;
 	
@@ -103,12 +99,12 @@ public class EntityCRUDPanel<T> extends FormPanel implements ClickListener{
 		manager = (EntityCRUDOperationsManager<T>) EntityCRUDOperationsManager.getInstance(entityClass);
 		
 		String titleKey =  StringUtils.defaultIfEmpty(entityConfigData.getTitleKey(), titleFmt.format(new String[]{entityConfigData.getEntityClass().getSimpleName()}));
-		setTitle(LocaleMessagesUtil.getLocalizedMessage(entityStrings, titleKey));
+		setTitle(LocaleMessagesUtil.getLocalizedMessage(getEntityStrings(), titleKey));
 		
-		List<FieldConfigData> sortedFields = FMWEntityUtils.sortByUIControlTypePriority(entityConfigData.getFieldsData(), entityConfigData.getPkFieldName());
+		List<FieldConfigData> sortedFields = FMWEntityUtils.sortByUIControlTypePriority(entityConfigData);
 		
 		for(FieldConfigData fieldCfg : sortedFields){
-			Component comp = EntityConfigUtils.createComponentForCrudField(fieldCfg, entityConfigData, labelsFmt, entityStrings);
+			Component comp = EntityConfigUtils.createComponentForCrudField(fieldCfg, entityConfigData, labelsFmt, getEntityStrings());
 			add(comp, Dimension.percent(100));
 			componentMap.put(fieldCfg.getFieldName(), comp);
 		}
@@ -185,9 +181,8 @@ public class EntityCRUDPanel<T> extends FormPanel implements ClickListener{
 			public void refreshPageData(List<T> pageData) {
 				try{
 					if(pageData.isEmpty()) return;
-					for(Object propertyId : beanItem.getItemPropertyIds())
-						beanItem.getItemProperty(propertyId).setValue(PropertyUtils.getProperty(pageData.get(0), (String)propertyId));
-				}catch(ReadOnlyException | IllegalAccessException | InvocationTargetException | NoSuchMethodException ex){
+					VWebUtils.resetBeanItemDS(beanItem, pageData.get(0));
+				}catch(ReadOnlyException | ReflectiveOperationException ex){
 					MessageDialog.showExceptions(ex, LOGGER);
 				}
 			}
@@ -297,6 +292,12 @@ public class EntityCRUDPanel<T> extends FormPanel implements ClickListener{
 		initFocus();
 	}
 	
+	private MessageBundleManager getEntityStrings(){
+		if(entityStrings == null)
+			entityStrings = EntityConfigUtils.createMessageManagerEntityConfig(entityConfigData);
+		return entityStrings;
+	}
+	
 	private void addAuditoryDataIfNecessary(boolean isNew) throws IllegalAccessException, InvocationTargetException, NoSuchMethodException{
 		if(!(entityConfigData instanceof AuditableEntityConfigData))return;
 		AuditableEntityConfigData<T> configData = (AuditableEntityConfigData<T>)entityConfigData;
@@ -305,7 +306,7 @@ public class EntityCRUDPanel<T> extends FormPanel implements ClickListener{
 		String modificationUserProperty = configData.getModificationUserFieldCfg() != null ? configData.getModificationUserFieldCfg().getFieldName() : null;
 		String creationDateProperty = configData.getCreationDateFieldCfg() != null ? configData.getCreationDateFieldCfg().getFieldName() : null;
 		String modificationDateProperty = configData.getModificationDateFieldCfg() != null ?configData.getModificationDateFieldCfg().getFieldName() : null;
-		Object auditoryUser = auditoryDataProvider.getCurrenAuditoryUserByServletRequest(VWebUtils.getCurrentHttpRequest());
+		Object auditoryUser = auditoryDataProvider.gettCurrentAuditoryUserForEntityCRUD(VWebUtils.getCurrentHttpRequest());
 		Date currentDate = auditoryDataProvider.getCurrentDate();
 		//Creation User and Date
 		if(isNew && StringUtils.isNotEmpty(creationUserProperty))

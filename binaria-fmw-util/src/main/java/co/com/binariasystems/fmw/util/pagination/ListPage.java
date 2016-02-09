@@ -5,7 +5,7 @@ import java.util.List;
 
 public class ListPage<T> {
 	private List<T> data;
-	private int rowCount;
+	private long rowCount;
 	
 	public ListPage(){
 	}
@@ -14,7 +14,7 @@ public class ListPage<T> {
 		this.data = data;
 	}
 	
-	public ListPage(List<T> data, int rowCount){
+	public ListPage(List<T> data, long rowCount){
 		this.data = data;
 		this.rowCount = rowCount;
 	}
@@ -27,13 +27,13 @@ public class ListPage<T> {
 	public void setData(List<T> data) {
 		this.data = data;
 	}
-	public int getRowCount() {
+	public long getRowCount() {
 		if(rowCount < getData().size()){
 			setRowCount(getData().size());
 		}
 		return rowCount;
 	}
-	public void setRowCount(int rowCount) {
+	public void setRowCount(long rowCount) {
 		this.rowCount = rowCount;
 	}
 }

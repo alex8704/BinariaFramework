@@ -4,7 +4,6 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -119,13 +118,13 @@ public class FMWEntityUtils {
 	 * @param PKFieldName
 	 * @return
 	 */
-	public static List<FieldConfigData> sortByUIControlTypePriority(Map<String, FieldConfigData> fieldsDataMap, String PKFieldName){
+	public static List<FieldConfigData> sortByUIControlTypePriority(EntityConfigData<?> entityConfData){
 		List<FieldConfigData> resp = new ArrayList<EntityConfigData.FieldConfigData>();
 		int index = 0;
-		for(String fieldName : fieldsDataMap.keySet()){
-			FieldConfigData fieldCfgdData = fieldsDataMap.get(fieldName);
+		for(String fieldName : entityConfData.getFieldNames()){
+			FieldConfigData fieldCfgdData = entityConfData.getFieldData(fieldName);
 			if(fieldCfgdData.isAuditoryField()) continue;
-			if(fieldName.equals(PKFieldName))
+			if(fieldName.equals(entityConfData.getPkFieldName()))
 				resp.add(0, fieldCfgdData);
 			else{
 				for(index = 0; index < resp.size(); index++)

@@ -1,6 +1,7 @@
 package co.com.binariasystems.fmw.entity.cfg;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -18,6 +19,7 @@ public class EntityConfigData<T> implements Serializable {
 	private Class<? extends EntityValidator> validationClass;
 	private String table;
 	private Map<String, FieldConfigData> fieldsData = new HashMap<String, FieldConfigData>();
+	private List<String> fieldNamesByDeclarationOrder = new ArrayList<String>();
 	private String pkFieldName;
 	private String searchFieldName;
 	private List<String> searchDescriptionFields;
@@ -26,6 +28,7 @@ public class EntityConfigData<T> implements Serializable {
 	private EnumKeyProperty enumKeyProperty;
 	private boolean deleteEnabled;
 	private PKGenerationStrategy pkGenerationStrategy;
+	private String messagesFilePath;
 
 	public Class<T> getEntityClass() {
 		return entityClass;
@@ -43,17 +46,26 @@ public class EntityConfigData<T> implements Serializable {
 		this.table = table;
 	}
 
-	public Map<String, FieldConfigData> getFieldsData() {
-		return fieldsData;
-	}
+//	public Map<String, FieldConfigData> getFieldsData() {
+//		return fieldsData;
+//	}
 
 	public FieldConfigData getFieldData(String fieldName) {
 		return fieldsData.get(fieldName);
 	}
-
-	public void setFieldsData(Map<String, FieldConfigData> fieldsData) {
-		this.fieldsData = fieldsData;
+	
+	public void addFieldData(String fieldName, FieldConfigData fieldConfigData){
+		fieldNamesByDeclarationOrder.add(fieldName);
+		fieldsData.put(fieldName, fieldConfigData);
 	}
+	
+	public List<String> getFieldNames(){
+		return fieldNamesByDeclarationOrder;
+	}
+
+//	public void setFieldsData(Map<String, FieldConfigData> fieldsData) {
+//		this.fieldsData = fieldsData;
+//	}
 
 	public FieldConfigData getSearchFieldData() {
 		return fieldsData.get(getSearchFieldName());
@@ -131,6 +143,21 @@ public class EntityConfigData<T> implements Serializable {
 	public void setDeleteEnabled(boolean deleteEnabled) {
 		this.deleteEnabled = deleteEnabled;
 	}
+
+	/**
+	 * @return the messagesFilePath
+	 */
+	public String getMessagesFilePath() {
+		return messagesFilePath;
+	}
+
+	/**
+	 * @param messagesFilePath the messagesFilePath to set
+	 */
+	public void setMessagesFilePath(String messagesFilePath) {
+		this.messagesFilePath = messagesFilePath;
+	}
+
 
 
 	public static class AuditableEntityConfigData<T> extends EntityConfigData<T> {

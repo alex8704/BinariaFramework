@@ -109,8 +109,8 @@ public class EntityCRUDOperationsManager<T> {
 		sqlBuilder.append("insert into ").append(entityConfigData.getTable()).append("(");
 		String propertyName = null;
 		boolean first = true;
-		for (String fieldName : entityConfigData.getFieldsData().keySet()) {
-			FieldConfigData fieldCfg = entityConfigData.getFieldsData().get(fieldName);
+		for (String fieldName : entityConfigData.getFieldNames()) {
+			FieldConfigData fieldCfg = entityConfigData.getFieldData(fieldName);
 
 			if (fieldName.equals(entityConfigData.getPkFieldName()) && entityConfigData.getPkGenerationStrategy() == PKGenerationStrategy.IDENTITY)
 				continue;
@@ -171,8 +171,8 @@ public class EntityCRUDOperationsManager<T> {
 		sqlBuilder.append("update ").append(entityConfigData.getTable()).append(" set ");
 		boolean first = true;
 		String propertyName = null;
-		for (String fieldName : entityConfigData.getFieldsData().keySet()) {
-			FieldConfigData fieldCfg = entityConfigData.getFieldsData().get(fieldName);
+		for (String fieldName : entityConfigData.getFieldNames()) {
+			FieldConfigData fieldCfg = entityConfigData.getFieldData(fieldName);
 
 			if (fieldName.equals(entityConfigData.getPkFieldName())) {
 				paramSource.addValue(fieldCfg.getFieldName(), PropertyUtils.getNestedProperty(entityBean, fieldName));
@@ -202,7 +202,7 @@ public class EntityCRUDOperationsManager<T> {
 				paramSource.addValue(fieldCfg.getFieldName(), fieldValue);
 			first = false;
 		}
-		FieldConfigData pkField = entityConfigData.getFieldsData().get(entityConfigData.getPkFieldName());
+		FieldConfigData pkField = entityConfigData.getFieldData(entityConfigData.getPkFieldName());
 		sqlBuilder.append(" where ").append(pkField.getColumnName()).append(" = :").append(pkField.getFieldName());
 		
 		if(FMWEntityUtils.showOpeationsSql())
@@ -215,8 +215,8 @@ public class EntityCRUDOperationsManager<T> {
 		EntityConfigurator<?> mtd_configurator = EntityConfigurationManager.getInstance().getConfigurator(entityClazz);
 		EntityConfigData<?> mtd_cfgData = mtd_configurator.configure();
 
-		for (String fieldName : mtd_cfgData.getFieldsData().keySet()) {
-			FieldConfigData fieldCfg = mtd_cfgData.getFieldsData().get(fieldName);
+		for (String fieldName : mtd_cfgData.getFieldNames()) {
+			FieldConfigData fieldCfg = mtd_cfgData.getFieldData(fieldName);
 			if (fieldCfg instanceof RelationFieldConfigData && !TypeHelper.isBasicType(fieldCfg.getFieldType()) && includeRelations) {
 				List<String> joinCols = getColumnsForSQLSearchStatementFromEntity(((RelationFieldConfigData) fieldCfg).getRelationEntityClass(), ((RelationFieldConfigData) fieldCfg).getQueryAlias(), false, fieldCfg.getFieldName());
 				resp.addAll(joinCols);
@@ -283,14 +283,14 @@ public class EntityCRUDOperationsManager<T> {
 		}
 		sqlBuilder.append(" from ").append(entityConfigData.getTable()).append(" ").append(FMWEntityConstants.ENTITY_DYNASQL_MAIN_ALIAS);
 
-		for (String fieldName : entityConfigData.getFieldsData().keySet()) {
-			FieldConfigData fieldCfg = entityConfigData.getFieldsData().get(fieldName);
+		for (String fieldName : entityConfigData.getFieldNames()) {
+			FieldConfigData fieldCfg = entityConfigData.getFieldData(fieldName);
 			if (fieldCfg instanceof RelationFieldConfigData && !TypeHelper.isBasicType(fieldCfg.getFieldType())) {
 				EntityConfigurator<?> mtd_configurator = EntityConfigurationManager.getInstance().getConfigurator(((RelationFieldConfigData) fieldCfg).getRelationEntityClass());
 				EntityConfigData<?> mtd_cfgData = mtd_configurator.configure();
 				sqlBuilder.append(" left join ").append(mtd_cfgData.getTable()).append(" ").append(((RelationFieldConfigData) fieldCfg).getQueryAlias());
 				sqlBuilder.append(" on(").append(FMWEntityConstants.ENTITY_DYNASQL_MAIN_ALIAS).append(".").append(fieldCfg.getColumnName()).append(" = ");
-				sqlBuilder.append(((RelationFieldConfigData) fieldCfg).getQueryAlias()).append(".").append(mtd_cfgData.getFieldsData().get(mtd_cfgData.getPkFieldName()).getColumnName()).append(")");
+				sqlBuilder.append(((RelationFieldConfigData) fieldCfg).getQueryAlias()).append(".").append(mtd_cfgData.getFieldData(mtd_cfgData.getPkFieldName()).getColumnName()).append(")");
 
 			}
 		}
@@ -298,8 +298,8 @@ public class EntityCRUDOperationsManager<T> {
 		String propertyName = null;
 		Object fieldValue = null;
 		String comparingOperator = null;
-		for (String fieldName : entityConfigData.getFieldsData().keySet()) {
-			FieldConfigData fieldCfg = entityConfigData.getFieldsData().get(fieldName);
+		for (String fieldName : entityConfigData.getFieldNames()) {
+			FieldConfigData fieldCfg = entityConfigData.getFieldData(fieldName);
 
 			if ((skipPkFilter && fieldName.equals(entityConfigData.getPkFieldName())) || fieldCfg.isAuditoryField())
 				continue;
@@ -351,7 +351,7 @@ public class EntityCRUDOperationsManager<T> {
 		if (whereBuilder.length() > 0)
 			sqlBuilder.append(" where ").append(whereBuilder.toString());
 
-		sqlBuilder.append(" order by ").append(FMWEntityConstants.ENTITY_DYNASQL_MAIN_ALIAS).append(".").append(entityConfigData.getFieldsData().get(entityConfigData.getPkFieldName()).getColumnName()).append(" asc");
+		sqlBuilder.append(" order by ").append(FMWEntityConstants.ENTITY_DYNASQL_MAIN_ALIAS).append(".").append(entityConfigData.getFieldData(entityConfigData.getPkFieldName()).getColumnName()).append(" asc");
 		
 		if(FMWEntityUtils.showOpeationsSql())
 			LOGGER.info("SEARCH_SQL: {" + sqlBuilder.toString() + "}");
@@ -365,7 +365,7 @@ public class EntityCRUDOperationsManager<T> {
 		applyValidations(entityBean, CRUDOperation.DELETE);
 		StringBuilder sqlBuilder = new StringBuilder();
 		MapSqlParameterSource paramSource = new MapSqlParameterSource();
-		FieldConfigData pkField = entityConfigData.getFieldsData().get(entityConfigData.getPkFieldName());
+		FieldConfigData pkField = entityConfigData.getFieldData(entityConfigData.getPkFieldName());
 
 		sqlBuilder.append("delete from ").append(entityConfigData.getTable()).append(" where ").append(pkField.getColumnName()).append(" = :").append(pkField.getFieldName());
 		paramSource.addValue(pkField.getFieldName(), PropertyUtils.getNestedProperty(entityBean, pkField.getFieldName()));
@@ -407,7 +407,7 @@ public class EntityCRUDOperationsManager<T> {
 			else if (criteria instanceof ValueRangeCriteria)
 				entityField = ((ValueRangeCriteria<?>) criteria).getEntityField();
 
-			fieldCfg = configData.getFieldsData().get(entityField);
+			fieldCfg = configData.getFieldData(entityField);
 
 			if (fieldCfg == null)
 				throw new FMWUncheckedException("Cannon find '" + entityField + "' on Entyty class " + configData.getEntityClass() + ", for build criteria conditions");

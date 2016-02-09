@@ -26,8 +26,14 @@ public class EntityCRUDViewInstanceCreator implements ViewInstanceCreator {
 	@Override
 	public void init(Reflections reflections) {
 		Set<Class<?>> entityClasses = reflections.getTypesAnnotatedWith(Entity.class);
-		for(Class<?> entityClass : entityClasses)
-			entityClassesContext.put(entityClass.getSimpleName(), entityClass);
+		String entityClassKey = null;
+		for(Class<?> entityClass : entityClasses){
+			entityClassKey = entityClass.getSimpleName();
+			if(entityClassKey.toLowerCase().endsWith("dto"))
+				entityClassKey = entityClassKey.substring(0, entityClassKey.length() - "dto".length());
+			entityClassesContext.put(entityClassKey, entityClass);
+		}
+			
 	}
 
 	@Override
@@ -35,6 +41,8 @@ public class EntityCRUDViewInstanceCreator implements ViewInstanceCreator {
 		Matcher matcher = urlPattern.matcher(request.getUrl());
 		matcher.find();
 		String entityClassKey = matcher.group(5);
+		if(entityClassKey.toLowerCase().endsWith("dto"))
+			entityClassKey = entityClassKey.substring(0, entityClassKey.length() - "dto".length());
 		if(StringUtils.isEmpty(entityClassKey)) return null;
 		
 		Class<?> entityClass = entityClassesContext.get(entityClassKey);

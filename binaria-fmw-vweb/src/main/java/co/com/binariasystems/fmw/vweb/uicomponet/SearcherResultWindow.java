@@ -11,7 +11,6 @@ import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import co.com.binariasystems.fmw.constants.FMWConstants;
 import co.com.binariasystems.fmw.entity.cfg.EntityConfigData;
 import co.com.binariasystems.fmw.entity.cfg.EntityConfigData.FieldConfigData;
 import co.com.binariasystems.fmw.entity.cfg.EntityConfigurationManager;
@@ -20,7 +19,6 @@ import co.com.binariasystems.fmw.entity.manager.EntityCRUDOperationsManager;
 import co.com.binariasystems.fmw.entity.util.FMWEntityUtils;
 import co.com.binariasystems.fmw.exception.FMWException;
 import co.com.binariasystems.fmw.exception.FMWUncheckedException;
-import co.com.binariasystems.fmw.ioc.IOCHelper;
 import co.com.binariasystems.fmw.util.exception.FMWExceptionUtils;
 import co.com.binariasystems.fmw.util.messagebundle.MessageBundleManager;
 import co.com.binariasystems.fmw.util.pagination.ListPage;
@@ -85,9 +83,7 @@ public class SearcherResultWindow<T> extends Window implements CloseListener, Cl
 	private boolean initialized;
 	private static final String ACTIONS_COLUM_ID = "actions";
 	
-	private MessageBundleManager entityStrings = MessageBundleManager.forPath(
-			StringUtils.defaultIfBlank(IOCHelper.getBean(VWebCommonConstants.APP_ENTITIES_MESSAGES_FILE_IOC_KEY, String.class), VWebCommonConstants.ENTITY_STRINGS_PROPERTIES_FILENAME),
-			IOCHelper.getBean(FMWConstants.DEFAULT_LOADER_CLASS, Class.class));
+	private MessageBundleManager entityStrings;
 	
 	public static enum SearchType{PK, FILTER, BUTTON};
 	
@@ -126,10 +122,10 @@ public class SearcherResultWindow<T> extends Window implements CloseListener, Cl
 		try{
 			setCaption(VWebUtils.getCommonString(VWebCommonConstants.SEARCH_WIN_CAPTION));
 			form = new FormPanel(2);
-			List<FieldConfigData> sortedFields = FMWEntityUtils.sortByUIControlTypePriority(entityConfigData.getFieldsData(), entityConfigData.getPkFieldName());
+			List<FieldConfigData> sortedFields = FMWEntityUtils.sortByUIControlTypePriority(entityConfigData);
 			
 			for(FieldConfigData fieldCfg : sortedFields){
-				Component comp = EntityConfigUtils.createComponentForField(fieldCfg, entityConfigData, labelsFmt, entityStrings);
+				Component comp = EntityConfigUtils.createComponentForField(fieldCfg, entityConfigData, labelsFmt, getEntityStrings());
 				form.add(comp, Dimension.percent(100));
 				componentMap.put(fieldCfg.getFieldName(), comp);
 			}
@@ -155,7 +151,7 @@ public class SearcherResultWindow<T> extends Window implements CloseListener, Cl
 				FieldConfigData fieldCfg = entityConfigData.getFieldData(columnId);
 				Renderer<?> renderer = GridUtils.obtainRendererForType(fieldCfg.getFieldType());
 				Column column = resultsGrid.getColumn(columnId);
-				column.setHeaderCaption(EntityConfigUtils.getFieldCaptionText(fieldCfg, entityConfigData, labelsFmt, entityStrings));
+				column.setHeaderCaption(EntityConfigUtils.getFieldCaptionText(fieldCfg, entityConfigData, labelsFmt, getEntityStrings()));
 				if(fieldCfg.isRelationField() && FMWEntityUtils.isEntityClass(fieldCfg.getFieldType())){
 					gridContainer.addGeneratedProperty(columnId, genericPropertyGenerator);
 				}
@@ -198,13 +194,19 @@ public class SearcherResultWindow<T> extends Window implements CloseListener, Cl
 		gridColumnFields.add(ACTIONS_COLUM_ID);
 		gridColumnFields.add(entityConfigData.getPkFieldName());
 		boolean hasGridFields = !entityConfigData.getGridColumnFields().isEmpty();
-		Collection<String> columnFields = hasGridFields ? entityConfigData.getGridColumnFields() : entityConfigData.getFieldsData().keySet();
+		Collection<String> columnFields = hasGridFields ? entityConfigData.getGridColumnFields() : entityConfigData.getFieldNames();
 		for(String columnField : columnFields){
 			if(!columnField.equals(entityConfigData.getPkFieldName()))
 				gridColumnFields.add(columnField);
 		}
 		
 		return gridColumnFields;
+	}
+	
+	private MessageBundleManager getEntityStrings(){
+		if(entityStrings == null)
+			entityStrings = EntityConfigUtils.createMessageManagerEntityConfig(entityConfigData);
+		return entityStrings;
 	}
 	
 	private void bindComponentsToModel() throws FMWException{
@@ -289,10 +291,8 @@ public class SearcherResultWindow<T> extends Window implements CloseListener, Cl
 	}
 
 	private void handleClean() throws Exception{
-		Object emptyBean = entityConfigData.getEntityClass().getConstructor().newInstance();
-		for(Object propertyId : beanItem.getItemPropertyIds()){
-			beanItem.getItemProperty(propertyId).setValue(PropertyUtils.getProperty(emptyBean, (String)propertyId));
-		}
+		T emptyBean = entityConfigData.getEntityClass().getConstructor().newInstance();
+		VWebUtils.resetBeanItemDS(beanItem, emptyBean);
 		pager.reset();
 		if(wasChoice){
 			oldValue = selectedValue;

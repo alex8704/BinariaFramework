@@ -15,13 +15,14 @@ import co.com.binariasystems.fmw.entity.cfg.EntityConfigUIControl;
 import co.com.binariasystems.fmw.entity.manager.EntityCRUDOperationsManager;
 import co.com.binariasystems.fmw.entity.util.FMWEntityUtils;
 import co.com.binariasystems.fmw.exception.FMWException;
+import co.com.binariasystems.fmw.ioc.IOCHelper;
 import co.com.binariasystems.fmw.reflec.TypeHelper;
 import co.com.binariasystems.fmw.util.messagebundle.MessageBundleManager;
 import co.com.binariasystems.fmw.vweb.constants.UIConstants;
+import co.com.binariasystems.fmw.vweb.constants.VWebCommonConstants;
 import co.com.binariasystems.fmw.vweb.uicomponet.SearcherField;
 import co.com.binariasystems.fmw.vweb.util.converter.DateToTimestampConverter;
 
-import com.vaadin.data.Item;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.server.Sizeable.Unit;
 import com.vaadin.ui.AbstractSelect;
@@ -267,5 +268,12 @@ public class EntityConfigUtils {
 			throw new FMWException(ex);
 		}
 		return resp;
+	}
+	
+	public static MessageBundleManager createMessageManagerEntityConfig(EntityConfigData<?> entityConfig){
+		String path = StringUtils.defaultIfBlank(IOCHelper.getBean(VWebCommonConstants.APP_ENTITIES_MESSAGES_FILE_IOC_KEY, String.class), VWebCommonConstants.ENTITY_STRINGS_PROPERTIES_FILENAME);
+		path = entityConfig.getMessagesFilePath() != null ? entityConfig.getMessagesFilePath() : path;
+		Class loaderClazz = entityConfig.getMessagesFilePath() != null ? entityConfig.getEntityClass() : IOCHelper.getBean(FMWConstants.DEFAULT_LOADER_CLASS, Class.class);
+		return MessageBundleManager.forPath(path, loaderClazz);
 	}
 }

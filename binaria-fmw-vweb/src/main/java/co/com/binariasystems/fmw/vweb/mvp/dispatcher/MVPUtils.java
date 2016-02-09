@@ -89,8 +89,16 @@ public class MVPUtils {
 				FieldUtils.writeField(field, targetController, sourceValue, forceAccess);
 		}
 	}
+	
+	public static void applyConventionStringsForView(Object viewInstance, String messagesFilePath) {
+		ViewInfo viewInfo = new ViewInfo();
+		viewInfo.setMessages(messagesFilePath);
+		viewInfo.setViewStringsByConventions(true);
+		viewInfo.setViewClass(viewInstance.getClass());
+		applyConventionStringsForView(viewInstance, viewInfo, createMessageBundleManager(viewInfo));
+	}
 
-	public static void applyConventionStringsForView(Object viewInstance, ViewInfo viewInfo, MessageBundleManager messageManager) throws ParseException {
+	public static void applyConventionStringsForView(Object viewInstance, ViewInfo viewInfo, MessageBundleManager messageManager) {
 		Object fieldValue = null;
 		boolean forceAccess = true;
 		String localizedCaption = "";
@@ -149,6 +157,13 @@ public class MVPUtils {
 				}
 			}
 		}
+	}
+	
+	public static void applyValidatorsForView(Object viewInstance) throws ParseException{
+		ViewInfo viewInfo = new ViewInfo();
+		viewInfo.setViewStringsByConventions(true);
+		viewInfo.setViewClass(viewInstance.getClass());
+		applyValidatorsForView(viewInstance, viewInfo);
 	}
 	
 	public static void applyValidatorsForView(Object viewInstance, ViewInfo viewInfo) throws ParseException {

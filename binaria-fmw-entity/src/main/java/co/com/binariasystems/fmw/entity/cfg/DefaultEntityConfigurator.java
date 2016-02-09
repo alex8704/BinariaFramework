@@ -95,6 +95,8 @@ public class DefaultEntityConfigurator<T> implements EntityConfigurator<T>{
 				if(!EntityValidator.class.equals(((CRUDViewConfig)annot).validationClass()))
 					entityConfigData.setValidationClass(((CRUDViewConfig)annot).validationClass());
 				entityConfigData.setDeleteEnabled(((CRUDViewConfig)annot).deleteEnabled());
+				if(StringUtils.isNotEmpty(((CRUDViewConfig)annot).messagesFilePath()))
+					entityConfigData.setMessagesFilePath(((CRUDViewConfig)annot).messagesFilePath());
 			}
 		}
 		
@@ -196,7 +198,7 @@ public class DefaultEntityConfigurator<T> implements EntityConfigurator<T>{
 			if(field.getName().equals(entityConfigData.getPkFieldName()) && fieldCfg instanceof RelationFieldConfigData)//No se puede tener una PK y anotarla como ForeignKey
 				throw new FMWException("Field "+clazz.getName()+"."+field.getName()+" has annotated at same time with @"+Key.class.getSimpleName()+" and @"+ForeignKey.class.getSimpleName()+" and these are mutualy exclusive annotations");
 			
-			entityConfigData.getFieldsData().put(fieldCfg.getFieldName(), fieldCfg);
+			entityConfigData.addFieldData(fieldCfg.getFieldName(), fieldCfg);
 		}
 	}
 	
@@ -263,7 +265,7 @@ public class DefaultEntityConfigurator<T> implements EntityConfigurator<T>{
 	}
 	
 	private String generateRelationFieldQueryAlias(FieldConfigData fieldCfg){
-		return "as_"+fieldCfg.getFieldName() + "_" + entityConfigData.getFieldsData().size();
+		return "as_"+fieldCfg.getFieldName() + "_" + entityConfigData.getFieldNames().size();
 	}
 	
 

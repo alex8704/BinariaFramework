@@ -19,4 +19,5 @@ public @interface CRUDViewConfig {
 	public abstract String modificationUserField() default "modificationUser";
 	public abstract String creationDateField() default "creationDate";
 	public abstract String modificationDateField() default "modificationDate";
+	public abstract String messagesFilePath() default "";
 }
