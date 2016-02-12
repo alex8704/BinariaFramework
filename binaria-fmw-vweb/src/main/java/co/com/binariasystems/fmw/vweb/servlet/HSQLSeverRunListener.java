@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import co.com.binariasystems.fmw.util.db.HSQLSeverRunner;
+import co.com.binariasystems.fmw.util.exception.FMWExceptionUtils;
 
 public class HSQLSeverRunListener implements ServletContextListener {
 	private static final Logger LOGGER = LoggerFactory.getLogger(HSQLSeverRunListener.class);
@@ -55,16 +56,18 @@ public class HSQLSeverRunListener implements ServletContextListener {
 				return;
 			}
 		}
+		try{
+			serverRunner.startServer();
+			waitServerStart();
+		}catch(IOException ex){
+			LOGGER.error("Canno't start HSQL server from application: "+FMWExceptionUtils.prettyMessageException(ex).getMessage());
+		}
 		
-		serverRunner.startServer();
-		waitServerStart();
 	}
 	
 	private void waitServerStart(){
 		try {
 			Thread.sleep(4000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
+		} catch (InterruptedException e) {}
 	}
 }

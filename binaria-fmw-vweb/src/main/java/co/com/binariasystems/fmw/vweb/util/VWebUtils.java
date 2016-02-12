@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.beanutils.PropertyUtils;
 
+import co.com.binariasystems.fmw.exception.FMWUncheckedException;
 import co.com.binariasystems.fmw.util.messagebundle.MessageBundleManager;
 import co.com.binariasystems.fmw.vweb.constants.VWebCommonConstants;
 import co.com.binariasystems.fmw.vweb.resources.resources;
@@ -213,8 +214,12 @@ public final class VWebUtils {
 		});
 	}
 	
-	public static <T> void resetBeanItemDS(BeanItem<T> beanItem, T newBean) throws ReflectiveOperationException{
-		for(Object propertyId : beanItem.getItemPropertyIds())
-			beanItem.getItemProperty(propertyId).setValue((newBean == null) ? null : PropertyUtils.getProperty(newBean, propertyId.toString()));
+	public static <T> void resetBeanItemDS(BeanItem<T> beanItem, T newBean) throws FMWUncheckedException{
+		try {
+			for(Object propertyId : beanItem.getItemPropertyIds())
+				beanItem.getItemProperty(propertyId).setValue((newBean == null) ? null : PropertyUtils.getProperty(newBean, propertyId.toString()));
+		} catch (ReflectiveOperationException e) {
+			throw new FMWUncheckedException(e);
+		}
 	}
 }

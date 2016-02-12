@@ -22,7 +22,7 @@ public class HSQLSeverRunner{
 	private Server server;
 	private boolean serverStarted;
 	
-	public void startServer(){
+	public void startServer() throws IOException{
 		if(serverStarted) return;
 		if(serverConfig == null)buildServerConfig();;
 		HsqlProperties serverProps = new HsqlProperties(serverConfig);
@@ -30,7 +30,7 @@ public class HSQLSeverRunner{
 		try {
 			server.setProperties(serverProps);
 		} catch (IOException | AclFormatException e) {
-			LOGGER.error("Error starting HSQL Server", e);
+			LOGGER.error("Error configuring HSQL Server properties", e);
 			return;
 		}
 		server.start();

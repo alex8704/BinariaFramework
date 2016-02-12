@@ -34,8 +34,8 @@ import co.com.binariasystems.fmw.vweb.util.EntityConfigUtils;
 import co.com.binariasystems.fmw.vweb.util.LocaleMessagesUtil;
 import co.com.binariasystems.fmw.vweb.util.VWebUtils;
 
-import com.vaadin.data.Property.ReadOnlyException;
 import com.vaadin.data.util.BeanItem;
+import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
@@ -110,21 +110,27 @@ public class EntityCRUDPanel<T> extends FormPanel implements ClickListener{
 		}
 		
 		pager = new Pager<T,T>(PagerMode.ITEM);
-		saveBtn = new Button(VWebUtils.getCommonString(VWebCommonConstants.MASTER_CRUD_MSG_SAVECAPTION));
-		editBtn = new Button(VWebUtils.getCommonString(VWebCommonConstants.MASTER_CRUD_MSG_EDITCAPTION));
-		searchBtn = new Button(VWebUtils.getCommonString(VWebCommonConstants.MASTER_CRUD_MSG_SEARCHCAPTION));
-		searchAllBtn = new Button(VWebUtils.getCommonString(VWebCommonConstants.MASTER_CRUD_MSG_SEARCHALLCAPTION));
-		cleanBtn = new Button(VWebUtils.getCommonString(VWebCommonConstants.MASTER_CRUD_MSG_CLEANCAPTION));
+		saveBtn = new Button(FontAwesome.SAVE);
+		saveBtn.setDescription(VWebUtils.getCommonString(VWebCommonConstants.MASTER_CRUD_MSG_SAVECAPTION));
+		editBtn = new Button(FontAwesome.EDIT);
+		editBtn.setDescription(VWebUtils.getCommonString(VWebCommonConstants.MASTER_CRUD_MSG_EDITCAPTION));
+		searchBtn = new Button(FontAwesome.SEARCH);
+		searchBtn.setDescription(VWebUtils.getCommonString(VWebCommonConstants.MASTER_CRUD_MSG_SEARCHCAPTION));
+		searchAllBtn = new Button(FontAwesome.SEARCH_PLUS);
+		searchAllBtn.setDescription(VWebUtils.getCommonString(VWebCommonConstants.MASTER_CRUD_MSG_SEARCHALLCAPTION));
+		cleanBtn = new Button(FontAwesome.ERASER);
+		cleanBtn.setDescription(VWebUtils.getCommonString(VWebCommonConstants.MASTER_CRUD_MSG_CLEANCAPTION));
 		
 		addEmptyRow();
 		addCenteredOnNewRow(Dimension.fullPercent(), pager);
 		addEmptyRow();
 		
 		if(entityConfigData.isDeleteEnabled()){
-			deleteBtn = new Button(VWebUtils.getCommonString(VWebCommonConstants.MASTER_CRUD_MSG_DELETECAPTION));
-			addCenteredOnNewRow(Dimension.pixels(EntityConfigUtils.BUTTONS_WIDTH), saveBtn, editBtn, searchBtn, searchAllBtn, deleteBtn, cleanBtn);
+			deleteBtn = new Button(FontAwesome.TRASH);
+			deleteBtn.setDescription(VWebUtils.getCommonString(VWebCommonConstants.MASTER_CRUD_MSG_DELETECAPTION));
+			addCenteredOnNewRow(saveBtn, editBtn, searchBtn, searchAllBtn, deleteBtn, cleanBtn);
 		}else
-			addCenteredOnNewRow(Dimension.pixels(EntityConfigUtils.BUTTONS_WIDTH), saveBtn, editBtn, searchBtn, searchAllBtn, cleanBtn);
+			addCenteredOnNewRow(saveBtn, editBtn, searchBtn, searchAllBtn, cleanBtn);
 		
 		bindComponentsToModel();
 		
@@ -179,12 +185,7 @@ public class EntityCRUDPanel<T> extends FormPanel implements ClickListener{
 			@SuppressWarnings("unchecked")
 			@Override
 			public void refreshPageData(List<T> pageData) {
-				try{
-					if(pageData.isEmpty()) return;
-					VWebUtils.resetBeanItemDS(beanItem, pageData.get(0));
-				}catch(ReadOnlyException | ReflectiveOperationException ex){
-					MessageDialog.showExceptions(ex, LOGGER);
-				}
+				VWebUtils.resetBeanItemDS(beanItem, pageData.get(0));
 			}
 		});
 	}

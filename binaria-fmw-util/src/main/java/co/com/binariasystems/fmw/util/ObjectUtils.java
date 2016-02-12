@@ -201,16 +201,11 @@ private static final Logger LOGGER = LoggerFactory.getLogger(ObjectUtils.class);
 				if (PropertyUtils.isReadable(sourceObject, propertyName) && PropertyUtils.isWriteable(targetObject, propertyName)){
 					//Caso especial en que dos propiedades se llaman igual pero son de diferentes clases con iguales atributos
 					//Entonces se hace un mecanismo de copiado recursivo [Solo para clases propias de la aplicacion, que no hagan parte del API de java]
-					if(!targetPropertyDesc.getPropertyType().isAssignableFrom(sourcePropertyDesc.getPropertyType()) 
+					if(!targetPropertyDesc.getPropertyType().isEnum() && !sourcePropertyDesc.getPropertyType().isEnum()
 							&& !TypeHelper.isBasicType(targetPropertyDesc.getPropertyType()) && !TypeHelper.isBasicType(sourcePropertyDesc.getPropertyType())){
 						Object value = PropertyUtils.getSimpleProperty(sourceObject, propertyName);
-						if(value != null){
-							Object target = targetPropertyDesc.getPropertyType().newInstance();
-							transferProperties(value,target);
-							BeanUtils.copyProperty(targetObject, propertyName, target);
-						}else
-							BeanUtils.copyProperty(targetObject, propertyName, value);
-							
+						Object target = transferProperties(value,targetPropertyDesc.getPropertyType());
+						BeanUtils.copyProperty(targetObject, propertyName, target);
 					}
 					else if(!targetPropertyDesc.getPropertyType().isArray() && !Collection.class.isAssignableFrom(targetPropertyDesc.getPropertyType()) &&
 							targetPropertyDesc.getPropertyType().isAssignableFrom(sourcePropertyDesc.getPropertyType()) ){

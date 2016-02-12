@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.beanutils.BeanUtils;
-import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import co.com.binariasystems.fmw.entity.cfg.EntityConfigData;
@@ -40,6 +39,7 @@ import com.vaadin.data.Item;
 import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.data.util.GeneratedPropertyContainer;
+import com.vaadin.server.FontAwesome;
 import com.vaadin.shared.ui.grid.HeightMode;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
@@ -131,9 +131,12 @@ public class SearcherResultWindow<T> extends Window implements CloseListener, Cl
 			}
 			
 			pager = new Pager<T, T>(PagerMode.PAGE);
-			searchBtn = new Button(VWebUtils.getCommonString(VWebCommonConstants.MASTER_CRUD_MSG_SEARCHCAPTION));
-			searchAllBtn = new Button(VWebUtils.getCommonString(VWebCommonConstants.MASTER_CRUD_MSG_SEARCHALLCAPTION));
-			cleanBtn = new Button(VWebUtils.getCommonString(VWebCommonConstants.MASTER_CRUD_MSG_CLEANCAPTION));
+			searchBtn = new Button(FontAwesome.SEARCH);
+			searchBtn.setDescription(VWebUtils.getCommonString(VWebCommonConstants.MASTER_CRUD_MSG_SEARCHCAPTION));
+			searchAllBtn = new Button(FontAwesome.SEARCH_PLUS);
+			searchAllBtn.setDescription(VWebUtils.getCommonString(VWebCommonConstants.MASTER_CRUD_MSG_SEARCHALLCAPTION));
+			cleanBtn = new Button(FontAwesome.ERASER);
+			cleanBtn.setDescription(VWebUtils.getCommonString(VWebCommonConstants.MASTER_CRUD_MSG_CLEANCAPTION));
 			
 			gridContainer = new GeneratedPropertyContainer(new BeanItemContainer<T>(entityConfigData.getEntityClass()));
 			gridContainer.addGeneratedProperty(ACTIONS_COLUM_ID, new GridUtils.ActionLinkValueGenerator(entityConfigData.getPkFieldName(), null, this, selectionEventFunction, new ActionLinkInfo("select",VWebUtils.getCommonString(VWebCommonConstants.SEARCH_WIN_CHOOSE_CAPTION))));
@@ -165,7 +168,7 @@ public class SearcherResultWindow<T> extends Window implements CloseListener, Cl
 			resultsGrid.setHeightByRows(pager.getRowsByPage());
 			
 			form.addEmptyRow();
-			form.addCenteredOnNewRow(Dimension.pixels(EntityConfigUtils.BUTTONS_WIDTH), searchBtn, searchAllBtn, cleanBtn);
+			form.addCenteredOnNewRow(searchBtn, searchAllBtn, cleanBtn);
 			form.add(resultsGrid, 2, Dimension.fullPercent());
 			form.addCenteredOnNewRow(Dimension.fullPercent(), pager);
 			
