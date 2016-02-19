@@ -33,6 +33,7 @@ import co.com.binariasystems.fmw.vweb.mvp.annotation.validation.NullValidator;
 import co.com.binariasystems.fmw.vweb.mvp.annotation.validation.RegExpValidator;
 import co.com.binariasystems.fmw.vweb.mvp.annotation.validation.StringLengthValidator;
 import co.com.binariasystems.fmw.vweb.mvp.dispatcher.data.ViewInfo;
+import co.com.binariasystems.fmw.vweb.uicomponet.AddressEditorField;
 import co.com.binariasystems.fmw.vweb.uicomponet.FormPanel;
 import co.com.binariasystems.fmw.vweb.uicomponet.TreeMenu;
 import co.com.binariasystems.fmw.vweb.util.LocaleMessagesUtil;
@@ -57,7 +58,7 @@ public class MVPUtils {
 	public static MessageBundleManager createMessageBundleManager(ViewInfo viewInfo) {
 		MessageBundleManager resp = null;
 		if (!StringUtils.isEmpty(viewInfo.getMessages())) {
-			resp = MessageBundleManager.forPath(viewInfo.getMessages(), viewInfo.getViewClass());
+			resp = MessageBundleManager.forPath(viewInfo.getMessages(), true, viewInfo.getViewClass());
 		}
 		return resp;
 	}
@@ -210,8 +211,9 @@ public class MVPUtils {
 						else if (annotation instanceof RegExpValidator)
 							((Validatable) fieldValue).addValidator(ValidationUtils.regexpValidator(
 									StringUtils.defaultIfEmpty(((RegExpValidator) annotation).fieldCaption(), fieldCaption), ((RegExpValidator) annotation).expression(), ((RegExpValidator) annotation).example()));
-						else if (annotation instanceof AddressValidator)
-							((Validatable) fieldValue).addValidator(ValidationUtils.addressValidator(StringUtils.defaultIfEmpty(((AddressValidator) annotation).fieldCaption(), fieldCaption)));
+						else if (annotation instanceof AddressValidator && AddressEditorField.class.isAssignableFrom(viewField.getType()))
+							((Validatable) fieldValue).addValidator(ValidationUtils.addressValidator(StringUtils.defaultIfEmpty(((AddressValidator) annotation).fieldCaption(), fieldCaption),
+									((AddressEditorField) fieldValue).getFieldsToPropertyMapping()));
 					}
 				}
 			}

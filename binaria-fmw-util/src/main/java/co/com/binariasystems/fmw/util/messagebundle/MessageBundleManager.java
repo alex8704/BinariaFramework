@@ -25,11 +25,11 @@ public abstract class MessageBundleManager {
     private MessageBundleManager(){}
 
     public static MessageBundleManager forPath(String resourcePath) {
-        return forPath(resourcePath, true);
+        return forPath(resourcePath, false);
     }
 
     public static MessageBundleManager forPath(String resourcePath, Class loaderClass) {
-        return forPath(resourcePath, true, loaderClass);
+        return forPath(resourcePath, false, loaderClass);
     }
 
     public static MessageBundleManager forPath(String resourcePath, boolean returnKeyWhenNotFound) {

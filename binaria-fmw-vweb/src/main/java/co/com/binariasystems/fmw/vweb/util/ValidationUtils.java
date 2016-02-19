@@ -8,6 +8,7 @@ import java.util.Date;
 import org.apache.commons.lang3.StringUtils;
 
 import co.com.binariasystems.fmw.constants.FMWConstants;
+import co.com.binariasystems.fmw.vweb.uicomponet.AddressEditorField.AddressFieldsToDTOMappingInfo;
 
 import com.vaadin.data.Validator;
 import com.vaadin.data.validator.DateRangeValidator;
@@ -16,7 +17,6 @@ import com.vaadin.data.validator.EmailValidator;
 import com.vaadin.data.validator.IntegerRangeValidator;
 import com.vaadin.data.validator.NullValidator;
 import com.vaadin.data.validator.RegexpValidator;
-import com.vaadin.data.validator.StringLengthValidator;
 
 public class ValidationUtils {
 	//Value of {0} field is mandatory
@@ -112,12 +112,12 @@ public class ValidationUtils {
 	
 	public static Validator minStringLengthValidator(String fieldCaption, Integer minLength){
 		String expectedLength = minLength == null ? "#" : String.valueOf(minLength);
-		return new StringLengthValidator(new MessageFormat(VWebUtils.getCommonString(LENGTH_AT_LEAST_THAN_MESSAGE_TEMPLATE_KEY)).format(new Object[]{fieldCaption, expectedLength}), minLength, null, true);
+		return new CustomStringLengthValidator(new MessageFormat(VWebUtils.getCommonString(LENGTH_AT_LEAST_THAN_MESSAGE_TEMPLATE_KEY)).format(new Object[]{fieldCaption, expectedLength}), minLength, null);
 	}
 	
 	public static Validator maxStringLengthValidator(String fieldCaption, Integer maxLength){
 		String expectedLength = maxLength == null ? "#" : String.valueOf(maxLength);
-		return new StringLengthValidator(new MessageFormat(VWebUtils.getCommonString(LENGTH_MAXIMUM_OF_MESSAGE_TEMPLATE_KEY)).format(new Object[]{fieldCaption, expectedLength}), null, maxLength, true);
+		return new CustomStringLengthValidator(new MessageFormat(VWebUtils.getCommonString(LENGTH_MAXIMUM_OF_MESSAGE_TEMPLATE_KEY)).format(new Object[]{fieldCaption, expectedLength}), null, maxLength);
 	}
 	
 	public static Validator stringLengthRangeValidator(String fieldCaption, Integer minLength, Integer maxLength){
@@ -128,7 +128,7 @@ public class ValidationUtils {
 		
 		String expectedMinLength = minLength == null ? "#" : String.valueOf(minLength);
 		String expectedMaxLength = maxLength == null || maxLength == Integer.MAX_VALUE? "#" : String.valueOf(maxLength);
-		return new StringLengthValidator(new MessageFormat(VWebUtils.getCommonString(LENGTH_BETWEEN_MESSAGE_TEMPLATE_KEY)).format(new Object[]{fieldCaption, expectedMinLength, expectedMaxLength}), minLength, maxLength, true);
+		return new CustomStringLengthValidator(new MessageFormat(VWebUtils.getCommonString(LENGTH_BETWEEN_MESSAGE_TEMPLATE_KEY)).format(new Object[]{fieldCaption, expectedMinLength, expectedMaxLength}), minLength, maxLength);
 	}
 	
 	public static Validator emailValidator(String fieldCaption){
@@ -155,8 +155,8 @@ public class ValidationUtils {
 		return new MessageFormat(VWebUtils.getCommonString(VALUE_BETWEEN_MESSAGE_TEMPLATE_KEY)).format(new Object[]{fieldCaption, expectedMinValue, expectedMaxValue});
 	}
 	
-	public static Validator addressValidator(String fieldCaption){
-		return new AddressFieldValidator(new MessageFormat(VWebUtils.getCommonString(ADDRESS_MESSAGE_TEMPLATE_KEY)).format(new Object[]{fieldCaption}));
+	public static Validator addressValidator(String fieldCaption, AddressFieldsToDTOMappingInfo fieldsToDTOMapping){
+		return new AddressFieldValidator(new MessageFormat(VWebUtils.getCommonString(ADDRESS_MESSAGE_TEMPLATE_KEY)).format(new Object[]{fieldCaption}), fieldsToDTOMapping);
 	}
 	
 	public static boolean isValidatorAnnotation(Annotation annot){

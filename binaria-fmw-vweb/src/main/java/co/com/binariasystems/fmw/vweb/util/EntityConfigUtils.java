@@ -58,6 +58,7 @@ public class EntityConfigUtils {
 				widget.setImmediate(true);
 				widget.setMaxLength(TEXTFIELD_MAX_LENGTH);
 				widget.setNullRepresentation("");
+				widget.setInvalidCommitted(true);
 				if(TypeHelper.isNumericType(fieldInfo.getFieldType()))
 					widget.setConverter(fieldInfo.getFieldType());
 				if(!fieldInfo.isOmmitUpperTransform())
@@ -70,6 +71,7 @@ public class EntityConfigUtils {
 				widget.setMaxLength(TEXTFIELD_MAX_LENGTH);
 	
 				widget.setValidationVisible(true);
+				widget.setInvalidCommitted(true);
 				widget.setNullRepresentation("");
 				resp = widget;
 			}
@@ -77,6 +79,7 @@ public class EntityConfigUtils {
 				TextArea widget = new TextArea(caption);
 				widget.setMaxLength(TEXTAREA_MAX_LENGTH);
 				widget.setValidationVisible(true);
+				widget.setInvalidCommitted(true);
 				widget.setNullRepresentation("");
 				resp = widget;
 			}
@@ -84,28 +87,33 @@ public class EntityConfigUtils {
 				DateField widget = new DateField(caption);
 				widget.setDateFormat(FMWConstants.DATE_DEFAULT_FORMAT);
 				widget.setValidationVisible(true);
+				widget.setInvalidCommitted(true);
 				resp = widget;
 			}
 			else if(controlType == EntityConfigUIControl.COMBOBOX){
 				ComboBox widget = new ComboBox(caption);
 				widget.setValidationVisible(true);
+				widget.setInvalidCommitted(true);
 				resp = widget;
 				
 			}
 			else if(controlType == EntityConfigUIControl.RADIO){
 				OptionGroup widget = new OptionGroup(caption);
 				widget.addStyleName(ValoTheme.OPTIONGROUP_HORIZONTAL);
+				widget.setInvalidCommitted(true);
 				widget.setValidationVisible(true);
 				resp = widget;
 				
 			}
 			else if(controlType == EntityConfigUIControl.CHECKBOX){
 				CheckBox widget = new CheckBox(caption);
+				widget.setInvalidCommitted(true);
 				resp = widget;
 			}
 			else if(controlType == EntityConfigUIControl.SEARCHBOX){
 				SearcherField<?> widget = new SearcherField<>(((RelationFieldConfigData)fieldInfo).getRelationEntityClass(), fieldInfo.getFieldType(), caption);
 				widget.setRequired(fieldInfo.isMandatory());
+				widget.setInvalidCommitted(true);
 				resp = widget;
 			}
 			
@@ -274,6 +282,6 @@ public class EntityConfigUtils {
 		String path = StringUtils.defaultIfBlank(IOCHelper.getBean(VWebCommonConstants.APP_ENTITIES_MESSAGES_FILE_IOC_KEY, String.class), VWebCommonConstants.ENTITY_STRINGS_PROPERTIES_FILENAME);
 		path = entityConfig.getMessagesFilePath() != null ? entityConfig.getMessagesFilePath() : path;
 		Class loaderClazz = entityConfig.getMessagesFilePath() != null ? entityConfig.getEntityClass() : IOCHelper.getBean(FMWConstants.DEFAULT_LOADER_CLASS, Class.class);
-		return MessageBundleManager.forPath(path, loaderClazz);
+		return MessageBundleManager.forPath(path, true, loaderClazz);
 	}
 }

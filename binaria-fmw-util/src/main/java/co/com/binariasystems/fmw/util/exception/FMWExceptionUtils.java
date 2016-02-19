@@ -44,6 +44,7 @@ import co.com.binariasystems.fmw.exception.FMWDataAccessException;
 import co.com.binariasystems.fmw.exception.FMWException;
 import co.com.binariasystems.fmw.exception.FMWUncheckedException;
 import co.com.binariasystems.fmw.util.FMWUtilConstants;
+import co.com.binariasystems.fmw.util.db.DBUtil;
 import co.com.binariasystems.fmw.util.messagebundle.MessageBundleManager;
 
 public class FMWExceptionUtils {
@@ -94,13 +95,12 @@ public class FMWExceptionUtils {
 		if(ex instanceof FMWException || ex instanceof FMWUncheckedException || ex instanceof FMWDataAccessException)
 			return ex;			
 		if(ex instanceof SQLException){
-			String msgKey = "sql.state.code."+((SQLException)ex).getSQLState();
-			boolean foundMessage = !StringUtils.defaultIfEmpty(getSQLErrorMessage(msgKey, ex, locale), msgKey).equals(msgKey);
-			if(foundMessage)
-				return new FMWDataAccessException(getSQLErrorMessage(msgKey, ex, locale));
+			return new FMWDataAccessException(sqlExceptionMessage((SQLException)ex, locale));
 		}else if(ex instanceof DataAccessException){
+			if(((DataAccessException)ex).getMostSpecificCause() instanceof SQLException)
+				return prettyMessageException(((DataAccessException)ex).getMostSpecificCause(), locale);
 			String msgKey = StringUtils.defaultIfEmpty(springExceptionMsgMapping.get(ex.getClass()), DEFAUL_DATAACCESERROR_MSG_KEY);
-			return new FMWDataAccessException(getSQLErrorMessage(msgKey, ex, locale));
+			return new FMWDataAccessException(getSpringErrorMessage(msgKey, ex, locale));
 		}else if(ex instanceof RuntimeException || ex instanceof InvocationTargetException){
 			Throwable tr = ex;
 			while(tr.getCause() != null){
@@ -114,19 +114,36 @@ public class FMWExceptionUtils {
 		return ex;
 	}
 	
-	private static String getSQLErrorMessage(String messageKey, Throwable cause, Locale locale){
-		String defaultDataAcessError = mm.getString(DEFAUL_DATAACCESERROR_MSG_KEY, locale);
+	private static String getSpringErrorMessage(String messageKey, Throwable cause, Locale locale){
 		String message = mm.getString(messageKey, locale);
-		if(defaultDataAcessError.equals(message))
-			return MessageFormat.format(message, new Object[]{cause.getMessage()});
+		if(StringUtils.isEmpty(message))
+			return MessageFormat.format(mm.getString(DEFAUL_DATAACCESERROR_MSG_KEY, locale), new Object[]{cause.getMessage()});
 		return message;
 	}
 	
 	private static String getSocketErrorMessage(String messageKey, Throwable cause, Locale locale){
-		String defaultDataAcessError = mm.getString(DEFAUL_SOCKETERRROR_MSG_KEY, locale);
 		String message = mm.getString(messageKey, locale);
-		if(defaultDataAcessError.equals(message))
-			return MessageFormat.format(message, new Object[]{cause.getMessage()});
+		if(StringUtils.isEmpty(message))
+			return MessageFormat.format(mm.getString(DEFAUL_SOCKETERRROR_MSG_KEY,locale), new Object[]{cause.getMessage()});
+		return message;
+	}
+	
+	private static String sqlExceptionMessage(SQLException ex, Locale locale){
+		String messageBaseKey = "sql.state.code."+DBUtil.getCurrentDBMS().name().toLowerCase();
+		String msgKey = messageBaseKey +"."+ex.getSQLState()+"."+ex.getErrorCode();
+		String message = mm.getString(msgKey, locale);
+		if(StringUtils.isEmpty(message)){
+			msgKey = messageBaseKey +"."+ex.getSQLState();
+			message = mm.getString(msgKey, locale);
+			if(StringUtils.isEmpty(message)){
+				msgKey = messageBaseKey;
+				message = mm.getString(msgKey, locale);
+				if(StringUtils.isEmpty(message)){
+					message = MessageFormat.format(mm.getString(DEFAUL_DATAACCESERROR_MSG_KEY, locale), new Object[]{ex.getMessage()});
+				}
+			}
+		}
+			
 		return message;
 	}
 }

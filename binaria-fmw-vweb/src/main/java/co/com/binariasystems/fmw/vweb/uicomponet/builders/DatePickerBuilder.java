@@ -48,6 +48,7 @@ public class DatePickerBuilder extends InlineDateField {
 
 	private void setDefaults(){
 		setConversionError(VWebUtils.getCommonString(VWebCommonConstants.FIELD_CONVERSION_ERROR_DEFAULT_MSG));
+		setInvalidCommitted(true);
 		//setInvalidAllowed(invalidAllowed);
 		//setValidationVisible(validateAutomatically);
 	}

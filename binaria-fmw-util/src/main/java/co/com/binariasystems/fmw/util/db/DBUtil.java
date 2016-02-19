@@ -62,6 +62,6 @@ public class DBUtil {
 	}
 	
 	public static DBMS getCurrentDBMS(){
-		return currentDBMS;
+		return currentDBMS != null ? currentDBMS : DBMS.UNSUPPORTED;
 	}
 }

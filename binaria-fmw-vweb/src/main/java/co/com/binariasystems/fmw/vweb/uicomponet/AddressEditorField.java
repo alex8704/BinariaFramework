@@ -1,8 +1,6 @@
 package co.com.binariasystems.fmw.vweb.uicomponet;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -14,7 +12,6 @@ import co.com.binariasystems.fmw.dto.Listable;
 import co.com.binariasystems.fmw.util.ObjectUtils;
 import co.com.binariasystems.fmw.vweb.constants.UIConstants;
 import co.com.binariasystems.fmw.vweb.constants.VWebCommonConstants;
-import co.com.binariasystems.fmw.vweb.uicomponet.AddressEditorField.Address;
 import co.com.binariasystems.fmw.vweb.uicomponet.addresseditor.AddressEditorParametersProvider;
 import co.com.binariasystems.fmw.vweb.uicomponet.addresseditor.BuiltInAddressEditorParametersProvider;
 import co.com.binariasystems.fmw.vweb.util.VWebUtils;
@@ -44,13 +41,8 @@ import com.vaadin.ui.themes.ValoTheme;
  * @author Alexander Castro O.
  *
  */
-public class AddressEditorField<T extends Address> extends CustomField<T> implements UIConstants, VWebCommonConstants{
+public class AddressEditorField<T> extends CustomField<T> implements UIConstants, VWebCommonConstants{
 	private static final Logger LOGGER = LoggerFactory.getLogger(AddressEditorField.class);
-	private static final String[] ADDRESS_PROPERTYIDS = {
-		"mainViaType", "mainViaNum", "mainViaLetter", "mainViaBis", "mainViaBisLetter", "mainViaQuadrant",
-		"mainViaComplement", "mainViaComplementDetail", "secondaryViaNum", "secondaryViaLetter",
-		"complementaryViaNum", "complementaryViaQuadrant", "complementaryViaComplement", "complementaryViaComplementDetail"
-	};
 	private GridLayout content;
 	private HorizontalLayout generatorPanel;
 	private Label mainViaLbl;
@@ -78,28 +70,45 @@ public class AddressEditorField<T extends Address> extends CustomField<T> implem
 	private AddressEditorParametersProvider parametersProvider;
 	private Class<T> valueType;
 	
-	private BeanItem<InternalAddress> beanItem = new BeanItem<InternalAddress>(new InternalAddress(), InternalAddress.class);
+	private BeanItem<T> beanItem;
 	private ObjectProperty<String> generatedAddressProperty = new ObjectProperty<String>("", String.class);
 	private ValueChangeListener valueChangeListener;
 	private boolean ommitDsUpdate;
-	private Map<Property, String> propertiesAndIds = new HashMap<Property, String>();
+	private AddressFieldsToDTOMappingInfo fieldsToPropertyMapping = new AddressFieldsToDTOMappingInfo();
 	
 	public AddressEditorField(Class<T> valueType) {
-		this(null, valueType);
+		this(valueType, null, null);
 	}
 	
-	public AddressEditorField(String caption, Class<T> valueType) {
-		super();
+	public AddressEditorField(Class<T> valueType, String caption) {
+		this(valueType, null, null);
+	}
+	
+	public AddressEditorField(Class<T> valueType, AddressFieldsToDTOMappingInfo fieldsToPropertyMapping) {
+		this(valueType, fieldsToPropertyMapping, null);
+	}
+	
+	public AddressEditorField(Class<T> valueType, AddressFieldsToDTOMappingInfo fieldsToPropertyMapping, String caption) {
 		this.setCaption(caption);
 		this.addStyleName(ADDRESS_EDITOR_STYLENAME);
 		this.valueType = valueType;
-		
+		if(fieldsToPropertyMapping != null)
+			this.fieldsToPropertyMapping = fieldsToPropertyMapping;
+		initBeanItem();
+		initComponents();
+	}
+	
+	private void initBeanItem(){
+		try{
+			beanItem = new BeanItem<T>(valueType.newInstance(), valueType);
+		}catch(ReflectiveOperationException ex){
+			throw new RuntimeException("Has aocurred an unespexted error initializing Address Editor", ex);
+		}
 	}
 
 
 	@Override
 	protected Component initContent() {
-		initComponents();
 		loadParameters();
 		return content;
 	}
@@ -161,6 +170,8 @@ public class AddressEditorField<T extends Address> extends CustomField<T> implem
 		complementaryViaNumTxt.setNullRepresentation("");
 		complementaryViaComplementTxt.setNullRepresentation("");
 		bindEvents();
+//		if(getPropertyDataSource() != null)
+//			this.setValue((T)getPropertyDataSource().getValue());
 	}
 	
 	
@@ -311,20 +322,20 @@ public class AddressEditorField<T extends Address> extends CustomField<T> implem
 		complementaryViaComplementCmb.setImmediate(true);
 		complementaryViaComplementTxt.setImmediate(true);
 		
-		mainViaTypeCmb.setPropertyDataSource(beanItem.getItemProperty("mainViaType"));
-		mainViaNumTxt.setPropertyDataSource(beanItem.getItemProperty("mainViaNum"));
-		mainViaLetterTxt.setPropertyDataSource(beanItem.getItemProperty("mainViaLetter"));
-		mainViaBisCmb.setPropertyDataSource(beanItem.getItemProperty("mainViaBis"));
-		mainViaBisLetterTxt.setPropertyDataSource(beanItem.getItemProperty("mainViaBisLetter"));
-		mainViaQuadrantCmb.setPropertyDataSource(beanItem.getItemProperty("mainViaQuadrant"));
-		mainViaComplementCmb.setPropertyDataSource(beanItem.getItemProperty("mainViaComplement"));
-		mainViaComplementTxt.setPropertyDataSource(beanItem.getItemProperty("mainViaComplementDetail"));
-		secondaryViaNumTxt.setPropertyDataSource(beanItem.getItemProperty("secondaryViaNum"));
-		secondaryViaLetterTxt.setPropertyDataSource(beanItem.getItemProperty("secondaryViaLetter"));
-		complementaryViaNumTxt.setPropertyDataSource(beanItem.getItemProperty("complementaryViaNum"));
-		complementaryViaQuadrantCmb.setPropertyDataSource(beanItem.getItemProperty("complementaryViaQuadrant"));
-		complementaryViaComplementCmb.setPropertyDataSource(beanItem.getItemProperty("complementaryViaComplement"));
-		complementaryViaComplementTxt.setPropertyDataSource(beanItem.getItemProperty("complementaryViaComplementDetail"));
+		mainViaTypeCmb.setPropertyDataSource(beanItem.getItemProperty(fieldsToPropertyMapping.getMainViaTypeProperty()));
+		mainViaNumTxt.setPropertyDataSource(beanItem.getItemProperty(fieldsToPropertyMapping.getMainViaNumProperty()));
+		mainViaLetterTxt.setPropertyDataSource(beanItem.getItemProperty(fieldsToPropertyMapping.getMainViaLetterProperty()));
+		mainViaBisCmb.setPropertyDataSource(beanItem.getItemProperty(fieldsToPropertyMapping.getMainViaBisProperty()));
+		mainViaBisLetterTxt.setPropertyDataSource(beanItem.getItemProperty(fieldsToPropertyMapping.getMainViaBisLetterProperty()));
+		mainViaQuadrantCmb.setPropertyDataSource(beanItem.getItemProperty(fieldsToPropertyMapping.getMainViaQuadrantProperty()));
+		mainViaComplementCmb.setPropertyDataSource(beanItem.getItemProperty(fieldsToPropertyMapping.getMainViaComplementProperty()));
+		mainViaComplementTxt.setPropertyDataSource(beanItem.getItemProperty(fieldsToPropertyMapping.getMainViaComplementDetailProperty()));
+		secondaryViaNumTxt.setPropertyDataSource(beanItem.getItemProperty(fieldsToPropertyMapping.getSecondaryViaNumProperty()));
+		secondaryViaLetterTxt.setPropertyDataSource(beanItem.getItemProperty(fieldsToPropertyMapping.getSecondaryViaLetterProperty()));
+		complementaryViaNumTxt.setPropertyDataSource(beanItem.getItemProperty(fieldsToPropertyMapping.getComplementaryViaNumProperty()));
+		complementaryViaQuadrantCmb.setPropertyDataSource(beanItem.getItemProperty(fieldsToPropertyMapping.getComplementaryViaQuadrantProperty()));
+		complementaryViaComplementCmb.setPropertyDataSource(beanItem.getItemProperty(fieldsToPropertyMapping.getComplementaryViaComplementProperty()));
+		complementaryViaComplementTxt.setPropertyDataSource(beanItem.getItemProperty(fieldsToPropertyMapping.getComplementaryViaComplementDetailProperty()));
 		generatedAddressTxt.setPropertyDataSource(generatedAddressProperty);
 		
 		valueChangeListener = new Property.ValueChangeListener() {
@@ -337,23 +348,20 @@ public class AddressEditorField<T extends Address> extends CustomField<T> implem
 		};
 		
 		
-		for(String propertyId : ADDRESS_PROPERTYIDS){
+		for(String propertyId : getFieldsToPropertyMapping().getPropertyNames()){
 			if(beanItem.getItemProperty(propertyId) instanceof AbstractProperty)
 				((AbstractProperty)beanItem.getItemProperty(propertyId)).addValueChangeListener(valueChangeListener);
-			propertiesAndIds.put(beanItem.getItemProperty(propertyId), propertyId);
 		}
 		addValueChangeListener(valueChangeListener);
 	}
 	
-	
 	@SuppressWarnings("unchecked")
 	private void handleAdrressEditorPropertyValueChange(Property.ValueChangeEvent event){
-		beanItem.getBean().clean();
-		Object sourceBean = (event.getProperty().getValue() == null) ? beanItem.getBean() : event.getProperty().getValue();
+		Object sourceBean = event.getProperty().getValue();
 		try {
 			ommitDsUpdate = true;
-			for(String propertyId : ADDRESS_PROPERTYIDS){
-				beanItem.getItemProperty(propertyId).setValue(PropertyUtils.getProperty(sourceBean, propertyId));
+			for(String propertyId : getFieldsToPropertyMapping().getPropertyNames()){
+				beanItem.getItemProperty(propertyId).setValue(sourceBean == null ? null : PropertyUtils.getProperty(sourceBean, propertyId));
 			}
 		} catch (ReflectiveOperationException e) {
 			LOGGER.error("Cannot handle value change on AddressEditor: "+e.getMessage());
@@ -364,7 +372,7 @@ public class AddressEditorField<T extends Address> extends CustomField<T> implem
 	
 	@SuppressWarnings("unchecked")
 	private void handleControlsPropertyValueChange(Property.ValueChangeEvent event){
-		generatedAddressProperty.setValue(beanItem.getBean().toString());
+		generatedAddressProperty.setValue(getAddrressString());
 		if(!ommitDsUpdate && this.getPropertyDataSource() != null){
 			if(this.getPropertyDataSource().getValue() != null)
 				ObjectUtils.transferProperties(beanItem.getBean(), this.getPropertyDataSource().getValue());
@@ -386,177 +394,207 @@ public class AddressEditorField<T extends Address> extends CustomField<T> implem
 		this.parametersProvider = parametersProvider;
 	}
 	
-	public static abstract class Address{
-		public abstract String getMainViaType();
-		public abstract void setMainViaType(String mainViaType);
-		public abstract Integer getMainViaNum();
-		public abstract void setMainViaNum(Integer mainViaNum);
-		public abstract String getMainViaLetter();
-		public abstract void setMainViaLetter(String mainViaLetter);
-		public abstract String getMainViaBis();
-		public abstract void setMainViaBis(String mainViaBis);
-		public abstract String getMainViaBisLetter();
-		public abstract void setMainViaBisLetter(String mainViaBisLetter);
-		public abstract String getMainViaQuadrant();
-		public abstract void setMainViaQuadrant(String mainViaQuadrant);
-		public abstract String getMainViaComplement();
-		public abstract void setMainViaComplement(String mainViaComplement);
-		public abstract String getMainViaComplementDetail();
-		public abstract void setMainViaComplementDetail(String mainViaComplementDetail);
-		public abstract Integer getSecondaryViaNum();
-		public abstract void setSecondaryViaNum(Integer secondaryViaNum);
-		public abstract String getSecondaryViaLetter();
-		public abstract void setSecondaryViaLetter(String secondaryViaLetter);
-		public abstract Integer getComplementaryViaNum();
-		public abstract void setComplementaryViaNum(Integer complementaryViaNum);
-		public abstract String getComplementaryViaQuadrant();
-		public abstract void setComplementaryViaQuadrant(String complementaryViaQuadrant);
-		public abstract String getComplementaryViaComplement();
-		public abstract void setComplementaryViaComplement(String complementaryViaComplement);
-		public abstract String getComplementaryViaComplementDetail();
-		public abstract void setComplementaryViaComplementDetail(String complementaryViaComplementDetail);
-		
-		public void clean(){
-			setMainViaType(null);
-			setMainViaNum(null);
-			setMainViaLetter(null);
-			setMainViaBis(null);
-			setMainViaBisLetter(null);
-			setMainViaQuadrant(null);
-			setMainViaComplement(null);
-			setMainViaComplementDetail(null);
-			setSecondaryViaNum(null);
-			setSecondaryViaLetter(null);
-			setComplementaryViaNum(null);
-			setComplementaryViaQuadrant(null);
-			setComplementaryViaComplement(null);
-			setComplementaryViaComplementDetail(null);
-		}
-		
-		@Override
-		public String toString() {
-			StringBuilder stringBuilder = new StringBuilder();
-			stringBuilder.append(StringUtils.isNotBlank( getMainViaType()) ?  getMainViaType() : "")
-			.append(getMainViaNum() != null ? FMWConstants.WHITE_SPACE : "").append(getMainViaNum() != null ? getMainViaNum() : "")
-			.append(StringUtils.isNotBlank(getMainViaLetter()) ? FMWConstants.WHITE_SPACE : "").append(StringUtils.isNotBlank(getMainViaLetter()) ? getMainViaLetter() : "")
-			.append(StringUtils.isNotBlank(getMainViaBis()) ? FMWConstants.WHITE_SPACE : "").append(StringUtils.isNotBlank(getMainViaBis()) ? getMainViaBis() : "")
-			.append(StringUtils.isNotBlank(getMainViaBisLetter()) ? FMWConstants.WHITE_SPACE : "").append(StringUtils.isNotBlank(getMainViaBisLetter()) ? getMainViaBisLetter() : "")
-			.append(StringUtils.isNotBlank(getMainViaQuadrant()) ? FMWConstants.WHITE_SPACE : "").append(StringUtils.isNotBlank(getMainViaQuadrant()) ? getMainViaQuadrant() : "")
-			.append(StringUtils.isNotBlank(getMainViaComplement()) ? FMWConstants.WHITE_SPACE : "").append(StringUtils.isNotBlank(getMainViaComplement()) ? getMainViaComplement() : "")
-			.append(StringUtils.isNotBlank(getMainViaComplementDetail()) ? FMWConstants.WHITE_SPACE : "").append(StringUtils.isNotBlank(getMainViaComplementDetail()) ? getMainViaComplementDetail() : "")
-			.append(getSecondaryViaNum() != null ? FMWConstants.WHITE_SPACE : "").append(getSecondaryViaNum() != null ? getSecondaryViaNum() : "")
-			.append(StringUtils.isNotBlank(getSecondaryViaLetter()) ? FMWConstants.WHITE_SPACE : "").append(StringUtils.isNotBlank(getSecondaryViaLetter()) ? getSecondaryViaLetter() : "")
-			.append(getComplementaryViaNum() != null ? FMWConstants.WHITE_SPACE : "").append(getComplementaryViaNum() != null ? getComplementaryViaNum() : "")
-			.append(StringUtils.isNotBlank(getComplementaryViaQuadrant()) ? FMWConstants.WHITE_SPACE : "").append(StringUtils.isNotBlank(getComplementaryViaQuadrant()) ? getComplementaryViaQuadrant() : "")
-			.append(StringUtils.isNotBlank(getComplementaryViaComplement()) ? FMWConstants.WHITE_SPACE : "").append(StringUtils.isNotBlank(getComplementaryViaComplement()) ? getComplementaryViaComplement() : "")
-			.append(StringUtils.isNotBlank(getComplementaryViaComplementDetail()) ? FMWConstants.WHITE_SPACE : "").append(StringUtils.isNotBlank(getComplementaryViaComplementDetail()) ? getComplementaryViaComplementDetail() : "");
-			return stringBuilder.toString().trim();
-		}
+	public AddressFieldsToDTOMappingInfo getFieldsToPropertyMapping() {
+		return fieldsToPropertyMapping;
 	}
 
-	public static class InternalAddress extends Address{
-		private String mainViaType;
-		private Integer mainViaNum;
-		private String mainViaLetter;
-		private String mainViaBis;
-		private String mainViaBisLetter;
-		private String mainViaQuadrant;
-		private String mainViaComplement;
-		private String mainViaComplementDetail;
-		
-		private Integer secondaryViaNum;
-		private String secondaryViaLetter;
-		
-		private Integer complementaryViaNum;
-		private String complementaryViaQuadrant;
-		private String complementaryViaComplement;
-		private String complementaryViaComplementDetail;
+	public void setFieldsToPropertyMapping(AddressFieldsToDTOMappingInfo fieldsToPropertyMapping) {
+		this.fieldsToPropertyMapping = fieldsToPropertyMapping;
+	}
 
-		public String getMainViaType() {
-			return mainViaType;
+	public String getAddrressString() {
+		StringBuilder stringBuilder = new StringBuilder();
+		for(String propName : getFieldsToPropertyMapping().getPropertyNames()){
+			Object propValue = getBeanItemValue(propName);
+			String stringValue = propValue != null ? propValue.toString() : "";
+			stringBuilder.append(stringBuilder.length() == 0 ? "" : (StringUtils.isEmpty(stringValue) ? "" : FMWConstants.WHITE_SPACE));
+			stringBuilder.append(stringValue);
 		}
-		public void setMainViaType(String mainViaType) {
-			this.mainViaType = mainViaType;
+		return stringBuilder.toString().trim();
+	}
+	
+	private Object getBeanItemValue(String propertyId){
+		Property<?> prop = beanItem.getItemProperty(propertyId);
+		Object resp = prop.getValue();
+		if(resp != null && String.class.isAssignableFrom(prop.getType()))
+			resp = StringUtils.upperCase((String)resp).trim();
+		return resp;
+	}
+	
+	public static class AddressFieldsToDTOMappingInfo{
+		private String 		mainViaTypeProperty = "mainViaType", 
+							mainViaNumProperty = "mainViaNum", 
+							mainViaLetterProperty = "mainViaLetter", 
+							mainViaBisProperty = "mainViaBis", 
+							mainViaBisLetterProperty = "mainViaBisLetter", 
+							mainViaQuadrantProperty = "mainViaQuadrant",
+							mainViaComplementProperty = "mainViaComplement", 
+							mainViaComplementDetailProperty = "mainViaComplementDetail", 
+							secondaryViaNumProperty = "secondaryViaNum", 
+							secondaryViaLetterProperty = "secondaryViaLetter",
+							complementaryViaNumProperty = "complementaryViaNum", 
+							complementaryViaQuadrantProperty = "complementaryViaQuadrant", 
+							complementaryViaComplementProperty = "complementaryViaComplement", 
+							complementaryViaComplementDetailProperty = "complementaryViaComplementDetail";
+		
+		public AddressFieldsToDTOMappingInfo(){}
+
+		public AddressFieldsToDTOMappingInfo(String mainViaTypeProperty, 
+				String mainViaNumProperty, 
+				String mainViaLetterProperty, 
+				String mainViaBisProperty, 
+				String mainViaBisLetterProperty, 
+				String mainViaQuadrantProperty, 
+				String mainViaComplementProperty, 
+				String mainViaComplementDetailProperty, 
+				String secondaryViaNumProperty, 
+				String secondaryViaLetterProperty, 
+				String complementaryViaNumProperty, 
+				String complementaryViaQuadrantProperty, 
+				String complementaryViaComplementProperty, 
+				String complementaryViaComplementDetailProperty) {
+			
+			this.mainViaTypeProperty = mainViaTypeProperty;
+			this.mainViaNumProperty = mainViaNumProperty;
+			this.mainViaLetterProperty = mainViaLetterProperty;
+			this.mainViaBisProperty = mainViaBisProperty;
+			this.mainViaBisLetterProperty = mainViaBisLetterProperty;
+			this.mainViaQuadrantProperty = mainViaQuadrantProperty;
+			this.mainViaComplementProperty = mainViaComplementProperty;
+			this.mainViaComplementDetailProperty = mainViaComplementDetailProperty;
+			this.secondaryViaNumProperty = secondaryViaNumProperty;
+			this.secondaryViaLetterProperty = secondaryViaLetterProperty;
+			this.complementaryViaNumProperty = complementaryViaNumProperty;
+			this.complementaryViaQuadrantProperty = complementaryViaQuadrantProperty;
+			this.complementaryViaComplementProperty = complementaryViaComplementProperty;
+			this.complementaryViaComplementDetailProperty = complementaryViaComplementDetailProperty;
 		}
-		public Integer getMainViaNum() {
-			return mainViaNum;
+
+		public String getMainViaTypeProperty() {
+			return StringUtils.defaultString(mainViaTypeProperty, "mainViaType");
 		}
-		public void setMainViaNum(Integer mainViaNum) {
-			this.mainViaNum = mainViaNum;
+		
+		public void setMainViaTypeProperty(String mainViaTypeProperty) {
+			this.mainViaTypeProperty = mainViaTypeProperty;
 		}
-		public String getMainViaLetter() {
-			return mainViaLetter;
+		
+		public String getMainViaNumProperty() {
+			return StringUtils.defaultString(mainViaNumProperty, "mainViaNum");
 		}
-		public void setMainViaLetter(String mainViaLetter) {
-			this.mainViaLetter = StringUtils.upperCase(mainViaLetter);
+
+		public void setMainViaNumProperty(String mainViaNumProperty) {
+			this.mainViaNumProperty = mainViaNumProperty;
 		}
-		public String getMainViaBis() {
-			return mainViaBis;
+
+		public String getMainViaLetterProperty() {
+			return StringUtils.defaultString(mainViaLetterProperty, "mainViaLetter");
 		}
-		public void setMainViaBis(String mainViaBis) {
-			this.mainViaBis = mainViaBis;
+
+		public void setMainViaLetterProperty(String mainViaLetterProperty) {
+			this.mainViaLetterProperty = mainViaLetterProperty;
 		}
-		public String getMainViaBisLetter() {
-			return mainViaBisLetter;
+
+		public String getMainViaBisProperty() {
+			return StringUtils.defaultString(mainViaBisProperty, "mainViaBis");
 		}
-		public void setMainViaBisLetter(String mainViaBisLetter) {
-			this.mainViaBisLetter = StringUtils.upperCase(mainViaBisLetter);
+
+		public void setMainViaBisProperty(String mainViaBisProperty) {
+			this.mainViaBisProperty = mainViaBisProperty;
 		}
-		public String getMainViaQuadrant() {
-			return mainViaQuadrant;
+
+		public String getMainViaBisLetterProperty() {
+			return StringUtils.defaultString(mainViaBisLetterProperty, "mainViaBisLetter");
 		}
-		public void setMainViaQuadrant(String mainViaQuadrant) {
-			this.mainViaQuadrant = mainViaQuadrant;
+
+		public void setMainViaBisLetterProperty(String mainViaBisLetterProperty) {
+			this.mainViaBisLetterProperty = mainViaBisLetterProperty;
 		}
-		public String getMainViaComplement() {
-			return mainViaComplement;
+
+		public String getMainViaQuadrantProperty() {
+			return StringUtils.defaultString(mainViaQuadrantProperty, "mainViaQuadrant");
 		}
-		public void setMainViaComplement(String mainViaComplement) {
-			this.mainViaComplement = mainViaComplement;
+
+		public void setMainViaQuadrantProperty(String mainViaQuadrantProperty) {
+			this.mainViaQuadrantProperty = mainViaQuadrantProperty;
 		}
-		public String getMainViaComplementDetail() {
-			return mainViaComplementDetail;
+
+		public String getMainViaComplementProperty() {
+			return StringUtils.defaultString(mainViaComplementProperty, "mainViaComplement");
 		}
-		public void setMainViaComplementDetail(String mainViaComplementDetail) {
-			this.mainViaComplementDetail = StringUtils.upperCase(mainViaComplementDetail);
+
+		public void setMainViaComplementProperty(String mainViaComplementProperty) {
+			this.mainViaComplementProperty = mainViaComplementProperty;
 		}
-		public Integer getSecondaryViaNum() {
-			return secondaryViaNum;
+
+		public String getMainViaComplementDetailProperty() {
+			return StringUtils.defaultString(mainViaComplementDetailProperty, "mainViaComplementDetail");
 		}
-		public void setSecondaryViaNum(Integer secondaryViaNum) {
-			this.secondaryViaNum = secondaryViaNum;
+
+		public void setMainViaComplementDetailProperty(String mainViaComplementDetailProperty) {
+			this.mainViaComplementDetailProperty = mainViaComplementDetailProperty;
 		}
-		public String getSecondaryViaLetter() {
-			return secondaryViaLetter;
+
+		public String getSecondaryViaNumProperty() {
+			return StringUtils.defaultString(secondaryViaNumProperty, "secondaryViaNum");
 		}
-		public void setSecondaryViaLetter(String secondaryViaLetter) {
-			this.secondaryViaLetter = StringUtils.upperCase(secondaryViaLetter);
+
+		public void setSecondaryViaNumProperty(String secondaryViaNumProperty) {
+			this.secondaryViaNumProperty = secondaryViaNumProperty;
 		}
-		public Integer getComplementaryViaNum() {
-			return complementaryViaNum;
+
+		public String getSecondaryViaLetterProperty() {
+			return StringUtils.defaultString(secondaryViaLetterProperty, "secondaryViaLetter");
 		}
-		public void setComplementaryViaNum(Integer complementaryViaNum) {
-			this.complementaryViaNum = complementaryViaNum;
+
+		public void setSecondaryViaLetterProperty(String secondaryViaLetterProperty) {
+			this.secondaryViaLetterProperty = secondaryViaLetterProperty;
 		}
-		public String getComplementaryViaQuadrant() {
-			return complementaryViaQuadrant;
+
+		public String getComplementaryViaNumProperty() {
+			return StringUtils.defaultString(complementaryViaNumProperty, "complementaryViaNum");
 		}
-		public void setComplementaryViaQuadrant(String complementaryViaQuadrant) {
-			this.complementaryViaQuadrant = complementaryViaQuadrant;
+
+		public void setComplementaryViaNumProperty(String complementaryViaNumProperty) {
+			this.complementaryViaNumProperty = complementaryViaNumProperty;
 		}
-		public String getComplementaryViaComplement() {
-			return complementaryViaComplement;
+
+		public String getComplementaryViaQuadrantProperty() {
+			return StringUtils.defaultString(complementaryViaQuadrantProperty, "complementaryViaQuadrant");
 		}
-		public void setComplementaryViaComplement(String complementaryViaComplement) {
-			this.complementaryViaComplement = complementaryViaComplement;
+
+		public void setComplementaryViaQuadrantProperty(String complementaryViaQuadrantProperty) {
+			this.complementaryViaQuadrantProperty = complementaryViaQuadrantProperty;
 		}
-		public String getComplementaryViaComplementDetail() {
-			return complementaryViaComplementDetail;
+
+		public String getComplementaryViaComplementProperty() {
+			return StringUtils.defaultString(complementaryViaComplementProperty, "complementaryViaComplement");
 		}
-		public void setComplementaryViaComplementDetail(
-				String complementaryViaComplementDetail) {
-			this.complementaryViaComplementDetail = StringUtils.upperCase(complementaryViaComplementDetail);
+
+		public void setComplementaryViaComplementProperty(String complementaryViaComplementProperty) {
+			this.complementaryViaComplementProperty = complementaryViaComplementProperty;
 		}
+
+		public String getComplementaryViaComplementDetailProperty() {
+			return StringUtils.defaultString(complementaryViaComplementDetailProperty, "complementaryViaComplementDetail");
+		}
+
+		/**
+		 * @param complementaryViaComplementDetailProperty the complementaryViaComplementDetailProperty to set
+		 */
+		public void setComplementaryViaComplementDetailProperty(String complementaryViaComplementDetailProperty) {
+			this.complementaryViaComplementDetailProperty = complementaryViaComplementDetailProperty;
+		}
+		
+		public String[] getPropertyNames(){
+			return new String[]{
+					getMainViaTypeProperty(), getMainViaNumProperty(), 
+					getMainViaLetterProperty(), getMainViaBisProperty(), getMainViaBisLetterProperty(), 
+					getMainViaQuadrantProperty(), getMainViaComplementProperty(), getMainViaComplementDetailProperty(), 
+					getSecondaryViaNumProperty(), getSecondaryViaLetterProperty(), getComplementaryViaNumProperty(), 
+					getComplementaryViaQuadrantProperty(), getComplementaryViaComplementProperty(), getComplementaryViaComplementDetailProperty()
+			};
+		}
+		
 	}
 }
 

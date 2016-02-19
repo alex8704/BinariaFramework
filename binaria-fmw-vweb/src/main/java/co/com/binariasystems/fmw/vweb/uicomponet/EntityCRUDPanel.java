@@ -185,6 +185,7 @@ public class EntityCRUDPanel<T> extends FormPanel implements ClickListener{
 			@SuppressWarnings("unchecked")
 			@Override
 			public void refreshPageData(List<T> pageData) {
+				if(pageData.isEmpty()) return;
 				VWebUtils.resetBeanItemDS(beanItem, pageData.get(0));
 			}
 		});
@@ -213,7 +214,7 @@ public class EntityCRUDPanel<T> extends FormPanel implements ClickListener{
 		if(!isValid())
 			return;
 		
-		MessageDialog md = new MessageDialog(saveBtn.getCaption(), MessageFormat.format(VWebUtils.getCommonString(VWebCommonConstants.MASTER_CRUD_AREYOU_SURE_CONTINUE), saveBtn.getCaption()), Type.QUESTION);
+		MessageDialog md = new MessageDialog(saveBtn.getDescription(), MessageFormat.format(VWebUtils.getCommonString(VWebCommonConstants.MASTER_CRUD_AREYOU_SURE_CONTINUE), saveBtn.getDescription()), Type.QUESTION);
 		md.addYesClickListener(new ClickListener() {
 			@SuppressWarnings("unchecked")
 			@Override
@@ -238,7 +239,7 @@ public class EntityCRUDPanel<T> extends FormPanel implements ClickListener{
 				beanItem.getItemProperty(entityConfigData.getPkFieldName()).getValue() == null || !isValid())
 			return;
 		
-		MessageDialog md = new MessageDialog(editBtn.getCaption(), MessageFormat.format(VWebUtils.getCommonString(VWebCommonConstants.MASTER_CRUD_AREYOU_SURE_CONTINUE), editBtn.getCaption()), Type.QUESTION);
+		MessageDialog md = new MessageDialog(editBtn.getDescription(), MessageFormat.format(VWebUtils.getCommonString(VWebCommonConstants.MASTER_CRUD_AREYOU_SURE_CONTINUE), editBtn.getDescription()), Type.QUESTION);
 		md.addYesClickListener(new ClickListener() {
 			@Override
 			public void buttonClick(ClickEvent event) {
@@ -267,7 +268,7 @@ public class EntityCRUDPanel<T> extends FormPanel implements ClickListener{
 				beanItem.getItemProperty(entityConfigData.getPkFieldName()).getValue() == null)
 			return;
 		
-		MessageDialog md = new MessageDialog(deleteBtn.getCaption(), MessageFormat.format(VWebUtils.getCommonString(VWebCommonConstants.MASTER_CRUD_AREYOU_SURE_CONTINUE), deleteBtn.getCaption()), Type.QUESTION);
+		MessageDialog md = new MessageDialog(deleteBtn.getDescription(), MessageFormat.format(VWebUtils.getCommonString(VWebCommonConstants.MASTER_CRUD_AREYOU_SURE_CONTINUE), deleteBtn.getDescription()), Type.QUESTION);
 		md.addYesClickListener(new ClickListener() {
 			@Override
 			public void buttonClick(ClickEvent event) {

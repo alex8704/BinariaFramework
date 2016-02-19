@@ -117,7 +117,7 @@ public class SearcherField<T> extends CustomField<T> implements SearchSelectionC
 			
 			searchWindow = new SearcherResultWindow<Object>((Class<Object>) entityClazz);
 			initialized = true;//Debe estar en este lugar
-			
+			setInvalidCommitted(true);
 			bindEvents();
 		}catch(FMWException ex){
 			MessageDialog.showExceptions(ex, LOGGER);
