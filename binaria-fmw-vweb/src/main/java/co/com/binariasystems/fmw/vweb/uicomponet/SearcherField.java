@@ -1,7 +1,5 @@
 package co.com.binariasystems.fmw.vweb.uicomponet;
 
-import java.lang.reflect.InvocationTargetException;
-
 import org.apache.commons.beanutils.PropertyUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -119,6 +117,7 @@ public class SearcherField<T> extends CustomField<T> implements SearchSelectionC
 			initialized = true;//Debe estar en este lugar
 			setInvalidCommitted(true);
 			bindEvents();
+			fireFirstTimeValueChange();
 		}catch(FMWException ex){
 			MessageDialog.showExceptions(ex, LOGGER);
 		}
@@ -200,10 +199,21 @@ public class SearcherField<T> extends CustomField<T> implements SearchSelectionC
 		if(originalValue == null) return null;
 		try {
 			return PropertyUtils.getProperty(originalValue, fieldInfo.getFieldName());
-		} catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException ex) {
+		} catch (ReflectiveOperationException ex) {
 			MessageDialog.showExceptions(ex, LOGGER);
 		}
 		return null;	
+	}
+	
+	/**
+	 * Metodo util para mostrar el valor actual del componente
+	 * al vincularlo por primera vez a la sesion del usuario
+	 * Corrige Bug de  CustomFields que no son inicializados hasta que
+	 * son atados (attach) a la sesion.
+	 */
+	private void fireFirstTimeValueChange(){
+		if(getPropertyDataSource() != null && getPropertyDataSource().getValue() != null)
+			selectionChange(new SearchSelectionChangeEvent(null, getPropertyDataSource().getValue(), SearchType.PK, false));
 	}
 
 	@Override

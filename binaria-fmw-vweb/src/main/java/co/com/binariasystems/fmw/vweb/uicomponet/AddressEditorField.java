@@ -170,8 +170,6 @@ public class AddressEditorField<T> extends CustomField<T> implements UIConstants
 		complementaryViaNumTxt.setNullRepresentation("");
 		complementaryViaComplementTxt.setNullRepresentation("");
 		bindEvents();
-//		if(getPropertyDataSource() != null)
-//			this.setValue((T)getPropertyDataSource().getValue());
 	}
 	
 	
