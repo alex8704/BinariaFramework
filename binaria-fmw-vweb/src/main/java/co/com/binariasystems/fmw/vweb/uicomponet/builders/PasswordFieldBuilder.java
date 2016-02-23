@@ -49,6 +49,8 @@ public class PasswordFieldBuilder extends PasswordField {
 		setNullRepresentation("");
 		setConversionError(VWebUtils.getCommonString(VWebCommonConstants.FIELD_CONVERSION_ERROR_DEFAULT_MSG));
 		setInvalidCommitted(true);
+		setImmediate(true);
+		setNullSettingAllowed(true);
 		//setInvalidAllowed(invalidAllowed);
 		//setValidationVisible(validateAutomatically);
 	}

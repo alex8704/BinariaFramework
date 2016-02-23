@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.beanutils.BeanUtils;
+import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import co.com.binariasystems.fmw.entity.cfg.EntityConfigData;
@@ -56,6 +57,7 @@ import com.vaadin.ui.renderers.HtmlRenderer;
 import com.vaadin.ui.renderers.Renderer;
 
 public class SearcherResultWindow<T> extends Window implements CloseListener, ClickListener, ActionHandler {
+	public static enum SearchType{PK, FILTER, BUTTON};
 	private Class<T> entityClazz;
 	private FormPanel form;
 	private Button cleanBtn;
@@ -84,8 +86,8 @@ public class SearcherResultWindow<T> extends Window implements CloseListener, Cl
 	private static final String ACTIONS_COLUM_ID = "actions";
 	
 	private MessageBundleManager entityStrings;
+	private Object currentFilterValue;
 	
-	public static enum SearchType{PK, FILTER, BUTTON};
 	
 	public SearcherResultWindow(Class<T> entityClazz) {
 		this.entityClazz = entityClazz;
@@ -105,6 +107,9 @@ public class SearcherResultWindow<T> extends Window implements CloseListener, Cl
 	public void attach() {
 		super.attach();
 		initContent();
+		center();
+		beanItem.getItemProperty(entityConfigData.getSearchFieldName()).setValue(currentFilterValue);
+		searchBtn.click();
 	}
 	
 	public void setSelectionChangeListener(SearchSelectionChangeListener<T> selectionChangeListener) {
@@ -182,7 +187,6 @@ public class SearcherResultWindow<T> extends Window implements CloseListener, Cl
 			setContent(form);
 			setWidth(1000, Unit.PIXELS);
 			//setHeight(Page.getCurrent().getBrowserWindowHeight() - 25, Unit.PIXELS);
-			center();
 			setModal(true);
 			
 			cleanBtn.click();
@@ -257,7 +261,6 @@ public class SearcherResultWindow<T> extends Window implements CloseListener, Cl
 				handleClean();
 		}catch(Exception ex){
 			MessageDialog.showExceptions(ex);
-			ex.printStackTrace();
 		}finally{
 			form.initFocus();
 		}
@@ -266,6 +269,24 @@ public class SearcherResultWindow<T> extends Window implements CloseListener, Cl
 	@Override
 	public void windowClose(CloseEvent e) {
 		fireSelectionChangeEvent();
+		cleanBtn.click();
+	}
+	
+	private T handleBackgroundSearch(SearchType searchType){
+		try{
+			T searchBean = null;
+			if(entityClazz.isAssignableFrom(currentFilterValue.getClass()))
+				searchBean = (T)currentFilterValue;
+			else{
+				searchBean = entityConfigData.getEntityClass().getConstructor().newInstance();
+				PropertyUtils.setProperty(searchBean, (SearchType.FILTER == searchType ? entityConfigData.getSearchFieldName() : entityConfigData.getPkFieldName()), currentFilterValue);
+			}
+			ListPage<T> resultPage = manager.searchForFmwComponent(searchBean, 0, 10, null);
+			return resultPage.getRowCount() != 1 ? null : resultPage.getData().get(0);
+		}catch(ReflectiveOperationException | FMWException ex){
+			MessageDialog.showExceptions(ex);
+		}
+		return null;
 	}
 	
 	private void handleSearch(Button button) throws Exception{
@@ -274,28 +295,21 @@ public class SearcherResultWindow<T> extends Window implements CloseListener, Cl
 		pager.setFilterDto((T)BeanUtils.cloneBean(beanItem.getBean()));
 	}
 	
-	private void handlePKSearch(Object pkValue){
-		beanItem.getItemProperty(entityConfigData.getPkFieldName()).setValue(pkValue);
-		searchBtn.click();
-		selectedValue = (gridContainer.size() == 1) ? (T)gridContainer.firstItemId() : null;
+	private void handlePKSearch(){
+		selectedValue = handleBackgroundSearch(SearchType.PK);
 		fireSelectionChangeEvent();
 	}
 	
-	private void handleFilterSearch(Object filterValue){
-		beanItem.getItemProperty(entityConfigData.getSearchFieldName()).setValue(filterValue);
-		searchBtn.click();
-		if(gridContainer.size() != 1)
+	private void handleFilterSearch(){
+		selectedValue = handleBackgroundSearch(SearchType.FILTER);
+		if(selectedValue == null)
 			show();
-		else{
-			selectedValue = (T)gridContainer.firstItemId();
+		else
 			fireSelectionChangeEvent();
-		}
-			
 	}
 
 	private void handleClean() throws Exception{
-		T emptyBean = entityConfigData.getEntityClass().getConstructor().newInstance();
-		VWebUtils.resetBeanItemDS(beanItem, emptyBean);
+		VWebUtils.resetBeanItemDS(beanItem, null);
 		pager.reset();
 		if(wasChoice){
 			oldValue = selectedValue;
@@ -308,42 +322,19 @@ public class SearcherResultWindow<T> extends Window implements CloseListener, Cl
 	//Busca y abre la ventana solo si no encuentra sesultado
 	public void search(Object filterValue, SearchType searchType){
 		this.currentSearchType = searchType != null ? searchType : SearchType.PK;
-		if(searchType.equals(SearchType.FILTER))
-			doFilterSearch(filterValue);
-		else if(searchType.equals(SearchType.BUTTON))
-			doButtonSearch(filterValue);
+		this.currentFilterValue = filterValue;
+		if(SearchType.BUTTON.equals(currentSearchType)){
+			show();
+			return;
+		}
+		if(currentFilterValue == null || (currentFilterValue instanceof CharSequence && StringUtils.isEmpty((CharSequence)currentFilterValue))){
+			fireResetSelectionEvent();
+			return;
+		}	
+		if(currentSearchType.equals(SearchType.FILTER))
+			handleFilterSearch();
 		else
-			doPKSearch(filterValue);
-	}
-	
-	
-	//Para el boton de "buscar" siempre se busca y se abre la ventana
-	private void doButtonSearch(Object filterValue){
-		initContent();
-		if(filterValue != null)
-			beanItem.getItemProperty(entityConfigData.getSearchFieldName()).setValue(filterValue);
-		searchBtn.click();
-		show();
-	}
-	
-	//Busca y abre la ventana solo si no encuentra resultado
-	private void doFilterSearch(Object filterValue){
-		initContent();
-		if(filterValue == null || (filterValue instanceof CharSequence && StringUtils.isEmpty((CharSequence)filterValue))){
-			fireResetSelectionEvent();
-			return;
-		}
-		handleFilterSearch(filterValue);
-	}
-	
-	//Busca y retorna unicamente
-	private void doPKSearch(Object pkValue){
-		initContent();
-		if(pkValue == null || (pkValue instanceof CharSequence && StringUtils.isEmpty((CharSequence)pkValue))){
-			fireResetSelectionEvent();
-			return;
-		}
-		handlePKSearch(pkValue);
+			handlePKSearch();
 	}
 
 	@Override
@@ -375,7 +366,6 @@ public class SearcherResultWindow<T> extends Window implements CloseListener, Cl
 			selectedValue = null;
 		}
 		SearchSelectionChangeEvent<T> event = new SearchSelectionChangeEvent<T>(oldValue, selectedValue, currentSearchType, isReset);
-		cleanBtn.click();
 		if(selectionChangeListener != null)
 			selectionChangeListener.selectionChange(event);
 	}

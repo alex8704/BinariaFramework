@@ -2,6 +2,8 @@ package co.com.binariasystems.fmw.vweb.uicomponet;
 
 import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -31,21 +33,32 @@ import co.com.binariasystems.fmw.vweb.uicomponet.Pager.PagerMode;
 import co.com.binariasystems.fmw.vweb.uicomponet.pager.PageChangeEvent;
 import co.com.binariasystems.fmw.vweb.uicomponet.pager.PageChangeHandler;
 import co.com.binariasystems.fmw.vweb.util.EntityConfigUtils;
+import co.com.binariasystems.fmw.vweb.util.GridUtils;
+import co.com.binariasystems.fmw.vweb.util.GridUtils.GenericStringPropertyGenerator;
 import co.com.binariasystems.fmw.vweb.util.LocaleMessagesUtil;
 import co.com.binariasystems.fmw.vweb.util.VWebUtils;
 
 import com.vaadin.data.util.BeanItem;
+import com.vaadin.data.util.BeanItemContainer;
+import com.vaadin.data.util.GeneratedPropertyContainer;
+import com.vaadin.event.SelectionEvent;
+import com.vaadin.event.SelectionEvent.SelectionListener;
 import com.vaadin.server.FontAwesome;
+import com.vaadin.shared.ui.grid.HeightMode;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.Field;
+import com.vaadin.ui.Grid;
+import com.vaadin.ui.Grid.Column;
+import com.vaadin.ui.renderers.Renderer;
 
 @SuppressWarnings("serial")
 public class EntityCRUDPanel<T> extends FormPanel implements ClickListener{
 	private static final Logger LOGGER = LoggerFactory.getLogger(EntityCRUDPanel.class);
 	private Class<T> entityClass;
+	private Grid dataGrid;
 	private Button saveBtn;
 	private Button editBtn;
 	private Button cleanBtn;
@@ -59,6 +72,7 @@ public class EntityCRUDPanel<T> extends FormPanel implements ClickListener{
 	private Pager<T,T> pager;
 	private Object initialKeyValue;
 	
+	private GeneratedPropertyContainer gridContainer;
 	private BeanItem<T> beanItem;
 	
 	private MessageFormat labelsFmt;
@@ -109,7 +123,9 @@ public class EntityCRUDPanel<T> extends FormPanel implements ClickListener{
 			componentMap.put(fieldCfg.getFieldName(), comp);
 		}
 		
-		pager = new Pager<T,T>(PagerMode.ITEM);
+		gridContainer = new GeneratedPropertyContainer(new BeanItemContainer<T>(entityConfigData.getEntityClass()));
+		dataGrid = new Grid("-");
+		pager = new Pager<T,T>(PagerMode.PAGE);
 		saveBtn = new Button(FontAwesome.SAVE);
 		saveBtn.setDescription(VWebUtils.getCommonString(VWebCommonConstants.MASTER_CRUD_MSG_SAVECAPTION));
 		editBtn = new Button(FontAwesome.EDIT);
@@ -121,9 +137,11 @@ public class EntityCRUDPanel<T> extends FormPanel implements ClickListener{
 		cleanBtn = new Button(FontAwesome.ERASER);
 		cleanBtn.setDescription(VWebUtils.getCommonString(VWebCommonConstants.MASTER_CRUD_MSG_CLEANCAPTION));
 		
+		configureGrid();
+		
 		addEmptyRow();
-		addCenteredOnNewRow(Dimension.fullPercent(), pager);
-		addEmptyRow();
+//		addCenteredOnNewRow(Dimension.fullPercent(), pager);
+//		addEmptyRow();
 		
 		if(entityConfigData.isDeleteEnabled()){
 			deleteBtn = new Button(FontAwesome.TRASH);
@@ -132,6 +150,9 @@ public class EntityCRUDPanel<T> extends FormPanel implements ClickListener{
 		}else
 			addCenteredOnNewRow(saveBtn, editBtn, searchBtn, searchAllBtn, cleanBtn);
 		
+		addCenteredOnNewRow(Dimension.fullPercent(), dataGrid);
+		addCenteredOnNewRow(Dimension.fullPercent(), pager);
+		
 		bindComponentsToModel();
 		
 		bindControlEvents();
@@ -139,6 +160,46 @@ public class EntityCRUDPanel<T> extends FormPanel implements ClickListener{
 		setSubmitButton(saveBtn);
 		setResetButton(cleanBtn);
 		cleanBtn.click();
+	}
+	
+	private void configureGrid(){
+		dataGrid.setContainerDataSource(gridContainer);
+		List<String> columnIds = getGridColumnFields();
+		GenericStringPropertyGenerator genericPropertyGenerator = new GenericStringPropertyGenerator();
+		for(String columnId : columnIds){
+			FieldConfigData fieldCfg = entityConfigData.getFieldData(columnId);
+			Renderer<?> renderer = GridUtils.obtainRendererForType(fieldCfg.getFieldType());
+			Column column = dataGrid.getColumn(columnId);
+			column.setHeaderCaption(EntityConfigUtils.getFieldCaptionText(fieldCfg, entityConfigData, labelsFmt, getEntityStrings()));
+			if(fieldCfg.isRelationField() && FMWEntityUtils.isEntityClass(fieldCfg.getFieldType())){
+				gridContainer.addGeneratedProperty(columnId, genericPropertyGenerator);
+			}
+			if(renderer != null)
+				column.setRenderer(renderer);	
+		}
+		
+		dataGrid.setColumns(columnIds.toArray());
+		dataGrid.setHeightMode(HeightMode.ROW);
+		dataGrid.setHeightByRows(pager.getRowsByPage());
+		dataGrid.addSelectionListener(new SelectionListener() {
+			@Override public void select(SelectionEvent event) {
+				T selected = (T)dataGrid.getSelectedRow();
+				VWebUtils.resetBeanItemDS(beanItem, selected);
+				toggleActionButtonsState();
+			}
+		});
+	}
+	
+	private List<String> getGridColumnFields(){
+		List<String> gridColumnFields = new ArrayList<String>();
+		boolean hasGridFields = !entityConfigData.getGridColumnFields().isEmpty();
+		Collection<String> columnFields = hasGridFields ? entityConfigData.getGridColumnFields() : entityConfigData.getFieldNames();
+		for(String columnField : columnFields){
+			if(!columnField.equals(entityConfigData.getPkFieldName()))
+				gridColumnFields.add(columnField);
+		}
+		
+		return gridColumnFields;
 	}
 	
 	private void bindComponentsToModel() throws FMWException{
@@ -175,20 +236,20 @@ public class EntityCRUDPanel<T> extends FormPanel implements ClickListener{
 				try {
 					return manager.search(event.getFilterDTO(), event.getInitialRow(), event.getRowsByPage(), null);
 				} catch (Exception e) {
-					Throwable cause = FMWExceptionUtils.prettyMessageException(e);
-					throw new FMWUncheckedException(cause.getMessage(), cause);
+					throw new FMWUncheckedException(FMWExceptionUtils.prettyMessageException(e));
 				}
 			}
 		});
 		
-		pager.setPageDataTarget(new PageDataTarget<T>() {
-			@SuppressWarnings("unchecked")
-			@Override
-			public void refreshPageData(List<T> pageData) {
-				if(pageData.isEmpty()) return;
-				VWebUtils.resetBeanItemDS(beanItem, pageData.get(0));
-			}
-		});
+		pager.setPageDataTargetForGrid(dataGrid);
+//		pager.setPageDataTarget(new PageDataTarget<T>() {
+//			@SuppressWarnings("unchecked")
+//			@Override
+//			public void refreshPageData(List<T> pageData) {
+//				if(pageData.isEmpty()) return;
+//				VWebUtils.resetBeanItemDS(beanItem, pageData.get(0));
+//			}
+//		});
 	}
 	
 	public void buttonClick(ClickEvent event) {
@@ -206,6 +267,7 @@ public class EntityCRUDPanel<T> extends FormPanel implements ClickListener{
 		}catch(Exception ex){
 			MessageDialog.showExceptions(ex, LOGGER);
 		}finally{
+			toggleActionButtonsState();
 			initFocus();
 		}
 	}
@@ -286,12 +348,20 @@ public class EntityCRUDPanel<T> extends FormPanel implements ClickListener{
 	}
 	
 	@SuppressWarnings("unchecked")
-	private void handleClean() throws Exception{
-		Object emptyBean = entityConfigData.getEntityClass().getConstructor().newInstance();
-		for(Object propertyId : beanItem.getItemPropertyIds())
-			beanItem.getItemProperty(propertyId).setValue(PropertyUtils.getProperty(emptyBean, (String)propertyId));
+	private void handleClean(){
+//		Object emptyBean = entityConfigData.getEntityClass().getConstructor().newInstance();
+		VWebUtils.resetBeanItemDS(beanItem, null);
+//		for(Object propertyId : beanItem.getItemPropertyIds())
+//			beanItem.getItemProperty(propertyId).setValue(PropertyUtils.getProperty(emptyBean, (String)propertyId));
 		pager.reset();
 		initFocus();
+	}
+	
+	
+	private void toggleActionButtonsState(){
+		editBtn.setEnabled(beanItem.getItemProperty(entityConfigData.getPkFieldName()).getValue() != null);
+		if(deleteBtn != null)
+			deleteBtn.setEnabled(beanItem.getItemProperty(entityConfigData.getPkFieldName()).getValue() != null);
 	}
 	
 	private MessageBundleManager getEntityStrings(){

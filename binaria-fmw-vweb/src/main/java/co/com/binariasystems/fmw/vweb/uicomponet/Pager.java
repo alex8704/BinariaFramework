@@ -162,7 +162,8 @@ public class Pager<FILTER_TYPE, RESULT_TYPE> extends HorizontalLayout implements
 		bindEvents();
 		resetConstrains();
 		initialized = true;
-		//reset();
+		if(filterDto != null)
+			fireFilterDtoChangeEvent();
 	}
 	
 	private void bindEvents(){
@@ -203,7 +204,7 @@ public class Pager<FILTER_TYPE, RESULT_TYPE> extends HorizontalLayout implements
 	}
 	
 	public void reset(){
-		initContent();
+//		initContent();
 		setFilterDto(null);
 	}
 	
@@ -294,9 +295,10 @@ public class Pager<FILTER_TYPE, RESULT_TYPE> extends HorizontalLayout implements
 	}
 	
 	public void setFilterDto(FILTER_TYPE filterDto){
-		initContent();
+//		initContent();
 		this.filterDto = filterDto;
-		fireFilterDtoChangeEvent();
+		if(initialized)
+			fireFilterDtoChangeEvent();
 	}
 	
 	public void setMaxCachedPages(int max){
