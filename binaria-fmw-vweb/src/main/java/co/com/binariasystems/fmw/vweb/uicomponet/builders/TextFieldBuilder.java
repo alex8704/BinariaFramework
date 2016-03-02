@@ -52,7 +52,7 @@ public class TextFieldBuilder extends TextField{
 		setConversionError(VWebUtils.getCommonString(VWebCommonConstants.FIELD_CONVERSION_ERROR_DEFAULT_MSG));
 		addStyleName(UIConstants.UPPER_TRANSFORM_STYLENAME);
 		setNullSettingAllowed(true);
-		//setInvalidCommitted(true);
+		setInvalidCommitted(true);
 		setImmediate(true);
 		//setInvalidAllowed(invalidAllowed);
 		//setValidationVisible(validateAutomatically);
