@@ -38,7 +38,6 @@ import co.com.binariasystems.fmw.vweb.util.VWebUtils;
 
 import com.vaadin.data.Item;
 import com.vaadin.data.util.BeanItem;
-import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.data.util.GeneratedPropertyContainer;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.shared.ui.grid.HeightMode;
@@ -143,7 +142,7 @@ public class SearcherResultWindow<T> extends Window implements CloseListener, Cl
 			cleanBtn = new Button(FontAwesome.ERASER);
 			cleanBtn.setDescription(VWebUtils.getCommonString(VWebCommonConstants.MASTER_CRUD_MSG_CLEANCAPTION));
 			
-			gridContainer = new GeneratedPropertyContainer(new BeanItemContainer<T>(entityConfigData.getEntityClass()));
+			gridContainer = new GeneratedPropertyContainer(new SortableBeanContainer<T>(entityConfigData.getEntityClass()));
 			gridContainer.addGeneratedProperty(ACTIONS_COLUM_ID, new GridUtils.ActionLinkValueGenerator(entityConfigData.getPkFieldName(), null, this, selectionEventFunction, new ActionLinkInfo("select",VWebUtils.getCommonString(VWebCommonConstants.SEARCH_WIN_CHOOSE_CAPTION))));
 			resultsGrid = new Grid(VWebUtils.getCommonString(VWebCommonConstants.SEARCH_WIN_TABLE_CAPTION), gridContainer);
 			resultsGrid.setSelectionMode(SelectionMode.NONE);

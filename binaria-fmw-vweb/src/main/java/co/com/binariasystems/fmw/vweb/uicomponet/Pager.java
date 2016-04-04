@@ -1,7 +1,9 @@
 package co.com.binariasystems.fmw.vweb.uicomponet;
 
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import co.com.binariasystems.fmw.util.pagination.ListPage;
@@ -13,7 +15,11 @@ import co.com.binariasystems.fmw.vweb.uicomponet.pager.PageChangeEvent;
 import co.com.binariasystems.fmw.vweb.uicomponet.pager.PageChangeHandler;
 import co.com.binariasystems.fmw.vweb.util.VWebUtils;
 
+import com.vaadin.data.Container;
+import com.vaadin.data.Container.Indexed;
+import com.vaadin.data.Container.Sortable;
 import com.vaadin.data.Property.ValueChangeListener;
+import com.vaadin.data.util.GeneratedPropertyContainer;
 import com.vaadin.data.util.ObjectProperty;
 import com.vaadin.data.validator.IntegerRangeValidator;
 import com.vaadin.data.validator.NullValidator;
@@ -56,6 +62,7 @@ public class Pager<FILTER_TYPE, RESULT_TYPE> extends HorizontalLayout implements
 	private int currentCacheGroup;
 	private boolean initialized;
 	private int rowsByPage;
+	private BeanItemSorter itemSorter;
 	
 	
 	public Pager(){
@@ -252,6 +259,10 @@ public class Pager<FILTER_TYPE, RESULT_TYPE> extends HorizontalLayout implements
 		event.setPager(null);
 		event.setRowsByPage(rowsByPage());
 		event.setPagesPerGroup(maxCachedPages);
+		if(itemSorter instanceof Pager.PagerBeanItemSorter){
+			event.setSortProperties(((PagerBeanItemSorter)itemSorter).getSortPropertyIds());
+			event.setAscending(((PagerBeanItemSorter)itemSorter).getSortDirections());
+		}
 		
 		return event;
 	}
@@ -315,10 +326,29 @@ public class Pager<FILTER_TYPE, RESULT_TYPE> extends HorizontalLayout implements
 	
 	public void setPageDataTargetForGrid(Grid grid){
 		this.pageDataTarget = new GridPageDataTarget<RESULT_TYPE>(grid);
+		setItemSorterForGrid(grid);
 	}
 	
 	public void setPageDataTargetForTable(Table table){
 		this.pageDataTarget = new TablePageDataTarget<RESULT_TYPE>(table);
+		Container containerDS = table.getContainerDataSource();
+		if(containerDS instanceof SortableBeanContainer){
+			if(itemSorter == null)
+				itemSorter = new PagerBeanItemSorter();
+			((SortableBeanContainer)containerDS).setSorter(itemSorter);
+		}
+	}
+	
+	private void setItemSorterForGrid(Grid grid){
+		Indexed containerDS = grid.getContainerDataSource();
+		if(containerDS instanceof GeneratedPropertyContainer){
+			containerDS = ((GeneratedPropertyContainer)containerDS).getWrappedContainer();
+		}
+		if(containerDS instanceof SortableBeanContainer){
+			if(itemSorter == null)
+				itemSorter = new PagerBeanItemSorter();
+			((SortableBeanContainer)containerDS).setSorter(itemSorter);
+		}
 	}
 
 	private void setPageData(List<RESULT_TYPE> data){
@@ -330,4 +360,50 @@ public class Pager<FILTER_TYPE, RESULT_TYPE> extends HorizontalLayout implements
 		return rowsByPage();
 	}
 	
+	private class PagerBeanItemSorter implements BeanItemSorter{
+		private String[] sortPropertyIds;
+	    private boolean[] sortDirections;
+	    private Container container;
+		@Override public void sort(Sortable container, Object[] propertyId, boolean[] ascending) {
+			this.container = container;
+	        // Removes any non-sortable property ids
+	        final List<String> ids = new ArrayList<String>();
+	        final List<Boolean> orders = new ArrayList<Boolean>();
+	        final Collection<?> sortable = container
+	                .getSortableContainerPropertyIds();
+	        for (int i = 0; i < propertyId.length; i++) {
+	            if (sortable.contains(propertyId[i])) {
+	                ids.add(propertyId[i].toString());
+	                orders.add(Boolean.valueOf(i < ascending.length ? ascending[i] : true));
+	            }
+	        }
+	        sortPropertyIds = ids.toArray(new String[ids.size()]);
+	        sortDirections = new boolean[orders.size()];
+	        for (int i = 0; i < sortDirections.length; i++) {
+	            sortDirections[i] = (orders.get(i)).booleanValue();
+	        }
+	        
+	        setFilterDto(filterDto);
+		}
+		/**
+		 * @return the sortPropertyIds
+		 */
+		public String[] getSortPropertyIds() {
+			return sortPropertyIds;
+		}
+		/**
+		 * @return the sortDirections
+		 */
+		public boolean[] getSortDirections() {
+			return sortDirections;
+		}
+		/**
+		 * @return the container
+		 */
+		public Container getContainer() {
+			return container;
+		}
+		
+		
+	}
 }

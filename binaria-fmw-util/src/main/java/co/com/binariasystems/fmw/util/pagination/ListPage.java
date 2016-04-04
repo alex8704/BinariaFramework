@@ -1,6 +1,6 @@
 package co.com.binariasystems.fmw.util.pagination;
 
-import java.util.LinkedList;
+import java.util.Collections;
 import java.util.List;
 
 public class ListPage<T> {
@@ -21,16 +21,13 @@ public class ListPage<T> {
 	
 	public List<T> getData() {
 		if(data == null)
-			data = new LinkedList<T>();
+			data = Collections.EMPTY_LIST;
 		return data;
 	}
 	public void setData(List<T> data) {
 		this.data = data;
 	}
 	public long getRowCount() {
-		if(rowCount < getData().size()){
-			setRowCount(getData().size());
-		}
 		return rowCount;
 	}
 	public void setRowCount(long rowCount) {

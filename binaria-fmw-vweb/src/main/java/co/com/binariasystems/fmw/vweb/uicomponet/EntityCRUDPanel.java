@@ -39,7 +39,6 @@ import co.com.binariasystems.fmw.vweb.util.LocaleMessagesUtil;
 import co.com.binariasystems.fmw.vweb.util.VWebUtils;
 
 import com.vaadin.data.util.BeanItem;
-import com.vaadin.data.util.BeanItemContainer;
 import com.vaadin.data.util.GeneratedPropertyContainer;
 import com.vaadin.event.SelectionEvent;
 import com.vaadin.event.SelectionEvent.SelectionListener;
@@ -100,6 +99,7 @@ public class EntityCRUDPanel<T> extends FormPanel implements ClickListener{
 			}
 			attached = !attached;
 		}
+		searchAllBtn.click();
 	}
 	
 	@Override
@@ -123,7 +123,7 @@ public class EntityCRUDPanel<T> extends FormPanel implements ClickListener{
 			componentMap.put(fieldCfg.getFieldName(), comp);
 		}
 		
-		gridContainer = new GeneratedPropertyContainer(new BeanItemContainer<T>(entityConfigData.getEntityClass()));
+		gridContainer = new GeneratedPropertyContainer(new SortableBeanContainer<T>(entityConfigData.getEntityClass()));
 		dataGrid = new Grid("-");
 		pager = new Pager<T,T>(PagerMode.PAGE);
 		saveBtn = new Button(FontAwesome.SAVE);

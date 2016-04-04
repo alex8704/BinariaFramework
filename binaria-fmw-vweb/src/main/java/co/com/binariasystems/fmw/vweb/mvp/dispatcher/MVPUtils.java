@@ -43,6 +43,7 @@ import co.com.binariasystems.fmw.vweb.util.ValidationUtils;
 import com.vaadin.data.Validatable;
 import com.vaadin.server.Page;
 import com.vaadin.ui.AbstractComponent;
+import com.vaadin.ui.AbstractTextField;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.Grid.Column;
@@ -197,18 +198,21 @@ public class MVPUtils {
 							Date maxDate = max.equals(DateRangeValidator.CURRENT_DATE) ? new Date() : (max.equals("") ? null : new SimpleDateFormat(format).parse(max));
 
 							((Validatable) fieldValue).addValidator(ValidationUtils.dateRangeValidator(StringUtils.defaultIfEmpty(((DateRangeValidator) annotation).fieldCaption(), fieldCaption), minDate, maxDate));
-						} else if (annotation instanceof DoubleRangeValidator)
+						} else if (annotation instanceof DoubleRangeValidator){
 							((Validatable) fieldValue).addValidator(ValidationUtils.doubleRangeValidator(
 									StringUtils.defaultIfEmpty(((DoubleRangeValidator) annotation).fieldCaption(), fieldCaption), ((DoubleRangeValidator) annotation).min(), ((DoubleRangeValidator) annotation).max()));
-						else if (annotation instanceof IntRangeValidator)
+							applyFieldRangeConstraintIfPossyble(fieldValue, ((DoubleRangeValidator) annotation).max());
+						}else if (annotation instanceof IntRangeValidator){
 							((Validatable) fieldValue).addValidator(ValidationUtils.integerRangeValidator(
 									StringUtils.defaultIfEmpty(((IntRangeValidator) annotation).fieldCaption(), fieldCaption), ((IntRangeValidator) annotation).min(), ((IntRangeValidator) annotation).max()));
-						else if (annotation instanceof EmailValidator)
+							applyFieldRangeConstraintIfPossyble(fieldValue, ((DoubleRangeValidator) annotation).max());
+						}else if (annotation instanceof EmailValidator)
 							((Validatable) fieldValue).addValidator(ValidationUtils.emailValidator(StringUtils.defaultIfEmpty(((EmailValidator) annotation).fieldCaption(), fieldCaption)));
-						else if (annotation instanceof StringLengthValidator)
+						else if (annotation instanceof StringLengthValidator){
 							((Validatable) fieldValue).addValidator(ValidationUtils.stringLengthRangeValidator(
 									StringUtils.defaultIfEmpty(((StringLengthValidator) annotation).fieldCaption(), fieldCaption), ((StringLengthValidator) annotation).min(), ((StringLengthValidator) annotation).max()));
-						else if (annotation instanceof RegExpValidator)
+							applyFieldLengthConstraintIfPossyble(fieldValue, ((StringLengthValidator) annotation).max());
+						}else if (annotation instanceof RegExpValidator)
 							((Validatable) fieldValue).addValidator(ValidationUtils.regexpValidator(
 									StringUtils.defaultIfEmpty(((RegExpValidator) annotation).fieldCaption(), fieldCaption), ((RegExpValidator) annotation).expression(), ((RegExpValidator) annotation).example()));
 						else if (annotation instanceof AddressValidator && AddressEditorField.class.isAssignableFrom(viewField.getType()))
@@ -218,6 +222,17 @@ public class MVPUtils {
 				}
 			}
 		}
+	}
+	
+	private static void applyFieldLengthConstraintIfPossyble(Object fieldValue, int maxLength){
+		if( maxLength <= 0 || maxLength == Integer.MAX_VALUE || !(fieldValue instanceof AbstractTextField) ) return;
+		((AbstractTextField)fieldValue).setMaxLength(maxLength);
+	}
+	
+	private static void applyFieldRangeConstraintIfPossyble(Object fieldValue, double maxValue){
+		if(maxValue <= 0 || maxValue >= Double.MAX_VALUE || !(fieldValue instanceof AbstractTextField)) return;
+		int maxLength = String.valueOf((int)maxValue + 1).length();
+		((AbstractTextField)fieldValue).setMaxLength(maxLength);
 	}
 	
 	private static boolean permitConventionStringCaption(Field field){

@@ -262,11 +262,11 @@ public class SearcherField<T> extends CustomField<T> implements SearchSelectionC
 				freeConditionsPropertyListener(criteria);
 		}else{
 			if(oldCriteria instanceof VCriteria){
-				if(oldCriteria instanceof VSimpleCriteria && ((VSimpleCriteria<?>)oldCriteria).getProperty() instanceof ObjectProperty)
-					((ObjectProperty<?>)((VSimpleCriteria<?>)oldCriteria).getProperty()).removeValueChangeListener(conditionsChangeListener);
-				if(oldCriteria instanceof VRangeCriteria && ((VRangeCriteria<?>)oldCriteria).getMinProperty() instanceof ObjectProperty && ((VRangeCriteria<?>)oldCriteria).getMaxProperty() instanceof ObjectProperty){
-					((ObjectProperty<?>)((VRangeCriteria<?>)oldCriteria).getMinProperty()).removeValueChangeListener(conditionsChangeListener);
-					((ObjectProperty<?>)((VRangeCriteria<?>)oldCriteria).getMaxProperty()).removeValueChangeListener(conditionsChangeListener);
+				if(oldCriteria instanceof VSimpleCriteria && ((VSimpleCriteria<?>)oldCriteria).getProperty() instanceof AbstractProperty)
+					((AbstractProperty<?>)((VSimpleCriteria<?>)oldCriteria).getProperty()).removeValueChangeListener(conditionsChangeListener);
+				if(oldCriteria instanceof VRangeCriteria && ((VRangeCriteria<?>)oldCriteria).getMinProperty() instanceof AbstractProperty && ((VRangeCriteria<?>)oldCriteria).getMaxProperty() instanceof AbstractProperty){
+					((AbstractProperty<?>)((VRangeCriteria<?>)oldCriteria).getMinProperty()).removeValueChangeListener(conditionsChangeListener);
+					((AbstractProperty<?>)((VRangeCriteria<?>)oldCriteria).getMaxProperty()).removeValueChangeListener(conditionsChangeListener);
 				}
 			}
 		}
@@ -279,11 +279,11 @@ public class SearcherField<T> extends CustomField<T> implements SearchSelectionC
 				applyConditionsPropertyListener(criteria);
 		}else{
 			if(newCriteria instanceof VCriteria){
-				if(newCriteria instanceof VSimpleCriteria && ((VSimpleCriteria<?>)newCriteria).getProperty() instanceof ObjectProperty)
-					((ObjectProperty<?>)((VSimpleCriteria<?>)newCriteria).getProperty()).addValueChangeListener(conditionsChangeListener);
-				if(newCriteria instanceof VRangeCriteria && ((VRangeCriteria<?>)newCriteria).getMinProperty() instanceof ObjectProperty && ((VRangeCriteria<?>)newCriteria).getMaxProperty() instanceof ObjectProperty){
-					((ObjectProperty<?>)((VRangeCriteria<?>)newCriteria).getMinProperty()).addValueChangeListener(conditionsChangeListener);
-					((ObjectProperty<?>)((VRangeCriteria<?>)newCriteria).getMaxProperty()).addValueChangeListener(conditionsChangeListener);
+				if(newCriteria instanceof VSimpleCriteria && ((VSimpleCriteria<?>)newCriteria).getProperty() instanceof AbstractProperty)
+					((AbstractProperty<?>)((VSimpleCriteria<?>)newCriteria).getProperty()).addValueChangeListener(conditionsChangeListener);
+				if(newCriteria instanceof VRangeCriteria && ((VRangeCriteria<?>)newCriteria).getMinProperty() instanceof AbstractProperty && ((VRangeCriteria<?>)newCriteria).getMaxProperty() instanceof AbstractProperty){
+					((AbstractProperty<?>)((VRangeCriteria<?>)newCriteria).getMinProperty()).addValueChangeListener(conditionsChangeListener);
+					((AbstractProperty<?>)((VRangeCriteria<?>)newCriteria).getMaxProperty()).addValueChangeListener(conditionsChangeListener);
 				}
 			}
 		}

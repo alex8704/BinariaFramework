@@ -74,6 +74,7 @@ public class EntityCRUDDAOImpl<T> extends FMWAbstractDAO implements EntityCRUDDA
 		try{
 			List<T> data = getNamedParameterJdbcTemplate().query(sqlStatement, paramSource, rowMapper);
 			resp.setData(data);
+			resp.setRowCount(data.size());
 		}catch(DataAccessException ex){
 			throw new FMWDataAccessException(FMWExceptionUtils.prettyMessageException(ex).getMessage());
 		}

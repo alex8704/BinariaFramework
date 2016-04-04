@@ -1,5 +1,9 @@
 package co.com.binariasystems.fmw.vweb.uicomponet.pager;
 
+import co.com.binariasystems.fmw.business.domain.Order;
+import co.com.binariasystems.fmw.business.domain.Order.Direction;
+import co.com.binariasystems.fmw.business.domain.PageRequest;
+import co.com.binariasystems.fmw.business.domain.Sort;
 import co.com.binariasystems.fmw.event.FMWEvent;
 import co.com.binariasystems.fmw.vweb.uicomponet.Pager;
 
@@ -10,6 +14,8 @@ public class PageChangeEvent<FILTER_TYPE> implements FMWEvent{
 	private int pagesPerGroup;
 	private FILTER_TYPE filterDTO;
 	private Pager<FILTER_TYPE, ?> pager;
+	private String[] sortProperties;
+	private boolean[] ascending;
 	
 	
 	public int getOldPage() {
@@ -58,7 +64,41 @@ public class PageChangeEvent<FILTER_TYPE> implements FMWEvent{
 	public void setPagesPerGroup(int pagesPerGroup) {
 		this.pagesPerGroup = pagesPerGroup;
 	}
+	/**
+	 * @return the sortProperties
+	 */
+	public String[] getSortProperties() {
+		return sortProperties;
+	}
+	/**
+	 * @param sortProperties the sortProperties to set
+	 */
+	public void setSortProperties(String[] sortProperties) {
+		this.sortProperties = sortProperties;
+	}
+	/**
+	 * @return the ascending
+	 */
+	public boolean[] getAscending() {
+		return ascending;
+	}
+	/**
+	 * @param ascending the ascending to set
+	 */
+	public void setAscending(boolean[] ascending) {
+		this.ascending = ascending;
+	}
 	
+	public PageRequest getPageRequest(){
+		Order[] orders = null;
+		if(getSortProperties() != null && getSortProperties().length > 0){
+			orders = new Order[getSortProperties().length];
+			for(int i = 0; i < getSortProperties().length; i++){
+				orders[i] = new Order((getAscending()[i] ? Direction.ASC : Direction.DESC),getSortProperties()[i]);
+			}
+		}
+		return new PageRequest(page, rowsByPage * pagesPerGroup , (orders != null ? new Sort(orders) : null));
+	}
 	
 	
 }

@@ -14,6 +14,7 @@ public class TablePageDataTarget<RESULT_TYPE> implements PageDataTarget<RESULT_T
 	@Override
 	public void refreshPageData(List<RESULT_TYPE> pageData) {
 		if(table != null){
+			table.setValue(null);
 			table.getContainerDataSource().removeAllItems();
 			for(RESULT_TYPE row : pageData)
 				table.getContainerDataSource().addItem(row);
